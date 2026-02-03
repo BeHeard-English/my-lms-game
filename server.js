@@ -111,9 +111,12 @@ app.post('/upload-game',
 
 const path = require('path');
 
-// Khi học sinh vào trang chủ, tự động gửi file users.html
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'users.html')); 
+// Cho phép truy cập các file trong thư mục public
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Ép server phải nhận diện file users.html khi vào đường dẫn /users
+app.get('/users', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'users.html'));
 });
 
 // --- START SERVER (Luôn để cuối cùng) ---
