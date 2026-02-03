@@ -109,10 +109,11 @@ app.post('/upload-game',
     }
 );
 
-// --- FRONTEND ROUTE (Đoạn mới thêm) ---
-// Khi vào trang chủ (/) thì gửi về file index.html
+const path = require('path');
+
+// Khi học sinh vào trang chủ, tự động gửi file users.html
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'users.html')); 
 });
 
 // --- START SERVER (Luôn để cuối cùng) ---
