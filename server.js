@@ -19,24 +19,27 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Dòng này giúp máy chủ biết tìm file html ở đâu
 app.use(express.static('public')); 
 
-// --- DATABASE SETUP ---
-const DB_FILE = path.join(__dirname, 'data', 'games.json');
+// --- DATABASE SETUP (MONGODB) ---
+const mongoose = require('mongoose');
 
-if (!fs.existsSync(path.join(__dirname, 'data'))) {
-    fs.mkdirSync(path.join(__dirname, 'data'));
-}
-if (!fs.existsSync(DB_FILE)) {
-    fs.writeFileSync(DB_FILE, JSON.stringify([]));
-}
+// Thay chuỗi này bằng chuỗi kết nối của bạn (nhớ thay <password>)
+const mongoURI = "mongodb+srv://admin:Matkhau123@cluster0.xxxx.mongodb.net/myLMS?retryWrites=true&w=majority";
 
-const readDB = () => {
-    const data = fs.readFileSync(DB_FILE);
-    return JSON.parse(data);
-};
+mongoose.connect(mongoURI)
+    .then(() => console.log("✅ Connected to MongoDB Atlas!"))
+    .catch(err => console.error("❌ MongoDB connection error:", err));
 
-const writeDB = (data) => {
-    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
-};
+// Định nghĩa khuôn mẫu cho Game (Schema)
+const gameSchema = new mongoose.Schema({
+    title: String,
+    level: String,
+    skill: String,
+    file: String,
+    icon: String,
+    createdAt: { type: Date, default: Date.now }
+});
+
+const Game = mongoose.model('Game', gameSchema);
 
 // --- MULTER CONFIGURATION ---
 const storage = multer.diskStorage({
@@ -59,23 +62,26 @@ const upload = multer({ storage: storage });
 
 // --- API ENDPOINTS ---
 
-app.get('/games', (req, res) => {
+app.get('/games', async (req, res) => {
     try {
-        const games = readDB();
+        const games = await Game.find(); // Lấy từ database thay vì đọc file
         const gamesWithUrls = games.map(game => ({
-            ...game,
+            id: game._id,
+            title: game.title,
+            level: game.level,
+            skill: game.skill,
             fileUrl: `${req.protocol}://${req.get('host')}/uploads/games/${game.file}`,
             iconUrl: `${req.protocol}://${req.get('host')}/uploads/icons/${game.icon}`
         }));
         res.json(gamesWithUrls);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to retrieve games' });
+        res.status(500).json({ error: 'Failed to retrieve games from database' });
     }
 });
 
 app.post('/upload-game', 
     upload.fields([{ name: 'gameFile', maxCount: 1 }, { name: 'iconFile', maxCount: 1 }]), 
-    (req, res) => {
+    async (req, res) => { // Thêm chữ 'async' ở đây
         try {
             const { title, level, skill } = req.body;
             const files = req.files;
@@ -84,25 +90,21 @@ app.post('/upload-game',
                 return res.status(400).json({ error: 'Missing required fields' });
             }
 
-            const newGame = {
-                id: uuidv4(),
-                title: title,
-                level: level,
-                skill: skill,
+            // Tạo đối tượng game mới theo Schema
+            const newGame = new Game({
+                title,
+                level,
+                skill,
                 file: files.gameFile[0].filename,
-                icon: files.iconFile[0].filename,
-                createdAt: new Date().toISOString()
-            };
+                icon: files.iconFile[0].filename
+            });
 
-            const games = readDB();
-            games.push(newGame);
-            writeDB(games);
+            await newGame.save(); // Lưu vào MongoDB Atlas
 
             res.status(201).json({ message: 'Success!', game: newGame });
-
         } catch (error) {
             console.error(error);
-            res.status(500).json({ error: 'Failed to save data.' });
+            res.status(500).json({ error: 'Failed to save game to database.' });
         }
     }
 );
