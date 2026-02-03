@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>English Adventure with Be Heard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Default: Bright & Cute */
+            --bg-color: #fffaf0;
+            --container-bg: #ffffff;
+            --vocab-grad: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            --pos-grad: linear-gradient(135deg, #d9d2e9 0%, #b4a7d6 100%);
+            --neg-grad: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            --text-main: #ff6b6b;
+            --text-tile: #2c3e50;
+            --border-color: #ffd1dc;
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Itim', cursive;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            transition: all 0.5s ease;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        #setup-page, #game-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        #game-page {
+            display: none;
+            padding: 10px;
+        }
+
+        .container {
+            background: var(--container-bg);
+            padding: 25px;
+            border-radius: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            border: 4px solid var(--border-color);
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--text-main);
+            font-size: clamp(2rem, 5vw, 3rem);
+            margin: 0 0 20px 0;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            border: 3px solid var(--border-color);
+            border-radius: 20px;
+            padding: 15px;
+            font-family: 'Itim', cursive;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            resize: vertical;
+            min-height: 120px;
+            max-height: 250px;
+        }
+
+        /* --- NEW: Player Selection Styles --- */
+        .player-setup {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.8);
+            border: 2px dashed var(--border-color);
+            border-radius: 15px;
+        }
+
+        .player-setup label {
+            display: block;
+            font-size: 1.2rem;
+            color: var(--text-main);
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .player-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .p-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            background: white;
+            font-size: 1.2rem;
+            font-family: 'Itim', cursive;
+            cursor: pointer;
+            transition: 0.2s;
+            color: var(--text-tile);
+        }
+
+        .p-btn.active {
+            background: var(--text-main);
+            color: white;
+            transform: scale(1.1);
+            border-color: var(--text-main);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        /* ------------------------------------- */
+
+        /* Music Upload Styling */
+        .music-upload {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            border: 2px dashed var(--border-color);
+            text-align: center;
+        }
+
+        .music-upload label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            color: var(--text-main);
+        }
+
+        .music-upload input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            background: white;
+            font-family: 'Itim', cursive;
+        }
+
+        .music-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .music-controls button {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            border-radius: 25px;
+            min-height: 40px;
+        }
+
+        /* Controls Bar */
+        .controls-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.95);
+            padding: 15px;
+            border-radius: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 900px;
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .controls-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 10px;
+            border-right: 2px solid #eee;
+        }
+
+        .controls-group:last-child {
+            border-right: none;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Itim', cursive;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+            min-height: 48px;
+            min-width: 48px;
+        }
+
+        .btn-primary { background: #ff8e8e; color: white; }
+        .btn-dice { background: #4ecdc4; color: white; }
+        .btn-shuffle { background: #ffbe0b; color: white; }
+        .btn-back { background: #bdc3c7; color: white; }
+        .btn-music { background: #9b59b6; color: white; }
+
+        button:hover, button:focus { transform: translateY(-2px); filter: brightness(1.1); }
+        button:active { transform: translateY(2px); box-shadow: none; }
+
+        #dice-res {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4ecdc4;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        /* Board */
+        .board-container {
+            width: 100%;
+            overflow-x: auto;
+            padding: 10px;
+            -webkit-overflow-scrolling: touch;
+            /* Important for absolute positioning of tokens */
+            position: relative; 
+        }
+
+        #board {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 8px;
+            min-width: 800px;
+            margin: 0 auto 30px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            touch-action: pan-x;
+        }
+
+        .tile {
+            aspect-ratio: 1/1;
+            border-radius: 12px;
+            border: 3px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .tile-vocab { background: var(--vocab-grad); }
+        .tile-positive { background: var(--pos-grad); }
+        .tile-negative { background: var(--neg-grad); }
+        .tile-start {
+            background: #ffffff;
+            color: #ff6b6b;
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            font-weight: bold;
+            border: 3px dashed #ff6b6b;
+        }
+
+        .tile-num {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            opacity: 0.7;
+            color: #000;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-select {
+            padding: 8px 12px;
+            border-radius: 25px;
+            border: 2px solid var(--border-color);
+            font-family: 'Itim', cursive;
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+            background: white;
+            min-width: 120px;
+        }
+
+        /* --- NEW: Draggable Tokens --- */
+        .token {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            cursor: grab;
+            /* Crucial for mobile drag */
+            touch-action: none; 
+            user-select: none;
+            transition: transform 0.1s;
+        }
+
+        .token:active {
+            cursor: grabbing;
+            transform: scale(1.2);
+            z-index: 1001;
+        }
+
+        /* Token Colors */
+        .token-1 { background: linear-gradient(135deg, #ff6b6b, #ee5253); } /* Red */
+        .token-2 { background: linear-gradient(135deg, #48dbfb, #0abde3); } /* Blue */
+        .token-3 { background: linear-gradient(135deg, #1dd1a1, #10ac84); } /* Green */
+        .token-4 { background: linear-gradient(135deg, #feca57, #ff9f43); } /* Yellow */
+
+        /* ----------------------------- */
+
+        /* Modal */
+        #modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 30px;
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            border: 8px solid var(--border-color);
+            animation: popIn 0.3s ease;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-text {
+            font-size: clamp(2rem, 6vw, 4rem);
+            font-weight: bold;
+            color: #222;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
+        .modal-sub {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            color: var(--text-main);
+            margin-bottom: 20px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .controls-bar { padding: 12px; gap: 10px; }
+            .controls-group { padding: 0 5px; }
+            button { padding: 10px 20px; font-size: 0.95rem; }
+        }
+
+        @media (max-width: 768px) {
+            #setup-page, #game-page { padding: 15px; }
+            .container { padding: 20px; border-radius: 20px; }
+            
+            .controls-bar {
+                flex-direction: column;
+                gap: 10px;
+                padding: 15px;
+                border-radius: 20px;
+            }
+            
+            .controls-group {
+                border-right: none;
+                border-bottom: 2px solid #eee;
+                padding-bottom: 10px;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .controls-group:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+            
+            #board { gap: 6px; padding: 10px; min-width: 700px; }
+            .tile { border-radius: 10px; border-width: 2px; }
+            .token { width: 35px; height: 35px; font-size: 16px; }
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 15px; border-width: 3px; }
+            textarea { height: 120px; padding: 12px; font-size: 1rem; }
+            
+            .controls-bar { padding: 12px; margin-bottom: 15px; }
+            button { padding: 10px 18px; font-size: 0.9rem; min-height: 44px; }
+            
+            #board { gap: 5px; padding: 8px; min-width: 600px; }
+            .tile { border-radius: 8px; font-size: 1.2rem; }
+            .modal-content { padding: 20px; border-radius: 25px; }
+            .modal-text { font-size: 2.5rem; }
+            .music-controls { flex-direction: column; }
+            .music-controls button { width: 100%; }
+        }
+
+        @media (max-width: 360px) {
+            h1 { font-size: 1.8rem; }
+            button { padding: 8px 15px; font-size: 0.85rem; }
+            #board { min-width: 550px; }
+        }
+
+        @media (max-height: 600px) and (orientation: landscape) {
+            .container { padding: 15px; max-height: 90vh; overflow-y: auto; }
+            textarea { height: 100px; min-height: 80px; }
+            #board { gap: 4px; padding: 5px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="setup-page">
+        <h1>🍭 Let's play with Be Heard</h1>
+        <div class="container">
+            <p>Nhập từ vựng/câu hỏi bên dưới</p>
+            <textarea id="vocabInput" placeholder="Ví dụ:&#10;Apple - Táo&#10;Banana - Chuối&#10;1. What is your name?&#10;- How are you?"></textarea>
+            
+            <div class="player-setup">
+                <label>👥 Số lượng người chơi:</label>
+                <div class="player-buttons">
+                    <button class="p-btn active" onclick="selectPlayers(1)">1</button>
+                    <button class="p-btn" onclick="selectPlayers(2)">2</button>
+                    <button class="p-btn" onclick="selectPlayers(3)">3</button>
+                    <button class="p-btn" onclick="selectPlayers(4)">4</button>
+                </div>
+            </div>
+
+            <div class="music-upload">
+                <label for="bgMusic">🎵 Nhạc nền (MP3, WAV, OGG):</label>
+                <input type="file" id="bgMusic" accept="audio/*">
+                <div class="music-controls">
+                    <button class="btn-music" onclick="toggleMusic()" id="musicToggle">⏸️ Pause</button>
+                    <button class="btn-music" onclick="changeVolume(0.1)">🔈 Vol -</button>
+                    <button class="btn-music" onclick="changeVolume(0.2)">🔊 Vol +</button>
+                </div>
+            </div>
+            
+            <button class="btn-primary" onclick="initGame()">🚀 Let's Start</button>
+        </div>
+    </div>
+
+    <div id="game-page">
+        <div class="controls-bar">
+            <div class="controls-group">
+                <button class="btn-dice" onclick="rollDice()">🎲 Roll Dice</button>
+                <div id="dice-res">?</div>
+            </div>
+            
+            <div class="controls-group">
+                <span>Theme:</span>
+                <select class="theme-select" id="themeSelector" onchange="changeTheme(this.value)">
+                    <option value="cute">🌸 Cute</option>
+                    <option value="action">🔥 Action</option>
+                    <option value="nature">🌿 Fresh</option>
+                    <option value="space">🌌 Mystery</option>
+                    <option value="vibrant">⚡ Vivid</option>
+                </select>
+            </div>
+            
+            <div class="controls-group">
+                <button class="btn-music" onclick="toggleMusic()" id="gameMusicToggle">⏸️ Music</button>
+                <button class="btn-shuffle" onclick="shuffleAndRebuildBoard()">🔀 Shuffle</button>
+                <button class="btn-back" onclick="goBack()">⬅ Back</button>
+            </div>
+        </div>
+
+        <div class="board-container" id="board-container">
+            <div id="board"></div>
+        </div>
+    </div>
+
+    <div id="modal-overlay" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div id="modal-sub" class="modal-sub">Tile Type</div>
+            <div id="modal-text" class="modal-text">Content</div>
+            <button class="btn-primary" onclick="closeModal()">OK!</button>
+        </div>
+    </div>
+
+    <audio id="bgAudio" loop></audio>
+
+    <script>
+        let audioCtx;
+        let vocabList = [];
+        let shuffledVocabList = [];
+        const TOTAL_TILES = 45;
+        const COLS = 9;
+        let isMusicPlaying = false;
+        let numPlayers = 1;
+
+        // Player Selection Logic
+        function selectPlayers(num) {
+            numPlayers = num;
+            const buttons = document.querySelectorAll('.p-btn');
+            buttons.forEach((btn, index) => {
+                if (index + 1 === num) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        const themes = {
+            cute: {
+                bg: '#fffaf0', container: '#ffffff', main: '#ff6b6b', border: '#ffd1dc',
+                vocab: 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)',
+                pos: 'linear-gradient(135deg, #d9d2e9 0%, #b4a7d6 100%)',
+                neg: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+                tileText: '#2c3e50'
+            },
+            action: {
+                bg: '#121212', container: '#1e1e1e', main: '#ff4757', border: '#333',
+                vocab: 'linear-gradient(135deg, #cacfd9, #57606f)',
+                pos: 'linear-gradient(135deg, #ff4757, #ff6b81)',
+                neg: 'linear-gradient(135deg, #2f3542, #000)',
+                tileText: '#fff'
+            },
+            nature: {
+                bg: '#f1f8e9', container: '#fff', main: '#2e7d32', border: '#a5d6a7',
+                vocab: 'linear-gradient(135deg, #d4fc79, #96e6a1)',
+                pos: 'linear-gradient(135deg, #f991ac, #f4cccc)',
+                neg: 'linear-gradient(135deg, #f6d365, #fda085)',
+                tileText: '#1b5e20'
+            },
+            space: {
+                bg: '#0b0e14', container: '#161b22', main: '#7d5fff', border: '#30363d',
+                vocab: 'linear-gradient(135deg, #d9d2e9, #a1c4fd)',
+                pos: 'linear-gradient(135deg, #00d2ff, #3a7bd5)',
+                neg: 'linear-gradient(135deg, #6a11cb, #2575fc)',
+                tileText: '#fff'
+            },
+            vibrant: {
+                bg: '#fff5e6', container: '#fff', main: '#f39c12', border: '#f1c40f',
+                vocab: 'linear-gradient(135deg, #ff9a00, #ff5a00)',
+                pos: 'linear-gradient(135deg, #fad02e, #f28c28)',
+                neg: 'linear-gradient(135deg, #ff0055, #ff00aa)',
+                tileText: '#fff'
+            }
+        };
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function changeTheme(key) {
+            const t = themes[key];
+            const root = document.documentElement;
+            root.style.setProperty('--bg-color', t.bg);
+            root.style.setProperty('--container-bg', t.container);
+            root.style.setProperty('--text-main', t.main);
+            root.style.setProperty('--border-color', t.border);
+            root.style.setProperty('--vocab-grad', t.vocab);
+            root.style.setProperty('--pos-grad', t.pos);
+            root.style.setProperty('--neg-grad', t.neg);
+            root.style.setProperty('--text-tile', t.tileText);
+        }
+
+        function playSound(type) {
+            initAudioContext();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+            
+            if (type === 'positive') {
+                osc.frequency.setValueAtTime(523, now);
+                osc.frequency.exponentialRampToValueAtTime(1046, now + 0.2);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            } else if (type === 'negative') {
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.linearRampToValueAtTime(50, now + 0.4);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+            } else {
+                osc.frequency.setValueAtTime(440, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+            }
+            osc.start();
+            osc.stop(now + 0.4);
+        }
+
+        function toggleMusic() {
+            const audio = document.getElementById('bgAudio');
+            if (isMusicPlaying) {
+                audio.pause();
+                document.getElementById('musicToggle').innerHTML = '▶️ Play';
+                document.getElementById('gameMusicToggle').innerHTML = '▶️ Music';
+            } else {
+                const playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        document.getElementById('musicToggle').innerHTML = '▶️ Tap to Play';
+                        document.getElementById('gameMusicToggle').innerHTML = '▶️ Tap for Music';
+                    });
+                }
+            }
+            isMusicPlaying = !isMusicPlaying;
+            if (isMusicPlaying) {
+                document.getElementById('musicToggle').innerHTML = '⏸️ Pause';
+                document.getElementById('gameMusicToggle').innerHTML = '⏸️ Music';
+            }
+        }
+
+        function changeVolume(amount) {
+            const audio = document.getElementById('bgAudio');
+            audio.volume = Math.min(Math.max(audio.volume + amount, 0), 1);
+        }
+
+        document.getElementById('bgMusic').onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const audio = document.getElementById('bgAudio');
+            audio.src = URL.createObjectURL(file);
+            audio.volume = 0.5;
+            if (!/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                audio.play().then(() => {
+                    isMusicPlaying = true;
+                    document.getElementById('musicToggle').innerHTML = '⏸️ Pause';
+                    document.getElementById('gameMusicToggle').innerHTML = '⏸️ Music';
+                }).catch(e => console.log(e));
+            }
+        };
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function initGame() {
+            const input = document.getElementById('vocabInput').value;
+            vocabList = input.split('\n')
+                .map(l => l.replace(/^[0-9.\-\*•\s]+/, '').trim())
+                .filter(l => l !== "");
+            
+            if (vocabList.length === 0) {
+                vocabList = ["Enter vocabulary in setup page"];
+            }
+            
+            shuffledVocabList = shuffleArray(vocabList);
+            
+            document.getElementById('setup-page').style.display = 'none';
+            document.getElementById('game-page').style.display = 'flex';
+            buildBoard();
+            createTokens();
+        }
+
+        // --- NEW: Create & Manage Draggable Tokens ---
+        function createTokens() {
+            // Remove old tokens
+            document.querySelectorAll('.token').forEach(el => el.remove());
+            
+            const container = document.getElementById('board-container');
+            const icons = ['🐱', '🐶', '🦊', '🐰'];
+            
+            for (let i = 0; i < numPlayers; i++) {
+                const token = document.createElement('div');
+                token.className = `token token-${i+1}`;
+                token.innerHTML = icons[i];
+                
+                // Initial position (near Start tile)
+                token.style.left = (20 + i * 45) + 'px';
+                token.style.top = '30px';
+                
+                makeDraggable(token, container);
+                container.appendChild(token);
+            }
+        }
+
+        function makeDraggable(element, container) {
+            let isDragging = false;
+            let startX, startY, initialLeft, initialTop;
+
+            const startDrag = (e) => {
+                // Prevent scrolling on touch
+                // e.preventDefault(); 
+                isDragging = true;
+                
+                const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+                
+                startX = clientX;
+                startY = clientY;
+                
+                initialLeft = element.offsetLeft;
+                initialTop = element.offsetTop;
+                
+                // Use Pointer Capture if available (better for mouse)
+                if (e.setPointerCapture && !e.type.includes('touch')) {
+                    e.setPointerCapture(e.pointerId);
+                }
+            };
+
+            const doDrag = (e) => {
+                if (!isDragging) return;
+                e.preventDefault(); // Stop scroll when dragging
+                
+                const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+                
+                const deltaX = clientX - startX;
+                const deltaY = clientY - startY;
+                
+                element.style.left = `${initialLeft + deltaX}px`;
+                element.style.top = `${initialTop + deltaY}px`;
+            };
+
+            const stopDrag = (e) => {
+                isDragging = false;
+                if (e.releasePointerCapture && !e.type.includes('touch')) {
+                    e.releasePointerCapture(e.pointerId);
+                }
+            };
+
+            // Using Pointer Events for unified Mouse/Touch handling
+            element.addEventListener('pointerdown', startDrag);
+            window.addEventListener('pointermove', doDrag);
+            window.addEventListener('pointerup', stopDrag);
+            
+            // Fallback for some touch devices specific behavior
+            element.addEventListener('touchstart', startDrag, {passive: false});
+            window.addEventListener('touchmove', doDrag, {passive: false});
+            window.addEventListener('touchend', stopDrag);
+        }
+
+        function shuffleAndRebuildBoard() {
+            shuffledVocabList = shuffleArray(vocabList);
+            buildBoard();
+            // Reset token positions is optional, decided to keep them where they are
+        }
+
+        function shuffleWithConstraints(arr) {
+            if (arr.length <= 1) return arr;
+            let shuffled = [...arr];
+            let hasBadSequence = true;
+            let attempts = 0;
+            while (hasBadSequence && attempts < 1000) {
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                hasBadSequence = false;
+                for (let i = 1; i < shuffled.length; i++) {
+                    if ((shuffled[i] === 'positive' || shuffled[i] === 'negative') &&
+                        (shuffled[i-1] === 'positive' || shuffled[i-1] === 'negative')) {
+                        if (shuffled[i] === shuffled[i-1]) {
+                            hasBadSequence = true;
+                            break;
+                        }
+                    }
+                }
+                attempts++;
+            }
+            return shuffled;
+        }
+
+        function createSnakeOrder(totalTiles, cols) {
+            const order = [];
+            const rows = Math.ceil(totalTiles / cols);
+            for (let row = 0; row < rows; row++) {
+                const start = row * cols;
+                const end = Math.min(start + cols, totalTiles);
+                if (row % 2 === 0) {
+                    for (let i = start; i < end; i++) order.push(i);
+                } else {
+                    for (let i = end - 1; i >= start; i--) order.push(i);
+                }
+            }
+            return order;
+        }
+
+        function buildBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = "";
+            let tiles = [];
+
+            // 1. Start tile
+            tiles.push({ type: 'start', content: 'START', icon: '🏁', sub: 'Let\'s Go!' });
+
+            // 2. Prepare tiles
+            const totalTiles = TOTAL_TILES;
+            const tilesToCreate = totalTiles - 1;
+            
+            let vocabForBoard = [];
+            while (vocabForBoard.length < tilesToCreate) {
+                vocabForBoard = vocabForBoard.concat([...shuffledVocabList]);
+            }
+            vocabForBoard = shuffleArray(vocabForBoard);
+            
+            // 3. Tile distribution
+            let tileDistribution = [];
+            for (let i = 0; i < 3; i++) tileDistribution.push('vocab'); // First 3
+            
+            const middleCount = totalTiles - 1 - 6;
+            const funcCount = Math.floor(middleCount * 0.4);
+            const vocabInMiddle = middleCount - funcCount;
+            
+            let middleTiles = [];
+            const posCount = Math.floor(funcCount / 2);
+            const negCount = funcCount - posCount;
+            
+            for (let i = 0; i < posCount; i++) middleTiles.push('positive');
+            for (let i = 0; i < negCount; i++) middleTiles.push('negative');
+            for (let i = 0; i < vocabInMiddle; i++) middleTiles.push('vocab');
+            
+            middleTiles = shuffleWithConstraints(middleTiles);
+            tileDistribution = tileDistribution.concat(middleTiles);
+            
+            for (let i = 0; i < 3; i++) tileDistribution.push('vocab'); // Last 3
+            
+            // 4. Prepare icons
+            const posIcons = ['🚀', '⭐', '🎁', '🏆', '🌈', '💎', '🔥', '🍬'];
+            const negIcons = ['🐌', '🌪️', '🧊', '👻', '⛈️', '🌧️', '🧨', '📉'];
+            
+            let vocabIndex = 0;
+            let lastPosValue = '';
+            let lastNegValue = '';
+            
+            tileDistribution.forEach((type) => {
+                let tileData;
+                switch (type) {
+                    case 'vocab':
+                        tileData = {
+                            type: 'vocab',
+                            content: vocabForBoard[vocabIndex % vocabForBoard.length],
+                            icon: '',
+                            sub: "VOCABULARY"
+                        };
+                        vocabIndex++;
+                        break;
+                    case 'positive':
+                        let posContent;
+                        do {
+                            if (Math.random() > 0.5) {
+                                posContent = `Forward ${Math.min(rand(3) + 1, 4)} Steps`;
+                            } else {
+                                posContent = `+${Math.min(rand(2) + 1, 3)} Points`;
+                            }
+                        } while (posContent === lastPosValue);
+                        lastPosValue = posContent;
+                        tileData = {
+                            type: 'positive',
+                            content: posContent,
+                            icon: posIcons[rand(posIcons.length) - 1],
+                            sub: "LUCKY!"
+                        };
+                        break;
+                    case 'negative':
+                        let negContent;
+                        do {
+                            if (Math.random() > 0.5) {
+                                negContent = `Back ${Math.min(rand(3), 3)} Steps`;
+                            } else {
+                                negContent = `-${Math.min(rand(2) + 1, 3)} Points`;
+                            }
+                        } while (negContent === lastNegValue);
+                        lastNegValue = negContent;
+                        tileData = {
+                            type: 'negative',
+                            content: negContent,
+                            icon: negIcons[rand(negIcons.length) - 1],
+                            sub: "OH NO!"
+                        };
+                        break;
+                }
+                tiles.push(tileData);
+            });
+
+            const displayOrder = createSnakeOrder(TOTAL_TILES, COLS);
+            displayOrder.forEach((tileIndex) => {
+                const data = tiles[tileIndex];
+                const el = document.createElement('div');
+                el.className = `tile tile-${data.type}`;
+                el.innerHTML = `<span class="tile-num">${tileIndex + 1}</span>${data.icon}`;
+                
+                el.addEventListener('click', () => {
+                    if (data.type !== 'start') {
+                        playSound(data.type);
+                        document.getElementById('modal-text').innerText = data.content.toUpperCase();
+                        document.getElementById('modal-sub').innerText = data.sub;
+                        document.getElementById('modal-overlay').style.display = 'flex';
+                    }
+                });
+                
+                el.addEventListener('touchstart', () => el.style.transform = 'scale(0.95)');
+                el.addEventListener('touchend', () => el.style.transform = '');
+                board.appendChild(el);
+            });
+        }
+
+        function rand(m) { return Math.floor(Math.random() * m) + 1; }
+        function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+        function goBack() { 
+            document.getElementById('game-page').style.display = 'none';
+            document.getElementById('setup-page').style.display = 'flex';
+        }
+        
+        function rollDice() {
+            initAudioContext();
+            const res = document.getElementById('dice-res');
+            let count = 0;
+            res.style.opacity = "0.5";
+            res.style.transform = "scale(0.8)";
+            
+            const rollSound = () => {
+                if (audioCtx) {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    const now = audioCtx.currentTime;
+                    osc.frequency.setValueAtTime(100 + Math.random() * 500, now);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start();
+                    osc.stop(now + 0.1);
+                }
+            };
+            
+            const rollInterval = setInterval(() => {
+                res.innerText = rand(6);
+                rollSound();
+                if (count++ > 10) {
+                    clearInterval(rollInterval);
+                    res.innerText = rand(6);
+                    res.style.opacity = "1";
+                    res.style.transform = "scale(1)";
+                    
+                    if (audioCtx) {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        const now = audioCtx.currentTime;
+                        osc.frequency.setValueAtTime(200, now);
+                        osc.frequency.exponentialRampToValueAtTime(800, now + 0.2);
+                        gain.gain.setValueAtTime(0.1, now);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                        osc.start();
+                        osc.stop(now + 0.3);
+                    }
+                }
+            }, 80);
+        }
+
+        function setViewportHeight() {
+            let vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+        window.addEventListener('resize', setViewportHeight);
+        window.addEventListener('orientationchange', setViewportHeight);
+        setViewportHeight();
+
+        document.addEventListener('touchstart', function(event) {
+            if (event.touches.length > 1) event.preventDefault();
+        }, { passive: false });
+
+        changeTheme('cute');
+    </script>
+</body>
+</html>

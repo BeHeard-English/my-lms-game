@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary with Be Heard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0; padding: 15px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 850px; margin: 0 auto;
+            background: var(--card);
+            padding: 25px; border-radius: 24px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+        }
+
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: var(--primary); margin-bottom: 5px; }
+        
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+        .tab-btn {
+            flex: 1; padding: 14px; border: none; border-radius: 12px;
+            background: #e2e8f0; cursor: pointer; font-weight: 700;
+            transition: 0.3s; font-size: 0.9rem;
+        }
+        .tab-btn.active { background: var(--primary); color: white; }
+
+        .pane { display: none; }
+        .pane.active { display: block; }
+
+        textarea {
+            width: 100%; height: 160px; padding: 15px;
+            border-radius: 12px; border: 1px solid #cbd5e1;
+            box-sizing: border-box; font-family: inherit; font-size: 1rem;
+        }
+
+        .action-btn {
+            width: 100%; padding: 16px; background: var(--primary);
+            color: white; border: none; border-radius: 12px;
+            font-weight: 800; cursor: pointer; font-size: 1.1rem; margin-top: 10px;
+        }
+
+        .quiz-area { display: none; margin-top: 30px; }
+        .q-card {
+            border: 1px solid #e2e8f0; padding: 20px;
+            border-radius: 18px; margin-bottom: 25px;
+            background: #fff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .q-text { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 15px; }
+
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .opt {
+            padding: 15px; border: 2px solid #f1f5f9;
+            border-radius: 12px; cursor: pointer;
+            transition: 0.2s; font-weight: 500;
+        }
+        .opt.selected { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .feedback {
+            margin-top: 15px; padding: 15px; border-radius: 12px;
+            display: none; background: #f8fafc; border-left: 5px solid var(--secondary);
+        }
+
+        .ipa-line { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .ipa-text { color: #be123c; font-weight: 700; font-family: monospace; font-size: 1.2rem; }
+        
+        .speak-btn {
+            background: #4f46e5; color: white; border: none; border-radius: 50%;
+            width: 44px; height: 44px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .submit-btn {
+            width: 100%; padding: 20px; background: var(--secondary);
+            color: white; border: none; border-radius: 15px;
+            font-size: 1.2rem; font-weight: 800; cursor: pointer;
+        }
+
+        #scoreBox { display: none; text-align: center; padding: 25px; border-radius: 20px; background: #0f172a; color: white; margin-bottom: 25px; }
+
+        @media (max-width: 600px) { .options { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Vocabulary and Pronunciation</h1>
+        <p>Học từ vựng cùng Be Heard</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('fileTab', this)">📁 Upload Docx</button>
+        <button class="tab-btn" onclick="switchTab('textTab', this)">✍️ Paste List</button>
+    </div>
+
+    <div id="fileTab" class="pane active">
+        <div style="border: 2px dashed #cbd5e1; padding: 35px; border-radius: 18px; text-align: center; cursor: pointer; background: #f1f5f9;" onclick="document.getElementById('fileIn').click()">
+            <strong id="fileInfo">Tap to upload .docx file</strong>
+            <input type="file" id="fileIn" hidden accept=".docx">
+        </div>
+    </div>
+
+    <div id="textTab" class="pane">
+        <textarea id="rawInput" placeholder="Ví dụ: 
+1. Alleviate : làm nhẹ bớt
+- Ambivalent : mâu thuẫn"></textarea>
+        <button class="action-btn" onclick="processText()">Start Practice</button>
+    </div>
+
+    <div id="scoreBox"></div>
+
+    <div id="quizArea" class="quiz-area">
+        <div id="quizContent"></div>
+        <button class="submit-btn" onclick="checkAll()">Submit & View Results</button>
+    </div>
+</div>
+
+<script>
+    const megaBank = [
+        {w: "Alleviate", i: "/əˈliːvieɪt/", m: "Làm nhẹ bớt", e: "The new medicine helps to alleviate the symptoms of the flu."},
+        {w: "Ambivalent", i: "/æmˈbɪvələnt/", m: "Mâu thuẫn trong tư tưởng", e: "He felt ambivalent about his new job; he loved the pay but hated the hours."},
+        {w: "Anomaly", i: "/əˈnɒməli/", m: "Sự bất thường", e: "The scientific results were an anomaly and didn't fit the pattern."},
+        {w: "Articulate", i: "/ɑːˈtɪkjuleɪt/", m: "Ăn nói lưu loát", e: "She is an articulate speaker who explains complex ideas clearly."},
+        {w: "Assertive", i: "/əˈsɜːtɪv/", m: "Quả quyết", e: "Being assertive means standing up for what you believe in."},
+        {w: "Autonomous", i: "/ɔːˈtɒnəməs/", m: "Độc lập, tự trị", e: "Teachers want their students to become more autonomous learners."},
+        {w: "Benevolent", i: "/bəˈnevələnt/", m: "Nhân từ", e: "A benevolent uncle paid for her college tuition."},
+        {w: "Coherent", i: "/kəʊˈhɪərənt/", m: "Mạch lạc", e: "He was so drunk he wasn't making any coherent sense."},
+        {w: "Complacent", i: "/kəmˈpleɪsnt/", m: "Tự mãn", e: "We cannot afford to become complacent about our success."},
+        {w: "Concede", i: "/kənˈsiːd/", m: "Thừa nhận", e: "The government has finally conceded that its policies were wrong."},
+        {w: "Conspicuous", i: "/kənˈspɪkjuəs/", m: "Dễ thấy, lộ liễu", e: "The bird has a conspicuous red head."},
+        {w: "Corroborate", i: "/kəˈrɒbəreɪt/", m: "Xác minh", e: "Recent research seems to corroborate his theory."},
+        {w: "Cursory", i: "/ˈkɜːsəri/", m: "Qua loa", e: "He gave the report a cursory glance before the meeting."},
+        {w: "Dearth", i: "/dɜːθ/", m: "Sự khan hiếm", e: "There is a dearth of reliable information on the subject."},
+        {w: "Debilitate", i: "/dɪˈbɪlɪteɪt/", m: "Làm suy yếu", e: "The disease can debilitate the patient for many weeks."},
+        {w: "Deference", i: "/ˈdefərəns/", m: "Sự tôn trọng", e: "He treats her with great deference because of her age."},
+        {w: "Deleterious", i: "/ˌdelɪˈtɪəriəs/", m: "Có hại", e: "Smoking has a deleterious effect on your health."},
+        {w: "Delineate", i: "/dɪˈlɪnieɪt/", m: "Phác thảo chi tiết", e: "The report clearly delineates the steps that must be taken."},
+        {w: "Denounce", i: "/dɪˈnaʊns/", m: "Lên án", e: "The dictator's actions were denounced by world leaders."},
+        {w: "Deplore", i: "/dɪˈplɔː(r)/", m: "Than phiền, hối tiếc", e: "We deplore all forms of violence."},
+        {w: "Detached", i: "/dɪˈtætʃt/", m: "Thờ ơ, tách biệt", e: "He tries to remain detached from the office politics."},
+        {w: "Deterrent", i: "/dɪˈterənt/", m: "Sự ngăn chặn", e: "Tougher prison sentences may act as a deterrent to crime."},
+        {w: "Deviate", i: "/ˈdiːvieɪt/", m: "Chệch hướng", e: "Never deviate from the original plan."},
+        {w: "Didactic", i: "/daɪˈdæktɪk/", m: "Có tính giáo huấn", e: "The story is didactic, intended to teach a moral lesson."},
+        {w: "Diligent", i: "/ˈdɪlɪdʒənt/", m: "Cần cù", e: "He is a diligent worker who never misses a deadline."},
+        {w: "Discrepancy", i: "/dɪˈskrepənsi/", m: "Sự khác biệt", e: "There is a discrepancy between the two bank statements."},
+        {w: "Disdain", i: "/dɪsˈdeɪn/", m: "Sự khinh miệt", e: "He treats his rivals with total disdain."},
+        {w: "Disparate", i: "/ˈdɪspərət/", m: "Khác biệt hoàn toàn", e: "The two cultures are completely disparate."},
+        {w: "Disseminate", i: "/dɪˈsemɪneɪt/", m: "Phổ biến thông tin", e: "The goal is to disseminate knowledge to everyone."},
+        {w: "Divergent", i: "/daɪˈvɜːdʒənt/", m: "Bất đồng, khác nhau", e: "They have divergent opinions on the issue."},
+        {w: "Dogmatic", i: "/dɒɡˈmætɪk/", m: "Giáo điều", e: "He is so dogmatic that he won't listen to reason."},
+        {w: "Dubious", i: "/ˈdjuːbiəs/", m: "Nghi ngờ, mơ hồ", e: "I am dubious about the success of this plan."},
+        {w: "Ebullient", i: "/ɪˈbʌliənt/", m: "Sôi nổi, hào hứng", e: "She was ebullient after her team won the championship."},
+        {w: "Eclectic", i: "/ɪˈklektɪk/", m: "Đa dạng", e: "Her musical tastes are quite eclectic."},
+        {w: "Efficacy", i: "/ˈefɪkəsi/", m: "Tính hiệu quả", e: "The drug's efficacy has been proven in clinical trials."},
+        {w: "Elusive", i: "/ɪˈluːsɪv/", m: "Khó nắm bắt", e: "Success can be elusive for many artists."},
+        {w: "Eminent", i: "/ˈemɪnənt/", m: "Xuất chúng, lỗi lạc", e: "He is an eminent professor of linguistics."},
+        {w: "Emulate", i: "/ˈemjuleɪt/", m: "Thi đua, bắt chước", e: "Children often try to emulate their parents."},
+        {w: "Enervate", i: "/ˈenəveɪt/", m: "Làm suy kiệt sức lực", e: "The humid heat enervates even the strongest people."},
+        {w: "Engender", i: "/ɪnˈdʒendə(r)/", m: "Gây ra", e: "The policy helped to engender a sense of community."},
+        {w: "Enigma", i: "/ɪˈnɪɡmə/", m: "Điều bí ẩn", e: "His sudden disappearance remains an enigma."},
+        {w: "Ephemeral", i: "/ɪˈfemərəl/", m: "Chóng vánh, phù du", e: "Fame in the social media era is often ephemeral."},
+        {w: "Equanimity", i: "/ˌekwəˈnɪməti/", m: "Sự điềm tĩnh", e: "She faced the crisis with perfect equanimity."},
+        {w: "Eradicate", i: "/ɪˈrædɪkeɪt/", m: "Diệt trừ tận gốc", e: "The disease has been almost eradicated."},
+        {w: "Erratic", i: "/ɪˈrætɪk/", m: "Thất thường", e: "The car's erratic movements worried the police."},
+        {w: "Erudite", i: "/ˈerudaɪt/", m: "Thông thái", e: "He gave an erudite lecture on history."},
+        {w: "Esoteric", i: "/ˌesəˈterɪk/", m: "Thâm thúy (ít người biết)", e: "The discussion was full of esoteric terminology."},
+        {w: "Exemplary", i: "/ɪɡˈzempləri/", m: "Mẫu mực, gương mẫu", e: "His behavior in class has been exemplary."},
+        {w: "Exhaustive", i: "/ɡˈzɔːstɪv/", m: "Toàn diện, thấu đáo", e: "The police conducted an exhaustive search."},
+        {w: "Exhilarating", i: "/ɪɡˈzɪləreɪtɪŋ/", m: "Làm phấn chấn", e: "Skydiving is an exhilarating experience."},
+        {w: "Exonerate", i: "/ɪɡˈzɒnəreɪt/", m: "Giải oan", e: "The DNA evidence helped to exonerate him."},
+        {w: "Expedient", i: "/ɪkˈspiːdiənt/", m: "Thực tế, có lợi", e: "The company found it expedient to settle out of court."},
+        {w: "Explicit", i: "/ɪkˈsplɪsɪt/", m: "Rõ ràng", e: "I gave you explicit instructions to stay here."},
+        {w: "Exploit", i: "/ɪkˈsplɔɪt/", m: "Khai thác, lợi dụng", e: "We need to exploit renewable energy sources."},
+        {w: "Extol", i: "/ɪkˈstəʊl/", m: "Tán dương", e: "Doctors extol the virtues of regular exercise."},
+        {w: "Facilitate", i: "/fəˈsɪlɪteɪt/", m: "Tạo điều kiện thuận lợi", e: "Modern technology facilitates remote work."},
+        {w: "Fallacious", i: "/fəˈleɪʃəs/", m: "Sai lầm", e: "His argument is based on fallacious reasoning."},
+        {w: "Fastidious", i: "/fæˈstɪdiəs/", m: "Cầu kỳ, kĩ tính", e: "He is very fastidious about his clothes."},
+        {w: "Fervent", i: "/ˈfɜːvənt/", m: "Nồng nhiệt, tha thiết", e: "She is a fervent believer in social justice."},
+        {w: "Fortuitous", i: "/fɔːˈtjuːɪtəs/", m: "Ngẫu nhiên may mắn", e: "Our meeting was entirely fortuitous."},
+        {w: "Frugal", i: "/ˈfruːɡl/", m: "Tiết kiệm", e: "He lives a frugal life to save money."},
+        {w: "Futile", i: "/ˈfjuːtaɪl/", m: "Vô ích", e: "It's futile to argue with him."},
+        {w: "Gregarious", i: "/ɡrɪˈɡeəriəs/", m: "Thích giao du", e: "She is a gregarious person who loves parties."},
+        {w: "Gullible", i: "/ˈɡʌləbl/", m: "Dễ tin, nhẹ dạ", e: "Don't be so gullible as to believe that."},
+        {w: "Hamper", i: "/ˈhæmpə(r)/", m: "Cản trở", e: "Bad weather hampered the rescue efforts."},
+        {w: "Haphazard", i: "/hæpˈhæzəd/", m: "Lộn xộn, ngẫu nhiên", e: "The books were piled in a haphazard way."},
+        {w: "Hierarchy", i: "/ˈhaɪərɑːki/", m: "Hệ thống cấp bậc", e: "There is a strict hierarchy in the army."},
+        {w: "Hindrance", i: "/ˈhɪndrəns/", m: "Sự cản trở", e: "The rain was a hindrance to our work."},
+        {w: "Imminent", i: "/ˈɪmɪnənt/", m: "Sắp xảy ra", e: "A decision is expected imminent."},
+        {w: "Immutable", i: "/ɪˈmjuːtəbl/", m: "Không thay đổi được", e: "The laws of nature are immutable."},
+        {w: "Impair", i: "/ɪmˈpeə(r)/", m: "Làm suy yếu, hỏng", e: "Alcohol can impair your driving ability."},
+        {w: "Impartial", i: "/ɪmˈpɑːʃl/", m: "Công bằng", e: "A judge must remain impartial."},
+        {w: "Impede", i: "/ɪmˈpiːd/", m: "Cản trở (tiến trình)", e: "Storms can impede the progress of the ship."},
+        {w: "Imperative", i: "/ɪmˈperətɪv/", m: "Cấp bách, bắt buộc", e: "It is imperative that you leave now."},
+        {w: "Implicit", i: "/ɪmˈplɪsɪt/", m: "Ngầm hiểu", e: "There was an implicit agreement between them."},
+        {w: "Incentive", i: "/ɪnˈsentɪv/", m: "Sự khích lệ", e: "Bonus payments provide an incentive to work harder."},
+        {w: "Incessant", i: "/ɪnˈsesnt/", m: "Liên miên không dứt", e: "The incessant noise made it hard to sleep."},
+        {w: "Incisive", i: "/ɪnˈsaɪsɪv/", m: "Sắc sảo", e: "She wrote an incisive analysis of the situation."},
+        {w: "Incongruous", i: "/ɪnˈkɒŋɡruəs/", m: "Không phù hợp", e: "The modern chair looked incongruous in the old room."},
+        {w: "Indigenous", i: "/ɪnˈdɪdʒənəs/", m: "Bản địa", e: "Kangaroos are indigenous to Australia."},
+        {w: "Indifferent", i: "/ɪnˈdɪfrənt/", m: "Thờ ơ", e: "He was indifferent to the suffering of others."},
+        {w: "Indolent", i: "/ˈɪndələnt/", m: "Lười biếng", e: "The indolent student failed the exam."},
+        {w: "Inevitable", i: "/ɪnˈevɪtəbl/", m: "Không thể tránh khỏi", e: "Death is inevitable."},
+        {w: "Inherent", i: "/ɪnˈhɪərənt/", m: "Vốn có", e: "Every job has inherent risks."},
+        {w: "Inhibit", i: "/ɪnˈhɪbɪt/", m: "Ngăn chặn, kiềm chế", e: "Strict rules can inhibit creativity."},
+        {w: "Innate", i: "/ɪˈneɪt/", m: "Bẩm sinh", e: "She has an innate talent for music."},
+        {w: "Innocuous", i: "/ɪˈnɒkjuəs/", m: "Vô hại", e: "It was an innocuous comment, but he took it personally."},
+        {w: "Insatiable", i: "/ɪnˈseɪʃəbl/", m: "Không thể thỏa mãn", e: "The child has an insatiable curiosity."},
+        {w: "Inscrutable", i: "/ɪnˈskruːtəbl/", m: "Bí hiểm, khó nhìn thấu", e: "He had an inscrutable expression on his face."},
+        {w: "Insidious", i: "/ɪnˈsɪdiəs/", m: "Xảo quyệt, âm ỉ", e: "The disease is insidious and hard to detect."},
+        {w: "Insipid", i: "/ɪnˈsɪpɪd/", m: "Nhạt nhẽo", e: "The soup was rather insipid."},
+        {w: "Instigate", i: "/ˈɪnstɪɡeɪt/", m: "Xúi giục, khởi xướng", e: "They tried to instigate a protest."},
+        {w: "Intangible", i: "/ɪnˈtændʒəbl/", m: "Vô hình", e: "Trust is an intangible asset."},
+        {w: "Integral", i: "/ˈɪntɪɡrəl/", m: "Thiết yếu", e: "Music is an integral part of his life."},
+        {w: "Integrity", i: "/ɪnˈteɡrəti/", m: "Sự chính trực", e: "He is a man of great integrity."},
+        {w: "Intermittent", i: "/ˌɪntəˈmɪtənt/", m: "Gián đoạn, lúc có lúc không", e: "There will be intermittent rain today."},
+        {w: "Intervene", i: "/ˌɪntəˈviːn/", m: "Can thiệp", e: "The UN had to intervene in the conflict."},
+        {w: "Intrepid", i: "/ɪnˈtrepɪd/", m: "Gan dạ", e: "The intrepid traveler set off alone."},
+        {w: "Intrinsic", i: "/ɪnˈtrɪnzɪk/", m: "Bản chất", e: "Flexibility is intrinsic to our business model."},
+        {w: "Inundate", i: "/ˈɪnʌndeɪt/", m: "Tràn ngập", e: "We were inundated with applications for the job."}
+    ];
+
+    const synth = window.speechSynthesis;
+    let userVocab = [];
+
+    // --- HELPER FUNCTIONS ---
+    function isMobile() {
+        return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+
+    function capitalize(str) {
+        if (!str) return "";
+        str = str.trim();
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function cleanPrefix(str) {
+        // Loại bỏ số thứ tự (1., 1), gạch đầu dòng (-, *), khoảng trắng dư thừa ở đầu
+        return str.replace(/^[\s\d.\-\*)\>]+/, "").trim();
+    }
+
+    // --- AUDIO LOGIC (HYBRID) ---
+    function speak(text) {
+        synth.cancel();
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'en-US';
+
+        if (isMobile()) {
+            setTimeout(() => {
+                const voices = synth.getVoices();
+                const bestVoice = voices.find(v => v.name.includes('Google') && v.lang.includes('en-US')) ||
+                                 voices.find(v => v.name.includes('Siri') && v.lang.includes('en-US')) ||
+                                 voices.find(v => v.lang.includes('en-US'));
+                if(bestVoice) msg.voice = bestVoice;
+                msg.rate = 0.85;
+                synth.speak(msg);
+            }, 50);
+        } else {
+            msg.rate = 0.8;
+            synth.speak(msg);
+        }
+    }
+
+    function unlockAudio() {
+        if (isMobile()) {
+            const ut = new SpeechSynthesisUtterance(' ');
+            ut.volume = 0;
+            synth.speak(ut);
+        }
+    }
+
+    // --- CORE LOGIC ---
+    function parseLines(text) {
+        userVocab = [];
+        text.split('\n').forEach(line => {
+            if(line.includes(':')) {
+                const parts = line.split(':');
+                let rawWord = cleanPrefix(parts[0]);
+                let rawMeaning = parts[1].trim();
+
+                if (rawWord && rawMeaning) {
+                    userVocab.push({
+                        w: capitalize(rawWord),
+                        m: capitalize(rawMeaning),
+                        e: "Practice makes perfect!"
+                    });
+                }
+            }
+        });
+        if(userVocab.length > 0) {
+            unlockAudio();
+            generateQuiz();
+        }
+    }
+
+    function processText() {
+        const val = document.getElementById('rawInput').value;
+        if(!val) return alert("Please enter your vocabulary list!");
+        parseLines(val);
+    }
+
+    document.getElementById('fileIn').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+        document.getElementById('fileInfo').innerText = "File loaded: " + file.name;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            mammoth.extractRawText({ arrayBuffer: ev.target.result }).then(res => parseLines(res.value));
+        };
+        reader.readAsArrayBuffer(file);
+    });
+
+    function generateQuiz() {
+        const container = document.getElementById('quizContent');
+        container.innerHTML = '';
+        document.getElementById('scoreBox').style.display = 'none';
+        document.getElementById('quizArea').style.display = 'block';
+
+        let pool = [...userVocab];
+        if(pool.length < 20) {
+            let shuffledBank = [...megaBank].sort(() => 0.5 - Math.random());
+            for(let item of shuffledBank) {
+                if(pool.length >= 20) break;
+                if(!pool.some(x => x.w.toLowerCase() === item.w.toLowerCase())) {
+                    pool.push(item);
+                }
+            }
+        }
+        
+        let quiz20 = pool.sort(() => 0.5 - Math.random()).slice(0, 20);
+
+        quiz20.forEach((item, idx) => {
+            const isEngQ = Math.random() > 0.5;
+            const qTxt = isEngQ ? `Meaning of "<strong>${item.w}</strong>"?` : `Which word means: "<strong>${item.m}</strong>"?`;
+            const correctAns = isEngQ ? item.m : item.w;
+            
+            let others = quiz20.filter(x => x.w !== item.w).map(x => isEngQ ? x.m : x.w);
+            let opts = [correctAns, ...others.sort(() => 0.5 - Math.random()).slice(0, 3)].sort(() => 0.5 - Math.random());
+
+            container.innerHTML += `
+                <div class="q-card" data-correct="${correctAns}">
+                    <div class="q-text">${idx+1}. ${qTxt}</div>
+                    <div class="options">
+                        ${opts.map(o => `<div class="opt" onclick="selectOpt(this)">${o}</div>`).join('')}
+                    </div>
+                    <div class="feedback">
+                        <div class="ipa-line">
+                            <span class="ipa-text">${item.w}</span>
+                            <button class="speak-btn" onclick="speak('${item.w}')">🔊</button>
+                        </div>
+                        <p><strong>Example:</strong> ${item.e}</p>
+                    </div>
+                </div>
+            `;
+        });
+        window.scrollTo({ top: document.getElementById('quizArea').offsetTop, behavior: 'smooth' });
+    }
+
+    function selectOpt(el) {
+        el.parentElement.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    function checkAll() {
+        const cards = document.querySelectorAll('.q-card');
+        let score = 0;
+        cards.forEach(card => {
+            const sel = card.querySelector('.opt.selected');
+            const cor = card.getAttribute('data-correct');
+            const fb = card.querySelector('.feedback');
+            fb.style.display = 'block';
+
+            if(sel && sel.innerText === cor) {
+                score++;
+                fb.style.borderLeftColor = "var(--secondary)";
+            } else {
+                fb.style.borderLeftColor = "var(--danger)";
+                fb.innerHTML = `<div style="color:var(--danger); font-weight:bold; margin-bottom:8px;">❌ Not quite! Correct: ${cor}</div>` + fb.innerHTML;
+            }
+        });
+
+        const box = document.getElementById('scoreBox');
+        box.style.display = 'block';
+        box.innerHTML = `<h2>Score: ${score}/20</h2><p>Tap 🔊 to master your pronunciation.</p>`;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function switchTab(id, btn) {
+        document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+    }
+</script>
+
+</body>
+</html>

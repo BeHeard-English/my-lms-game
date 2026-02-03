@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tic Tac Toe</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Mali:wght@500;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --spring-bg: linear-gradient(135deg, #a8e6cf 0%, #dcedc1 100%);
+            --summer-bg: linear-gradient(135deg, #ffedbc 0%, #ff6e7f 100%);
+            --autumn-bg: linear-gradient(135deg, #feb47b 0%, #ff7e5f 100%);
+            --winter-bg: linear-gradient(135deg, #70e1f5 0%, #ffd194 100%);
+            --primary: #6c5ce7;
+            --font-main: 'Mali', cursive;
+            --font-hand: 'Patrick Hand', cursive;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: var(--font-main);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background 0.5s;
+            color: #2d3436;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        /* Themes */
+        body.spring { background: var(--spring-bg); }
+        body.summer { background: var(--summer-bg); }
+        body.autumn { background: var(--autumn-bg); }
+        body.winter { background: var(--winter-bg); }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            border: 4px solid white;
+        }
+
+        #game-board.container {
+            display: flex;
+            flex-direction: column;
+            min-height: auto;
+            max-height: 95vh;
+            overflow: hidden;
+        }
+
+        h1 { 
+            font-family: var(--font-main); 
+            color: var(--primary); 
+            font-size: 2.2rem; 
+            margin: 0 0 15px 0;
+            text-shadow: 2px 2px #fff;
+            line-height: 1.2;
+        }
+
+        /* Setup Screen */
+        .setup-box { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+            text-align: left; 
+        }
+        .full-width { grid-column: span 2; }
+
+        label { font-weight: 700; font-size: 1rem; color: #444; margin-bottom: 5px; display: block; }
+        
+        select, input, textarea {
+            width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #ddd;
+            font-family: var(--font-main); font-size: 1rem;
+        }
+        
+        button {
+            background: var(--primary); color: white; border: none; 
+            padding: 12px 30px; font-size: 1.3rem; border-radius: 50px; 
+            cursor: pointer; font-family: var(--font-main); font-weight: 700;
+            transition: 0.2s; margin-top: 15px; box-shadow: 0 5px 0 #4834d4;
+            width: 100%; max-width: 300px;
+        }
+        button:active { transform: translateY(3px); box-shadow: 0 2px 0 #4834d4; }
+
+        /* Game Board */
+        #game-board { display: none; }
+        
+        .game-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            width: 100%;
+        }
+        
+        .grid-container-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+            padding: 10px 0;
+        }
+        
+        .grid {
+            display: grid; 
+            gap: 6px; 
+            margin: 0 auto;
+            width: 90vmin;
+            height: 90vmin;
+            max-width: 500px;
+            max-height: 500px;
+            aspect-ratio: 1/1;
+        }
+        
+        .cell {
+            background: white; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-hand); font-weight: 700;
+            cursor: pointer; box-shadow: 0 4px 0 #ccc; 
+            border: 3px solid transparent; color: #555;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cell-number {
+            position: absolute;
+            top: 3px;
+            left: 5px;
+            font-size: 0.9rem;
+            color: #aaa;
+            font-weight: bold;
+            font-family: var(--font-main);
+        }
+        
+        .cell-content {
+            font-size: 2.5rem;
+            font-family: var(--font-hand);
+            font-weight: 700;
+        }
+        
+        .cell:active { transform: scale(0.95); }
+        .cell.marked-X { color: #ff7675; background: #fff0f0; border-color: #ff7675; }
+        .cell.marked-O { color: #74b9ff; background: #f0f8ff; border-color: #74b9ff; }
+        .cell.winning-cell { animation: pulse 1s infinite; border-color: gold; box-shadow: 0 0 10px gold; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        /* Score & Toolbar */
+        .score-container { 
+            display: flex; 
+            justify-content: space-around; 
+            margin-bottom: 10px;
+            flex-shrink: 0;
+        }
+        .score-box { background: white; padding: 10px 20px; border-radius: 15px; min-width: 100px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+        .score-value { font-size: 2rem; font-weight: bold; }
+        .score-x { border-bottom: 4px solid #ff7675; color: #d63031; }
+        .score-o { border-bottom: 4px solid #74b9ff; color: #0984e3; }
+
+        .toolbar { 
+            display: flex; 
+            gap: 10px; 
+            justify-content: center; 
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+        }
+        .tool-btn { font-size: 1rem; padding: 10px 15px; width: auto; margin-top: 0; background: #636e72; box-shadow: 0 4px 0 #2d3436; }
+
+        /* Modal Responsive */
+        #modal, #win-modal {
+            display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white; padding: 25px; border-radius: 25px; position: relative;
+            width: 100%; max-width: 500px; text-align: center; border: 6px solid var(--primary);
+            animation: popIn 0.3s;
+        }
+
+        #word-text { 
+            font-family: var(--font-hand); 
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            color: #2d3436; margin: 20px 0 30px 0; display: block;
+            line-height: 1.3; font-weight: 700;
+            word-wrap: break-word; overflow-wrap: break-word;
+        }
+
+        .modal-btns { display: flex; justify-content: center; gap: 15px; }
+        .modal-btn { 
+            margin: 0; flex: 1; font-size: 1.2rem; padding: 15px; 
+            box-shadow: 0 5px 0 rgba(0,0,0,0.2);
+            border-radius: 15px; border: none; color: white; font-family: var(--font-main); font-weight: 700; cursor: pointer;
+        }
+        .btn-x { background: #ff7675; }
+        .btn-o { background: #74b9ff; }
+        
+        .close-modal-btn { 
+            position: absolute; top: 10px; right: 15px; font-size: 2rem; 
+            cursor: pointer; color: #b2bec3; width: 40px; height: 40px; line-height: 40px;
+        }
+
+        /* Win Modal */
+        .win-content { background: white; padding: 30px; border-radius: 30px; border: 8px solid gold; width: 90%; max-width: 400px; text-align: center; }
+        .win-title { font-size: 2.5rem; color: #6c5ce7; margin-bottom: 10px; }
+        .win-team { font-size: 3rem; margin: 15px 0; padding: 10px; border-radius: 15px; color: white; display: block; font-weight: 700; }
+        .team-x { background: #ff7675; }
+        .team-o { background: #74b9ff; }
+
+        /* Sound Controls */
+        .sound-controls { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
+        .sound-btn { 
+            width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2); font-size: 1.5rem; background: white; color: var(--primary); 
+            border: none; margin: 0; cursor: pointer;
+        }
+        .sound-off { background: #b2bec3; color: #636e72; }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .setup-box { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
+            .container { padding: 15px; margin: 5px 0; border-width: 2px; }
+            h1 { font-size: 1.8rem; }
+            .grid { 
+                width: 85vmin;
+                height: 85vmin;
+                gap: 4px; 
+            }
+            .cell { 
+                border-radius: 8px; 
+                box-shadow: 0 2px 0 #ccc; 
+            }
+            .cell-content {
+                font-size: 2rem;
+            }
+            .cell-number {
+                font-size: 0.8rem;
+                top: 2px;
+                left: 4px;
+            }
+            .score-box { padding: 8px 15px; min-width: 80px; }
+            .score-value { font-size: 1.5rem; }
+            #word-text { font-size: 1.8rem; margin: 10px 0 20px 0; }
+        }
+        
+        @media (min-width: 601px) and (max-width: 1024px) {
+            .grid {
+                width: 70vmin;
+                height: 70vmin;
+                max-width: 450px;
+                max-height: 450px;
+            }
+        }
+    </style>
+</head>
+<body class="spring">
+
+<div class="container" id="setup-screen">
+    <h1>🎈 Let's play 🎈</h1>
+    <div class="setup-box">
+        <div>
+            <label>1. Grid Size</label>
+            <select id="grid-size">
+                <option value="4">4 x 4 (Thắng khi đủ 4)</option>
+                <option value="5">5 x 5 (Thắng khi đủ 5)</option>
+                <option value="6">6 x 6 (Thắng khi đủ 5)</option>
+                <option value="7">7 x 7 (Thắng khi đủ 5)</option>
+            </select>
+        </div>
+        <div>
+            <label>2. Theme</label>
+            <select id="theme-select" onchange="changeTheme(this.value)">
+                <option value="spring">Spring 🌸</option>
+                <option value="summer">Summer ☀️</option>
+                <option value="autumn">Autumn 🍂</option>
+                <option value="winter">Winter ❄️</option>
+            </select>
+        </div>
+        <div class="full-width">
+            <label>3. Upload Vocab (.txt, .docx)</label>
+            <input type="file" id="file-input" accept=".txt,.docx">
+        </div>
+        <div class="full-width">
+            <label>OR Paste Vocabulary</label>
+            <textarea id="paste-input" placeholder="Dán danh sách từ vựng/câu hỏi vào đây..."></textarea>
+        </div>
+        <div class="full-width">
+            <label>4. Background Music (Audio)</label>
+            <input type="file" id="music-input" accept="audio/*">
+        </div>
+    </div>
+    <button onclick="initGame()">START GAME 🚀</button>
+</div>
+
+<div class="container" id="game-board">
+    <div class="game-content">
+        <div class="score-container">
+            <div class="score-box score-x">
+                <div>Team X</div>
+                <div class="score-value" id="score-x">0</div>
+            </div>
+            <div class="score-box score-o">
+                <div>Team O</div>
+                <div class="score-value" id="score-o">0</div>
+            </div>
+        </div>
+        
+        <div class="toolbar">
+            <select id="ingame-theme" onchange="changeTheme(this.value)" style="width: auto;">
+                <option value="spring">Spring</option>
+                <option value="summer">Summer</option>
+                <option value="autumn">Autumn</option>
+                <option value="winter">Winter</option>
+            </select>
+            <button class="tool-btn" onclick="shuffleWords()">Shuffle 🎲</button>
+            <button class="tool-btn" style="background: #fab1a0; box-shadow: 0 4px 0 #e17055;" onclick="location.reload()">Reset 🔄</button>
+        </div>
+        
+        <div class="grid-container-wrapper">
+            <div id="grid-container" class="grid"></div>
+        </div>
+    </div>
+</div>
+
+<div id="modal">
+    <div class="modal-content">
+        <div class="close-modal-btn" onclick="closeModal()">✖</div>
+        <span id="word-text">WORD</span>
+        <div class="modal-btns">
+            <button class="modal-btn btn-o" onclick="markWinner('O')">Team O</button>
+            <button class="modal-btn btn-x" onclick="markWinner('X')">Team X</button>
+        </div>
+    </div>
+</div>
+
+<div id="win-modal">
+    <div class="win-content">
+        <div class="win-title">🎉 Congrats 🎉</div>
+        <div style="color:#555;">The Winner is</div>
+        <div id="win-team" class="win-team team-x">TEAM X</div>
+        <div style="color:#555; margin-bottom: 20px;">Well done!</div>
+        <button class="modal-btn" style="background: #6c5ce7; width: 100%;" onclick="closeWinModal()">Keep playing</button>
+    </div>
+</div>
+
+<div class="sound-controls">
+    <button class="sound-btn" id="btn-sfx" onclick="toggleSound('effects')" title="Hiệu ứng (SFX)">
+        <i class="fas fa-volume-up" id="effects-icon"></i>
+    </button>
+    <button class="sound-btn" id="btn-music" onclick="toggleSound('music')" title="Nhạc nền (Music)">
+        <i class="fas fa-music" id="music-icon"></i>
+    </button>
+</div>
+
+<audio id="bg-audio" loop></audio>
+
+<script>
+    let vocabulary = [];
+    let gridWords = [];
+    let currentSize = 4;
+    let selectedIdx = -1;
+    let boardState = [];
+    let scoreX = 0; scoreO = 0;
+    
+    // Sound System
+    let soundEnabled = { effects: true, music: true };
+    let currentEffectAudio = null;
+    
+    const soundEffects = [
+        'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3', 
+        'https://assets.mixkit.co/active_storage/sfx/2219/2219-preview.mp3',
+        'https://assets.mixkit.co/active_storage/sfx/2467/2467-preview.mp3'
+    ];
+    const winSounds = ['https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3'];
+
+    function changeTheme(val) {
+        document.body.className = val;
+        document.getElementById('theme-select').value = val;
+        document.getElementById('ingame-theme').value = val;
+    }
+
+    function toggleSound(type) {
+        soundEnabled[type] = !soundEnabled[type];
+        const icon = document.getElementById(`${type}-icon`);
+        const btn = document.getElementById(type === 'effects' ? 'btn-sfx' : 'btn-music');
+
+        if (soundEnabled[type]) {
+            icon.className = type === 'effects' ? 'fas fa-volume-up' : 'fas fa-music';
+            btn.classList.remove('sound-off');
+        } else {
+            icon.className = type === 'effects' ? 'fas fa-volume-mute' : 'fas fa-music-slash';
+            btn.classList.add('sound-off');
+        }
+
+        if (type === 'music') {
+            const bgAudio = document.getElementById('bg-audio');
+            if (bgAudio.src) {
+                if (soundEnabled.music) bgAudio.play().catch(e=>{});
+                else bgAudio.pause();
+            }
+        } else if (type === 'effects') {
+            if (!soundEnabled.effects && currentEffectAudio) {
+                currentEffectAudio.pause();
+                currentEffectAudio.currentTime = 0;
+            }
+        }
+    }
+
+    async function initGame() {
+        const fileInput = document.getElementById('file-input');
+        const pasteInput = document.getElementById('paste-input').value;
+        const musicInput = document.getElementById('music-input');
+        
+        currentSize = parseInt(document.getElementById('grid-size').value);
+        let rawText = "";
+
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            if (file.name.endsWith('.docx')) {
+                const arrayBuffer = await file.arrayBuffer();
+                const result = await mammoth.extractRawText({arrayBuffer});
+                rawText = result.value;
+            } else {
+                rawText = await file.text();
+            }
+        } else {
+            rawText = pasteInput;
+        }
+
+        vocabulary = rawText.split('\n')
+            .map(line => line.replace(/^[\s\d.•*-]+/, '').trim())
+            .filter(line => line.length > 0);
+
+        // Xử lý nhạc nền
+        if (musicInput.files[0]) {
+            const audio = document.getElementById('bg-audio');
+            audio.src = URL.createObjectURL(musicInput.files[0]);
+            audio.load();
+            if (soundEnabled.music) {
+                audio.play().catch(e => console.log("Không thể tự động phát nhạc:", e));
+            }
+        }
+
+        scoreX = 0; scoreO = 0;
+        updateScores();
+        setupBoard();
+        document.getElementById('setup-screen').style.display = 'none';
+        document.getElementById('game-board').style.display = 'block';
+        
+        // Điều chỉnh kích thước grid sau khi hiển thị
+        adjustGridSize();
+    }
+
+    function setupBoard() {
+        const total = currentSize * currentSize;
+        let shuffled = [...vocabulary].sort(() => Math.random() - 0.5);
+        gridWords = [];
+        boardState = Array(total).fill(null);
+        for (let i = 0; i < total; i++) {
+            gridWords.push(shuffled[i] || "Challenge 🌟");
+        }
+        renderGrid();
+    }
+
+    function renderGrid() {
+        const container = document.getElementById('grid-container');
+        container.innerHTML = '';
+        container.style.gridTemplateColumns = `repeat(${currentSize}, 1fr)`;
+        container.style.gridTemplateRows = `repeat(${currentSize}, 1fr)`;
+        
+        gridWords.forEach((_, i) => {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.id = `cell-${i}`;
+            cell.dataset.word = gridWords[i];
+            
+            const numberSpan = document.createElement('span');
+            numberSpan.className = 'cell-number';
+            numberSpan.textContent = (i + 1).toString();
+            
+            const contentSpan = document.createElement('span');
+            contentSpan.className = 'cell-content';
+            
+            cell.appendChild(numberSpan);
+            cell.appendChild(contentSpan);
+            cell.onclick = () => openWord(i);
+            container.appendChild(cell);
+        });
+        
+        updateCellStates();
+    }
+
+    function updateCellStates() {
+        for (let i = 0; i < boardState.length; i++) {
+            const cell = document.getElementById(`cell-${i}`);
+            if (!cell) continue;
+            
+            const numberSpan = cell.querySelector('.cell-number');
+            const contentSpan = cell.querySelector('.cell-content');
+            
+            if (boardState[i]) {
+                cell.classList.add(`marked-${boardState[i]}`);
+                numberSpan.style.display = 'none';
+                contentSpan.style.display = 'block';
+                contentSpan.textContent = boardState[i];
+                contentSpan.style.color = boardState[i] === 'X' ? '#ff7675' : '#74b9ff';
+                cell.style.cursor = 'default';
+            } else {
+                cell.classList.remove('marked-X', 'marked-O', 'winning-cell');
+                numberSpan.style.display = 'block';
+                contentSpan.style.display = 'none';
+                cell.style.cursor = 'pointer';
+            }
+        }
+    }
+
+    function openWord(idx) {
+        if (boardState[idx]) return;
+        selectedIdx = idx;
+        
+        if (soundEnabled.effects) playRandomSound(soundEffects);
+        
+        document.getElementById('word-text').innerText = gridWords[idx];
+        document.getElementById('modal').style.display = 'flex';
+    }
+
+    function closeModal() { 
+        document.getElementById('modal').style.display = 'none';
+        if (currentEffectAudio) {
+            currentEffectAudio.pause();
+            currentEffectAudio.currentTime = 0;
+        }
+    }
+
+    function markWinner(team) {
+        boardState[selectedIdx] = team;
+        
+        updateCellStates();
+        
+        if (team === 'X') scoreX++; else scoreO++;
+        updateScores();
+        closeModal();
+        checkWin(team);
+    }
+
+    function updateScores() {
+        document.getElementById('score-x').textContent = scoreX;
+        document.getElementById('score-o').textContent = scoreO;
+    }
+
+    function shuffleWords() {
+        let unmarkedIndices = [];
+        boardState.forEach((val, idx) => { if(!val) unmarkedIndices.push(idx); });
+        let wordsToShuffle = unmarkedIndices.map(i => gridWords[i]);
+        wordsToShuffle.sort(() => Math.random() - 0.5);
+        unmarkedIndices.forEach((originalIdx, i) => gridWords[originalIdx] = wordsToShuffle[i]);
+        if (soundEnabled.effects) playRandomSound(soundEffects);
+        
+        unmarkedIndices.forEach((originalIdx, i) => {
+            const cell = document.getElementById(`cell-${originalIdx}`);
+            if (cell) {
+                cell.dataset.word = wordsToShuffle[i];
+            }
+        });
+        
+        alert("Shuffle - Done!");
+    }
+
+    function checkWin(team) {
+        const size = currentSize;
+        const winCondition = (size === 4) ? 4 : 5; 
+        let winningCells = [];
+        let win = false;
+        
+        const checkSequence = (startRow, startCol, dr, dc) => {
+            let cells = [];
+            for(let k=0; k<winCondition; k++) {
+                let r = startRow + k*dr;
+                let c = startCol + k*dc;
+                let idx = r*size + c;
+                if(boardState[idx] === team) cells.push(idx);
+                else return null;
+            }
+            return cells;
+        }
+
+        for(let r=0; r<size; r++) {
+            for(let c=0; c<size; c++) {
+                if(c <= size - winCondition) {
+                    let res = checkSequence(r, c, 0, 1);
+                    if(res) { win = true; winningCells = res; break; }
+                }
+                if(r <= size - winCondition) {
+                    let res = checkSequence(r, c, 1, 0);
+                    if(res) { win = true; winningCells = res; break; }
+                }
+                if(r <= size - winCondition && c <= size - winCondition) {
+                    let res = checkSequence(r, c, 1, 1);
+                    if(res) { win = true; winningCells = res; break; }
+                }
+                if(r <= size - winCondition && c >= winCondition - 1) {
+                    let res = checkSequence(r, c, 1, -1);
+                    if(res) { win = true; winningCells = res; break; }
+                }
+            }
+            if(win) break;
+        }
+
+        if (win) {
+            winningCells.forEach(idx => {
+                const cell = document.getElementById(`cell-${idx}`);
+                if (cell) cell.classList.add('winning-cell');
+            });
+            setTimeout(() => triggerWin(team), 500);
+        }
+    }
+
+    function triggerWin(team) {
+        if (soundEnabled.effects) playRandomSound(winSounds);
+        const winTeamEl = document.getElementById('win-team');
+        winTeamEl.textContent = `TEAM ${team}`;
+        winTeamEl.className = `win-team ${team === 'X' ? 'team-x' : 'team-o'}`;
+        document.getElementById('win-modal').style.display = 'flex';
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+    }
+
+    function closeWinModal() {
+        document.getElementById('win-modal').style.display = 'none';
+        document.querySelectorAll('.winning-cell').forEach(cell => cell.classList.remove('winning-cell'));
+        if (currentEffectAudio) {
+            currentEffectAudio.pause();
+            currentEffectAudio.currentTime = 0;
+        }
+    }
+
+    function playRandomSound(arr) {
+        if (currentEffectAudio) {
+            currentEffectAudio.pause();
+            currentEffectAudio.currentTime = 0;
+        }
+        
+        const url = arr[Math.floor(Math.random() * arr.length)];
+        currentEffectAudio = new Audio(url);
+        currentEffectAudio.volume = 0.5;
+        
+        currentEffectAudio.play().catch(e => console.log("Play error:", e));
+    }
+
+    // Hàm điều chỉnh kích thước grid để đảm bảo luôn vuông và vừa màn hình
+    function adjustGridSize() {
+        const gridContainer = document.querySelector('.grid');
+        const gameBoard = document.getElementById('game-board');
+        
+        if (!gridContainer || !gameBoard) return;
+        
+        // Tính toán không gian có sẵn
+        const gameBoardRect = gameBoard.getBoundingClientRect();
+        const toolbarHeight = document.querySelector('.toolbar').offsetHeight;
+        const scoreHeight = document.querySelector('.score-container').offsetHeight;
+        
+        const availableHeight = window.innerHeight - gameBoardRect.top - 30;
+        const availableWidth = gameBoardRect.width;
+        
+        // Tính kích thước tối đa có thể
+        const maxSize = Math.min(availableHeight - toolbarHeight - scoreHeight - 40, availableWidth - 40);
+        
+        // Đảm bảo không vượt quá giới hạn
+        const finalSize = Math.min(maxSize, 500);
+        
+        gridContainer.style.width = `${finalSize}px`;
+        gridContainer.style.height = `${finalSize}px`;
+    }
+
+    // Thêm sự kiện resize để điều chỉnh kích thước
+    window.addEventListener('resize', adjustGridSize);
+</script>
+</body>
+</html>

@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be Heard - Interactive Learning</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+    <style>
+        :root {
+            /* Base Variables */
+            --font-main: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            --transition-speed: 0.3s;
+        }
+
+        /* Themes */
+        .theme-spring {
+            --bg-color: #fce4ec;
+            --bg-gradient: linear-gradient(135deg, #fce4ec 0%, #e8f5e9 100%);
+            --primary-color: #66bb6a;
+            --secondary-color: #f06292;
+            --text-color: #2e7d32;
+            --card-bg: #ffffff;
+            --highlight: #a5d6a7;
+        }
+
+        .theme-summer {
+            --bg-color: #fffde7;
+            --bg-gradient: linear-gradient(135deg, #fffde7 0%, #e1f5fe 100%);
+            --primary-color: #29b6f6;
+            --secondary-color: #fbc02d;
+            --text-color: #0277bd;
+            --card-bg: #ffffff;
+            --highlight: #b3e5fc;
+        }
+
+        .theme-autumn {
+            --bg-color: #fff3e0;
+            --bg-gradient: linear-gradient(135deg, #fff3e0 0%, #d7ccc8 100%);
+            --primary-color: #ef6c00;
+            --secondary-color: #8d6e63;
+            --text-color: #e65100;
+            --card-bg: #ffffff;
+            --highlight: #ffe0b2;
+        }
+
+        .theme-winter {
+            --bg-color: #e3f2fd;
+            --bg-gradient: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
+            --primary-color: #42a5f5;
+            --secondary-color: #78909c;
+            --text-color: #1565c0;
+            --card-bg: #ffffff;
+            --highlight: #bbdefb;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            user-select: none; 
+            margin: 0;
+            padding: 0;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: var(--font-main);
+        }
+        
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            transition: background 1s ease;
+        }
+
+        /* UI Containers */
+        .screen {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            padding: 15px;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: fadeIn 0.5s;
+            overflow: hidden;
+        }
+
+        .screen.active { 
+            display: flex; 
+        }
+
+        @keyframes fadeIn { 
+            from { opacity: 0; } 
+            to { opacity: 1; } 
+        }
+
+        /* General UI Elements */
+        h1 { 
+            font-size: clamp(1.8rem, 5vw, 3rem); 
+            margin-bottom: 15px; 
+            text-shadow: 2px 2px 0px rgba(255,255,255,0.5); 
+            text-align: center; 
+            line-height: 1.2;
+        }
+        
+        h2 { 
+            font-size: clamp(1.3rem, 3.5vw, 2rem); 
+            margin: 8px 0; 
+            line-height: 1.2;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: clamp(12px, 2vw, 20px) clamp(20px, 4vw, 40px);
+            font-size: clamp(1rem, 2.5vw, 1.5rem);
+            font-family: var(--font-main);
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.1);
+            transition: transform 0.1s, background-color 0.3s;
+            margin: 8px;
+            font-weight: bold;
+            min-height: 44px; /* Tối thiểu cho touch */
+        }
+
+        button:active { 
+            transform: translateY(4px); 
+            box-shadow: 0 2px 0 rgba(0,0,0,0.1); 
+        }
+        
+        button:hover { 
+            filter: brightness(1.1); 
+        }
+
+        .btn-secondary { 
+            background-color: var(--secondary-color); 
+            font-size: clamp(0.9rem, 2vw, 1.2rem); 
+            padding: clamp(10px, 1.5vw, 15px) clamp(15px, 3vw, 30px); 
+        }
+
+        /* Home Screen Specifics */
+        .setup-container {
+            background: rgba(255,255,255,0.95);
+            padding: clamp(20px, 3vw, 40px);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            max-width: min(900px, 95vw);
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: clamp(15px, 2vw, 25px);
+            max-height: min(90vh, 800px);
+            overflow-y: auto;
+        }
+        
+        .full-width { 
+            grid-column: span 2; 
+        }
+
+        textarea {
+            width: 100%;
+            height: clamp(120px, 20vh, 200px);
+            border: 3px solid var(--primary-color);
+            border-radius: 12px;
+            padding: 12px;
+            font-family: inherit;
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .file-input-wrapper {
+            border: 3px dashed var(--secondary-color);
+            padding: clamp(20px, 3vw, 30px);
+            text-align: center;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            transition: background 0.3s;
+        }
+
+        .file-input-wrapper:hover {
+            background: rgba(255,255,255,0.8);
+        }
+
+        .theme-selector { 
+            display: flex; 
+            gap: clamp(10px, 1.5vw, 15px); 
+            justify-content: center; 
+            margin-top: 10px; 
+        }
+        
+        .theme-btn {
+            width: clamp(40px, 6vw, 50px); 
+            height: clamp(40px, 6vw, 50px); 
+            border-radius: 50%; 
+            border: 3px solid white; 
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Game Screen - OPTIMIZED FOR ALL DEVICES */
+        .game-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: clamp(8px, 1.5vw, 15px) clamp(15px, 2vw, 30px);
+            background: rgba(255,255,255,0.8);
+            border-radius: 0 0 20px 20px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            gap: 10px;
+            min-height: 60px;
+        }
+
+        .stats-box { 
+            font-size: clamp(1rem, 2.5vw, 1.5rem); 
+            font-weight: bold;
+            padding: clamp(5px, 1vw, 10px) clamp(10px, 2vw, 20px);
+            background: rgba(255,255,255,0.9);
+            border-radius: 12px;
+            min-width: min(120px, 25vw);
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .game-main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            height: calc(100% - 70px);
+            padding: clamp(10px, 1.5vw, 20px);
+            overflow: hidden;
+        }
+
+        .question-container {
+            width: 100%;
+            padding: clamp(15px, 2vw, 30px);
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            text-align: center;
+            font-size: clamp(1.5rem, 4vw, 2.8rem);
+            color: var(--text-color);
+            font-weight: 900;
+            z-index: 10;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-break: break-word;
+            line-height: 1.3;
+            margin-bottom: clamp(10px, 2vw, 20px);
+            max-height: 25vh;
+            overflow-y: auto;
+        }
+
+        .answers-grid-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: clamp(10px, 1.5vw, 20px);
+            width: 100%;
+            height: 100%;
+            max-height: 100%;
+            padding: clamp(5px, 1vw, 10px);
+            align-content: center;
+            justify-items: center;
+            overflow: hidden;
+        }
+
+        .answer-card {
+            background: var(--card-bg);
+            border: clamp(3px, 0.5vw, 5px) solid var(--primary-color);
+            border-radius: 15px;
+            padding: clamp(10px, 1.5vw, 20px);
+            text-align: center;
+            font-size: clamp(1rem, 2.5vw, 2rem);
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.1);
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+            word-break: break-word;
+            overflow: hidden;
+            line-height: 1.2;
+            touch-action: manipulation;
+        }
+
+        .answer-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 0 rgba(0,0,0,0.1);
+        }
+
+        .answer-card.correct { 
+            background-color: #a5d6a7; 
+            border-color: #2e7d32; 
+            color: #1b5e20; 
+            animation: pop 0.5s;
+            transform: scale(1.02);
+        }
+        
+        .answer-card.incorrect { 
+            background-color: #ef9a9a; 
+            border-color: #c62828; 
+            color: #b71c1c; 
+            opacity: 0.8; 
+        }
+
+        @keyframes pop { 
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1.02); }
+        }
+
+        /* Camera & Hand Tracking */
+        #camera-container {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            width: min(180px, 25vw);
+            height: min(135px, 18vw);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 3px solid white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+            z-index: 100;
+            background: black;
+        }
+        
+        #input_video { 
+            transform: scaleX(-1); 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+        }
+        
+        /* Custom Hand Cursor */
+        #hand-cursor {
+            position: fixed;
+            width: clamp(60px, 8vw, 80px);
+            height: clamp(60px, 8vw, 80px);
+            pointer-events: none;
+            z-index: 9999;
+            display: none;
+            transform: translate(-50%, -50%);
+        }
+
+        .cursor-circle {
+            width: 100%; 
+            height: 100%;
+            border: clamp(3px, 0.5vw, 5px) solid var(--primary-color);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .cursor-progress {
+            position: absolute;
+            top: -5px; 
+            left: -5px; 
+            right: -5px; 
+            bottom: -5px;
+            border-radius: 50%;
+            border: 5px solid transparent;
+            border-top-color: var(--secondary-color);
+            transform: rotate(0deg);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        /* Cursor states */
+        .grabbing .cursor-circle { 
+            background: rgba(255, 255, 255, 0.8); 
+            transform: scale(0.85); 
+            border-color: var(--secondary-color);
+        }
+        
+        .pointing .cursor-circle {
+            background: rgba(255, 255, 255, 0.6);
+            border-color: #FF9800;
+            transform: scale(1.1);
+        }
+        
+        .grabbing .cursor-progress, 
+        .pointing .cursor-progress { 
+            opacity: 1; 
+        }
+
+        /* Overlays */
+        .overlay {
+            position: fixed;
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .overlay.active { 
+            display: flex; 
+        }
+
+        /* Results Table */
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px; 
+            background: white; 
+            color: black; 
+            border-radius: 15px; 
+            overflow: hidden; 
+            font-size: clamp(1rem, 2vw, 1.3rem);
+        }
+        
+        th, td { 
+            padding: clamp(10px, 1.5vw, 20px); 
+            text-align: center; 
+            border-bottom: 2px solid #ddd; 
+        }
+        
+        th { 
+            background-color: var(--primary-color); 
+            color: white; 
+            font-size: clamp(1.1rem, 2vw, 1.5rem);
+        }
+        
+        .winner-row { 
+            background-color: #fff9c4; 
+            font-weight: bold; 
+            border: 3px solid #fbc02d; 
+        }
+
+        /* Utility */
+        .hidden { 
+            display: none !important; 
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 1024px) {
+            .answers-grid {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: repeat(3, 1fr);
+                gap: 15px;
+            }
+            
+            .question-container {
+                font-size: clamp(1.3rem, 3.5vw, 2.2rem);
+                padding: 20px;
+                max-height: 22vh;
+            }
+            
+            .answer-card {
+                font-size: clamp(0.9rem, 2.2vw, 1.6rem);
+            }
+            
+            .game-header {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+            }
+            
+            .stats-box {
+                min-width: min(110px, 28vw);
+                font-size: clamp(0.9rem, 2vw, 1.3rem);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .setup-container { 
+                grid-template-columns: 1fr; 
+                padding: 20px;
+                gap: 15px;
+            }
+            
+            .full-width {
+                grid-column: span 1;
+            }
+            
+            .answers-grid { 
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(6, 1fr);
+                gap: 10px;
+            }
+            
+            .question-container { 
+                font-size: clamp(1.2rem, 4vw, 1.8rem); 
+                padding: 15px;
+                max-height: 20vh;
+                margin-bottom: 10px;
+            }
+            
+            .answer-card { 
+                font-size: clamp(0.9rem, 2.5vw, 1.3rem); 
+                padding: 12px 8px;
+                min-height: 60px;
+            }
+            
+            .game-header {
+                padding: 8px 12px;
+                flex-direction: column;
+                align-items: center;
+                gap: 6px;
+                min-height: 80px;
+            }
+            
+            .stats-box {
+                width: 100%;
+                max-width: 250px;
+                min-width: auto;
+                font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+            }
+            
+            button {
+                padding: 12px 24px;
+                font-size: 1.1rem;
+            }
+            
+            #camera-container {
+                width: 120px;
+                height: 90px;
+                bottom: 10px;
+                right: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .screen {
+                padding: 10px;
+            }
+            
+            .question-container {
+                font-size: clamp(1rem, 3.5vw, 1.5rem);
+                padding: 12px;
+                max-height: 18vh;
+            }
+            
+            .answer-card {
+                font-size: clamp(0.8rem, 2.2vw, 1.1rem);
+                padding: 10px 6px;
+                min-height: 50px;
+            }
+            
+            .game-header {
+                min-height: 70px;
+            }
+            
+            .stats-box {
+                font-size: clamp(0.8rem, 2.2vw, 1rem);
+                padding: 6px 10px;
+            }
+            
+            .setup-container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: clamp(1.5rem, 4vw, 2rem);
+            }
+            
+            h2 {
+                font-size: clamp(1.1rem, 3vw, 1.5rem);
+            }
+            
+            #camera-container {
+                width: 100px;
+                height: 75px;
+            }
+        }
+        
+        @media (orientation: landscape) and (max-height: 600px) {
+            .game-main-content {
+                flex-direction: row;
+                gap: 15px;
+                height: calc(100% - 60px);
+            }
+            
+            .question-container {
+                width: 45%;
+                height: 100%;
+                max-height: 100%;
+                margin-bottom: 0;
+            }
+            
+            .answers-grid-container {
+                width: 55%;
+                height: 100%;
+            }
+            
+            .answers-grid {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: repeat(3, 1fr);
+            }
+        }
+        
+        /* Đảm bảo không có thanh cuộn */
+        .setup-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .setup-container::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+            border-radius: 3px;
+        }
+        
+        .setup-container::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="theme-spring">
+
+    <audio id="bg-music" loop></audio>
+
+    <div id="hand-cursor">
+        <div class="cursor-circle">
+            <div class="cursor-progress" id="cursor-loader"></div>
+        </div>
+    </div>
+
+    <div id="camera-container">
+        <video id="input_video" autoplay muted playsinline></video>
+    </div>
+
+    <div id="screen-home" class="screen active">
+        <h1>🌱 Let's Play 🎮</h1>
+        <div class="setup-container">
+            <div class="full-width">
+                <h2>1. Content</h2>
+                <div class="file-input-wrapper" onclick="document.getElementById('docx-upload').click()">
+                    <span>📂 Click to upload .docx</span>
+                    <input type="file" id="docx-upload" accept=".docx" style="display: none;" onchange="handleFileUpload(this)">
+                </div>
+                <p style="text-align:center; margin:10px; font-size:clamp(0.9rem, 1.8vw, 1.1rem);">OR Paste Text Below:</p>
+                <textarea id="text-input" placeholder="apple : quả táo&#10;banana : quả chuối&#10;cat : con mèo&#10;dog : con chó&#10;elephant : con voi&#10;fish : con cá"></textarea>
+            </div>
+
+            <div>
+                <h2>2. Game Mode</h2>
+                <select id="player-mode" style="padding: 12px; width: 100%; border-radius: 12px; border: 3px solid var(--primary-color); font-size: clamp(1rem, 2vw, 1.2rem);">
+                    <option value="1">One Player</option>
+                    <option value="2">Two Players (Turn-based)</option>
+                </select>
+            </div>
+
+            <div>
+                <h2>3. Music</h2>
+                <input type="file" id="music-upload" accept="audio/*" onchange="handleMusicUpload(this)" style="font-size:clamp(0.9rem, 1.8vw, 1.1rem); width:100%;">
+                <p id="music-status" style="font-size:clamp(0.8rem, 1.6vw, 1rem); color:gray; margin-top:5px;">No file selected</p>
+            </div>
+
+            <div class="full-width">
+                <h2>4. Theme</h2>
+                <div class="theme-selector">
+                    <div class="theme-btn" style="background:#a5d6a7" onclick="setTheme('spring')" title="Spring"></div>
+                    <div class="theme-btn" style="background:#fff176" onclick="setTheme('summer')" title="Summer"></div>
+                    <div class="theme-btn" style="background:#ffcc80" onclick="setTheme('autumn')" title="Autumn"></div>
+                    <div class="theme-btn" style="background:#90caf9" onclick="setTheme('winter')" title="Winter"></div>
+                </div>
+            </div>
+
+            <div class="full-width" style="text-align: center; margin-top: 10px;">
+                <button onclick="initializeGame()">Start Game ▶</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-game" class="screen">
+        <div class="game-header">
+            <button class="btn-secondary" onclick="toggleMute()">🎵 Mute</button>
+            <div class="stats-box">Player: <span id="current-player-display">1</span></div>
+            <div class="stats-box">Score: <span id="score-display">0</span></div>
+            <div class="stats-box">Round: <span id="round-display">1/10</span></div>
+        </div>
+
+        <div class="game-main-content">
+            <div class="question-container" id="question-text">
+                Loading...
+            </div>
+
+            <div class="answers-grid-container">
+                <div class="answers-grid" id="answers-container">
+                    <!-- Answer cards will be generated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="overlay-turn" class="overlay">
+        <h1 style="font-size:clamp(2rem, 6vw, 4rem);">Player <span id="next-player-name">1</span></h1>
+        <h2 style="font-size:clamp(1.5rem, 4vw, 2.5rem); margin-bottom:20px;">Are you ready?</h2>
+        <button onclick="startRound()">Start Round</button>
+    </div>
+
+    <div id="screen-results" class="screen">
+        <h1>🎉 Game Over! 🎉</h1>
+        <div style="background: white; padding: clamp(15px, 3vw, 30px); border-radius: 20px; width: 95%; max-width: 800px; max-height: 70vh; overflow-y: auto;">
+            <table id="results-table">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Correct</th>
+                        <th>Avg Time</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Results will be populated here -->
+                </tbody>
+            </table>
+        </div>
+        <button onclick="location.reload()" style="margin-top: 20px;">Play Again 🔄</button>
+    </div>
+
+    <script>
+        // --- STATE MANAGEMENT ---
+        const APP = {
+            questions: [],
+            players: [
+                { id: 1, score: 0, correct: 0, totalTime: 0, rounds: 0 },
+                { id: 2, score: 0, correct: 0, totalTime: 0, rounds: 0 }
+            ],
+            mode: 1, // 1 or 2 players
+            currentPlayerIdx: 0,
+            currentQuestionIdx: 0,
+            currentQuestionStartTime: 0,
+            isGameActive: false,
+            isRoundActive: false,
+            audio: document.getElementById('bg-music')
+        };
+
+        // --- THEME SYSTEM ---
+        function setTheme(season) {
+            document.body.className = `theme-${season}`;
+        }
+
+        // --- INPUT HANDLING ---
+        function handleFileUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                mammoth.extractRawText({arrayBuffer: event.target.result})
+                    .then(result => {
+                        document.getElementById('text-input').value = result.value;
+                    })
+                    .catch(err => alert("Error reading .docx: " + err.message));
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function handleMusicUpload(input) {
+            const file = input.files[0];
+            if (file) {
+                document.getElementById('music-status').innerText = "Loaded: " + file.name;
+                APP.audio.src = URL.createObjectURL(file);
+            }
+        }
+
+        function toggleMute() {
+            APP.audio.muted = !APP.audio.muted;
+            const btn = document.querySelector('.game-header button');
+            btn.innerText = APP.audio.muted ? "🔇 Unmute" : "🎵 Mute";
+        }
+
+        function parseContent() {
+            const raw = document.getElementById('text-input').value;
+            const lines = raw.split('\n');
+            const parsed = [];
+
+            lines.forEach(line => {
+                let cleanLine = line.replace(/^[\d\-\.\•\*]+\s*/, '').trim();
+                if(!cleanLine) return;
+
+                const parts = cleanLine.split(':');
+                if (parts.length >= 2) {
+                    parsed.push({
+                        q: parts[0].trim(),
+                        a: parts.slice(1).join(':').trim()
+                    });
+                }
+            });
+            return parsed;
+        }
+
+        // --- GAME LOGIC ---
+        function initializeGame() {
+            const data = parseContent();
+            if (data.length < 4) {
+                alert("Please add at least 4 vocabulary items to play.");
+                return;
+            }
+
+            // Shuffle full dataset
+            APP.questions = data.sort(() => 0.5 - Math.random());
+            APP.mode = parseInt(document.getElementById('player-mode').value);
+            
+            // Switch Screens
+            document.getElementById('screen-home').classList.remove('active');
+            document.getElementById('screen-game').classList.add('active');
+
+            // Audio
+            if(APP.audio.src) APP.audio.play().catch(e => console.log("Audio autoplay blocked"));
+
+            // Setup MediaPipe
+            initHandTracking();
+
+            prepareTurn();
+        }
+
+        function prepareTurn() {
+            if (APP.currentQuestionIdx >= APP.questions.length) {
+                endGame();
+                return;
+            }
+
+            const pId = (APP.currentQuestionIdx % APP.mode) + 1;
+            APP.currentPlayerIdx = pId - 1;
+            
+            document.getElementById('current-player-display').innerText = pId;
+            document.getElementById('score-display').innerText = APP.players[APP.currentPlayerIdx].score;
+            document.getElementById('round-display').innerText = `${APP.currentQuestionIdx + 1} / ${APP.questions.length}`;
+
+            if (APP.mode === 2) {
+                document.getElementById('next-player-name').innerText = pId;
+                document.getElementById('overlay-turn').classList.add('active');
+                APP.isRoundActive = false;
+            } else {
+                startRound();
+            }
+        }
+
+        function startRound() {
+            document.getElementById('overlay-turn').classList.remove('active');
+            renderRound();
+            APP.currentQuestionStartTime = Date.now();
+            APP.isRoundActive = true;
+        }
+
+        function renderRound() {
+            const qData = APP.questions[APP.currentQuestionIdx];
+            document.getElementById('question-text').innerText = qData.q;
+
+            // Generate Distractors
+            const answers = [qData.a];
+            const others = APP.questions.filter(i => i.a !== qData.a);
+            
+            // Fill up to 6 answers
+            while(answers.length < 6) {
+                if(others.length > 0) {
+                    const randomIdx = Math.floor(Math.random() * others.length);
+                    answers.push(others[randomIdx].a);
+                    others.splice(randomIdx, 1);
+                } else {
+                    answers.push(answers[Math.floor(Math.random() * answers.length)]);
+                }
+            }
+
+            // Shuffle Answers
+            answers.sort(() => 0.5 - Math.random());
+
+            const container = document.getElementById('answers-container');
+            container.innerHTML = '';
+
+            answers.forEach(ans => {
+                const card = document.createElement('div');
+                card.className = 'answer-card';
+                card.innerText = ans;
+                
+                card.onclick = () => handleAnswer(ans === qData.a, card);
+                card.dataset.isCorrect = (ans === qData.a);
+                
+                container.appendChild(card);
+            });
+        }
+
+        function handleAnswer(isCorrect, element) {
+            if (!APP.isRoundActive) return;
+            APP.isRoundActive = false;
+
+            const timeTaken = (Date.now() - APP.currentQuestionStartTime) / 1000;
+            const player = APP.players[APP.currentPlayerIdx];
+
+            // Scoring
+            if (isCorrect) {
+                element.classList.add('correct');
+                const timePenalty = Math.floor(timeTaken * 5);
+                const score = Math.max(20, 100 - timePenalty);
+                player.score += score;
+                player.correct++;
+            } else {
+                element.classList.add('incorrect');
+                // Highlight real answer
+                const cards = document.querySelectorAll('.answer-card');
+                cards.forEach(c => {
+                    if (c.dataset.isCorrect === 'true') c.classList.add('correct');
+                });
+            }
+
+            player.rounds++;
+            player.totalTime += timeTaken;
+
+            // Update UI
+            document.getElementById('score-display').innerText = player.score;
+
+            // Next Round Delay
+            setTimeout(() => {
+                APP.currentQuestionIdx++;
+                prepareTurn();
+            }, 2000);
+        }
+
+        function endGame() {
+            document.getElementById('screen-game').classList.remove('active');
+            document.getElementById('screen-results').classList.add('active');
+
+            const tbody = document.querySelector('#results-table tbody');
+            tbody.innerHTML = '';
+
+            let highestScore = -1;
+            let winnerId = -1;
+
+            APP.players.slice(0, APP.mode).forEach(p => {
+                if (p.score > highestScore) {
+                    highestScore = p.score;
+                    winnerId = p.id;
+                }
+            });
+
+            APP.players.slice(0, APP.mode).forEach(p => {
+                const avgTime = p.rounds > 0 ? (p.totalTime / p.rounds).toFixed(1) + 's' : '0s';
+                const row = document.createElement('tr');
+                if (APP.mode === 2 && p.id === winnerId) row.className = 'winner-row';
+                
+                row.innerHTML = `
+                    <td>Player ${p.id} ${APP.mode === 2 && p.id === winnerId ? '👑' : ''}</td>
+                    <td>${p.correct} / ${p.rounds}</td>
+                    <td>${avgTime}</td>
+                    <td>${p.score}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // --- HAND TRACKING & INTERACTION ---
+        let handCursor = { x: 0, y: 0, active: false, grabbing: false, pointing: false };
+        let hoverTarget = null;
+        let hoverStartTime = 0;
+        let animationFrameId;
+
+        async function initHandTracking() {
+            const videoElement = document.getElementById('input_video');
+            
+            const hands = new Hands({locateFile: (file) => {
+                return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+            }});
+
+            hands.setOptions({
+                maxNumHands: 1,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5
+            });
+
+            hands.onResults(onHandsResults);
+
+            const camera = new Camera(videoElement, {
+                onFrame: async () => {
+                    await hands.send({image: videoElement});
+                },
+                width: 320,
+                height: 240
+            });
+            camera.start();
+
+            requestAnimationFrame(processGestures);
+        }
+
+        function onHandsResults(results) {
+            const cursorEl = document.getElementById('hand-cursor');
+            
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const landmarks = results.multiHandLandmarks[0];
+                
+                // Use Index Finger Tip (8) as cursor
+                const x = (1 - landmarks[8].x) * window.innerWidth;
+                const y = landmarks[8].y * window.innerHeight;
+
+                handCursor.x = x;
+                handCursor.y = y;
+                handCursor.active = true;
+
+                // Detect Fist (Grab)
+                const isFist = 
+                    landmarks[8].y > landmarks[6].y && 
+                    landmarks[12].y > landmarks[10].y && 
+                    landmarks[16].y > landmarks[14].y && 
+                    landmarks[20].y > landmarks[18].y;
+
+                // Detect Pointing Gesture (index finger extended, others curled)
+                const isPointing = 
+                    landmarks[8].y < landmarks[6].y - 0.05 && // Index finger extended
+                    landmarks[12].y > landmarks[10].y + 0.03 && // Middle finger curled
+                    landmarks[16].y > landmarks[14].y + 0.03 && // Ring finger curled
+                    landmarks[20].y > landmarks[18].y + 0.03;   // Pinky curled
+
+                handCursor.grabbing = isFist;
+                handCursor.pointing = isPointing;
+
+                // Update Visuals
+                cursorEl.style.display = 'block';
+                cursorEl.style.left = `${x}px`;
+                cursorEl.style.top = `${y}px`;
+
+                if (isFist) {
+                    cursorEl.classList.add('grabbing');
+                    cursorEl.classList.remove('pointing');
+                } else if (isPointing) {
+                    cursorEl.classList.add('pointing');
+                    cursorEl.classList.remove('grabbing');
+                } else {
+                    cursorEl.classList.remove('grabbing', 'pointing');
+                }
+
+            } else {
+                handCursor.active = false;
+                cursorEl.style.display = 'none';
+            }
+        }
+
+        function processGestures() {
+            if (!APP.isRoundActive || !handCursor.active) {
+                requestAnimationFrame(processGestures);
+                return;
+            }
+
+            // Collision Detection
+            const targets = document.querySelectorAll('.answer-card');
+            let foundTarget = null;
+
+            targets.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                if (
+                    handCursor.x >= rect.left &&
+                    handCursor.x <= rect.right &&
+                    handCursor.y >= rect.top &&
+                    handCursor.y <= rect.bottom
+                ) {
+                    foundTarget = el;
+                }
+            });
+
+            const loader = document.getElementById('cursor-loader');
+            
+            // Logic: Must be hovering AND (Grabbing OR Pointing)
+            if (foundTarget && foundTarget === hoverTarget && (handCursor.grabbing || handCursor.pointing)) {
+                const elapsed = Date.now() - hoverStartTime;
+                const progress = Math.min(100, (elapsed / 500) * 100);
+                
+                // Draw circular progress
+                loader.style.transform = `rotate(${progress * 3.6}deg)`;
+                loader.style.borderTopColor = handCursor.pointing ? '#FF9800' : 'var(--secondary-color)';
+                loader.style.borderRightColor = progress > 25 ? (handCursor.pointing ? '#FF9800' : 'var(--secondary-color)') : 'transparent';
+                loader.style.borderBottomColor = progress > 50 ? (handCursor.pointing ? '#FF9800' : 'var(--secondary-color)') : 'transparent';
+                loader.style.borderLeftColor = progress > 75 ? (handCursor.pointing ? '#FF9800' : 'var(--secondary-color)') : 'transparent';
+
+                if (elapsed >= 500) {
+                    // Click!
+                    foundTarget.click();
+                    hoverTarget = null;
+                }
+            } else {
+                // Reset if target changed or gesture released
+                if (foundTarget !== hoverTarget || (!handCursor.grabbing && !handCursor.pointing)) {
+                    hoverTarget = foundTarget;
+                    hoverStartTime = Date.now();
+                    // Reset Loader CSS
+                    loader.style.borderColor = 'transparent';
+                    loader.style.borderTopColor = handCursor.pointing ? '#FF9800' : 'var(--secondary-color)';
+                }
+            }
+
+            requestAnimationFrame(processGestures);
+        }
+
+    </script>
+</body>
+</html>
