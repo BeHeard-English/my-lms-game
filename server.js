@@ -111,10 +111,15 @@ app.post('/upload-game',
 
 const path = require('path');
 
-// Cho phép truy cập các file trong thư mục public
+// 1. Phải có dòng này để server biết thư mục 'public' chứa gì
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Ép server phải nhận diện file users.html khi vào đường dẫn /users
+// 2. Ép trang chủ hiện users.html
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'users.html'));
+});
+
+// 3. Dự phòng: Nếu gõ /users cũng hiện users.html
 app.get('/users', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'users.html'));
 });
