@@ -187,60 +187,78 @@
     </div>
 
     <script>
-        const API_URL = window.location.origin;
+    // Tự động lấy địa chỉ web hiện tại
+    const API_URL = window.location.origin;
 
-        async function loadGames() {
-            try {
-                const response = await fetch(`${API_URL}/games`); //
-                const games = await response.json();
-                
-                const container = document.getElementById('gameContainer');
-                container.innerHTML = ''; 
+    // 1. Hàm tải danh sách game từ MongoDB
+    async function loadGames() {
+        try {
+            const response = await fetch(`${API_URL}/games`);
+            const games = await response.json();
+            
+            const container = document.getElementById('gameContainer');
+            container.innerHTML = ''; 
 
-                if (games.length === 0) {
-                    container.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">No missions found. Upload some fun!</p>';
-                    return;
-                }
-
-                games.forEach(game => {
-                    const card = `
-                        <div class="game-card">
-                            <img src="${game.iconUrl}" alt="Icon" class="game-icon">
-                            <h3>${game.title}</h3>
-                            <a href="${game.fileUrl}" target="_blank" class="play-btn">START GAME ▶</a>
-                        </div>
-                    `;
-                    container.innerHTML += card;
-                });
-            } catch (err) {
-                console.error('Error loading games:', err);
+            if (!games || games.length === 0) {
+                container.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">No missions found. Upload some fun!</p>';
+                return;
             }
+
+            games.forEach(game => {
+                const card = `
+                    <div class="game-card">
+                        <img src="${game.iconUrl}" alt="Icon" class="game-icon">
+                        <h3>${game.title}</h3>
+                        <a href="${game.fileUrl}" target="_blank" class="play-btn">START GAME ▶</a>
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+        } catch (err) {
+            console.error('Error loading games:', err);
         }
+    }
 
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
+    // 2. Hàm xử lý Upload game
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Hiệu ứng đổi chữ trên nút để biết đang xử lý
+        const btn = e.target.querySelector('button');
+        const originalText = btn.innerText;
+        btn.innerText = "UPLOADING... ⏳";
+        btn.disabled = true;
 
-            try {
-                const response = await fetch(`${API_URL}/upload-game`, { //
-                    method: 'POST',
-                    body: formData
-                });
+        const formData = new FormData(e.target);
 
-                if (response.ok) {
-                    alert('SUCCESS! Mission is live! 🎉');
-                    e.target.reset();
-                    loadGames();
-                } else {
-                    alert('UPLOAD FAILED! Check if the server is running.');
-                }
-            } catch (err) {
-                console.error('Error uploading:', err);
-                alert('Connection error with the server.');
+        try {
+            const response = await fetch(`${API_URL}/upload-game`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert('SUCCESS! Mission is live on MongoDB! 🎉');
+                e.target.reset();
+                await loadGames(); // Tải lại danh sách ngay lập tức
+            } else {
+                // Hiển thị lỗi cụ thể từ server trả về
+                alert('UPLOAD FAILED: ' + (result.error || 'Unknown error'));
             }
-        });
+        } catch (err) {
+            console.error('Error uploading:', err);
+            alert('Connection error! Please check your Render logs.');
+        } finally {
+            // Trả lại trạng thái nút bấm
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    });
 
-        loadGames();
-    </script>
+    // Chạy hàm tải game khi vừa mở trang
+    loadGames();
+</script>
 </body>
 </html>
