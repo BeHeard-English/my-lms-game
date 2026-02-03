@@ -17,7 +17,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Serve thư mục public (để hiện giao diện index.html)
 // Dòng này giúp máy chủ biết tìm file html ở đâu
-app.use(express.static('public')); 
+app.use(express.static('public', { extensions: ['html'] })); 
 
 // --- DATABASE SETUP (MONGODB) ---
 const mongoose = require('mongoose');
