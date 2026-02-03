@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Quest - Game Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #031383;
+            --secondary: #ff00ff; /* Neon Pink */
+            --accent: #00f2ff;    /* Cyan */
+            --yellow: #ffd700;
+            --white: #ffffff;
+            --bg: #0a0e29;
+        }
+
+        body { 
+            font-family: 'Quicksand', sans-serif; 
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at 20% 30%, #1a1f4d 0%, #0a0e29 100%);
+            color: var(--white);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        h1, h2 { 
+            font-family: 'Bungee', cursive; 
+            text-align: center;
+            text-shadow: 3px 3px 0px var(--secondary);
+            letter-spacing: 2px;
+        }
+
+        h1 { font-size: 3rem; color: var(--yellow); margin-bottom: 40px; }
+
+        .container { max-width: 900px; margin: 0 auto; }
+
+        section { 
+            background: rgba(3, 19, 131, 0.6); 
+            padding: 30px; 
+            margin-bottom: 40px; 
+            border: 4px solid var(--accent);
+            border-radius: 20px; 
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .form-group { margin-bottom: 20px; }
+        
+        label { 
+            display: block; 
+            margin-bottom: 10px; 
+            font-weight: 700; 
+            color: var(--accent);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"] { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid var(--accent);
+            border-radius: 10px; 
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        input[type="file"] {
+            color: var(--white);
+            font-size: 0.9rem;
+        }
+
+        button { 
+            width: 100%;
+            background: var(--secondary); 
+            color: white; 
+            padding: 15px; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-family: 'Bungee', cursive;
+            font-size: 1.2rem; 
+            transition: all 0.2s;
+            box-shadow: 0 5px 0px #b300b3;
+            margin-top: 10px;
+        }
+
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0px #b300b3;
+            filter: brightness(1.1);
+        }
+
+        button:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0px #b300b3;
+        }
+
+        .game-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+            gap: 25px; 
+        }
+
+        .game-card { 
+            background: var(--primary);
+            border: 3px solid var(--white);
+            border-radius: 15px; 
+            padding: 15px; 
+            text-align: center; 
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .game-card:hover { 
+            transform: scale(1.05) rotate(1deg);
+            border-color: var(--yellow);
+        }
+
+        .game-icon { 
+            width: 120px; 
+            height: 120px; 
+            object-fit: cover; 
+            border-radius: 12px; 
+            margin-bottom: 15px; 
+            border: 3px solid var(--accent);
+        }
+
+        .game-card h3 { 
+            margin: 10px 0; 
+            font-size: 1.3rem;
+            color: var(--yellow);
+        }
+
+        .play-btn { 
+            display: block; 
+            text-decoration: none; 
+            background: var(--accent); 
+            color: var(--primary); 
+            padding: 10px; 
+            border-radius: 8px; 
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>LEVEL UP! 🚀</h1>
+
+        <section>
+            <h2>NEW MISSION</h2>
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label>Game Title</label>
+                    <input type="text" name="title" required placeholder="Enter an awesome title...">
+                </div>
+
+                <input type="hidden" name="level" value="General">
+                <input type="hidden" name="skill" value="Fun Game">
+
+                <div class="form-group">
+                    <label>Game File (.html)</label>
+                    <input type="file" name="gameFile" accept=".html" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Icon Image (.png, .jpg)</label>
+                    <input type="file" name="iconFile" accept="image/*" required>
+                </div>
+
+                <button type="submit">Deploy Game 🛸</button>
+            </form>
+        </section>
+
+        <section>
+            <h2>READY TO PLAY?</h2>
+            <div id="gameContainer" class="game-grid">
+                <p>Scanning for games...</p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+
+        async function loadGames() {
+            try {
+                const response = await fetch(`${API_URL}/games`); //
+                const games = await response.json();
+                
+                const container = document.getElementById('gameContainer');
+                container.innerHTML = ''; 
+
+                if (games.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">No missions found. Upload some fun!</p>';
+                    return;
+                }
+
+                games.forEach(game => {
+                    const card = `
+                        <div class="game-card">
+                            <img src="${game.iconUrl}" alt="Icon" class="game-icon">
+                            <h3>${game.title}</h3>
+                            <a href="${game.fileUrl}" target="_blank" class="play-btn">START GAME ▶</a>
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+            } catch (err) {
+                console.error('Error loading games:', err);
+            }
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+
+            try {
+                const response = await fetch(`${API_URL}/upload-game`, { //
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert('SUCCESS! Mission is live! 🎉');
+                    e.target.reset();
+                    loadGames();
+                } else {
+                    alert('UPLOAD FAILED! Check if the server is running.');
+                }
+            } catch (err) {
+                console.error('Error uploading:', err);
+                alert('Connection error with the server.');
+            }
+        });
+
+        loadGames();
+    </script>
+</body>
+</html>
