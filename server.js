@@ -23,7 +23,7 @@ app.use(express.static('public'));
 const mongoose = require('mongoose');
 
 // Thay chuỗi này bằng chuỗi kết nối của bạn (nhớ thay <password>)
-const mongoURI = "mongodb+srv://admin:Matkhau123@cluster0.xxxx.mongodb.net/myLMS?retryWrites=true&w=majority";
+const mongoURI = "mongodb+srv://beheard:<10032026>@cluster0.2qyx0oo.mongodb.net/?appName=Cluster0";
 
 mongoose.connect(mongoURI)
     .then(() => console.log("✅ Connected to MongoDB Atlas!"))
