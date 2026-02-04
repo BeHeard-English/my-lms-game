@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be Heard - Word Master</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Palette */
+            --primary: #031383;       /* Requested Deep Blue */
+            --primary-dark: #020c5e;
+            --accent: #FFD93D;        /* Sunny Yellow */
+            --action: #FF6B6B;        /* Coral/Pink for excitement */
+            --action-dark: #e04f4f;
+            --bg: #EEF2FF;            /* Very light blue tint */
+            --card-bg: #ffffff;
+            --text: #031383;
+            --success: #6BCB77;
+            --danger: #FF6B6B;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: var(--bg);
+            background-image: radial-gradient(#dbeafe 15%, transparent 16%), radial-gradient(#dbeafe 15%, transparent 16%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            color: var(--text);
+            margin: 0; padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px; margin: 20px auto;
+            background: var(--card-bg);
+            padding: 40px; 
+            border-radius: 30px;
+            box-shadow: 0 10px 0 rgba(3, 19, 131, 0.1);
+            border: 3px solid #dae1f5;
+        }
+
+        /* --- Header --- */
+        .header { text-align: center; margin-bottom: 35px; }
+        .header h1 { 
+            color: var(--primary); 
+            font-size: 2.8rem; 
+            margin-bottom: 5px; 
+            text-shadow: 2px 2px 0px #dae1f5;
+            letter-spacing: -1px;
+        }
+        .header p { color: #667eea; font-weight: 500; font-size: 1.1rem; }
+        
+        /* --- Tabs --- */
+        .tabs { 
+            display: flex; gap: 15px; margin-bottom: 25px; 
+            background: #e0e7ff; padding: 8px; border-radius: 20px;
+        }
+        .tab-btn {
+            flex: 1; padding: 15px; border: none; border-radius: 16px;
+            background: transparent; cursor: pointer; 
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600; font-size: 1.1rem;
+            color: var(--primary); opacity: 0.6;
+            transition: 0.3s;
+        }
+        .tab-btn.active { 
+            background: #ffffff; 
+            color: var(--primary); 
+            opacity: 1;
+            box-shadow: 0 4px 10px rgba(3, 19, 131, 0.1);
+        }
+
+        .pane { display: none; animation: fadeIn 0.4s ease; }
+        .pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Input Areas --- */
+        .upload-box {
+            border: 3px dashed #a5b4fc; padding: 40px; 
+            border-radius: 20px; text-align: center; cursor: pointer; 
+            background: #f8fafc; transition: 0.3s;
+        }
+        .upload-box:hover { background: #eef2ff; border-color: var(--primary); }
+        .upload-icon { font-size: 3rem; margin-bottom: 10px; display: block; }
+
+        textarea {
+            width: 100%; height: 180px; padding: 20px;
+            border-radius: 20px; border: 3px solid #e0e7ff;
+            box-sizing: border-box; font-family: 'Fredoka', sans-serif; 
+            font-size: 1.1rem; color: var(--primary);
+            background: #fdfdfd; resize: vertical;
+        }
+        textarea:focus { outline: none; border-color: var(--primary); }
+
+        /* --- Game Buttons --- */
+        .btn-3d {
+            width: 100%; padding: 18px; 
+            color: white; border: none; border-radius: 18px;
+            font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 1.3rem; 
+            cursor: pointer; margin-top: 15px;
+            transition: all 0.1s; position: relative;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        
+        .btn-start {
+            background: var(--primary);
+            box-shadow: 0 6px 0 var(--primary-dark);
+        }
+        .btn-submit {
+            background: var(--action);
+            box-shadow: 0 6px 0 var(--action-dark);
+        }
+
+        .btn-3d:active {
+            transform: translateY(6px);
+            box-shadow: 0 0 0 transparent;
+        }
+
+        /* --- Quiz Cards --- */
+        .quiz-area { display: none; margin-top: 40px; }
+        .q-card {
+            border: 3px solid #eef2ff; padding: 25px;
+            border-radius: 24px; margin-bottom: 30px;
+            background: #fff; position: relative;
+        }
+
+        .q-number {
+            background: var(--accent); color: var(--primary);
+            padding: 5px 12px; border-radius: 10px; font-weight: 700;
+            display: inline-block; margin-bottom: 10px; font-size: 0.9rem;
+        }
+
+        .q-text { 
+            font-size: 1.4rem; font-weight: 600; 
+            color: var(--primary); margin-bottom: 20px; 
+        }
+
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .opt {
+            padding: 18px; border: 3px solid #eef2ff;
+            border-radius: 16px; cursor: pointer;
+            transition: 0.2s; font-weight: 600; font-size: 1.05rem;
+            color: #4b5563; background: #fff;
+        }
+        .opt:hover { border-color: var(--accent); background: #fffbeb; transform: translateY(-2px); }
+        .opt.selected { 
+            background: var(--primary); color: white; 
+            border-color: var(--primary); 
+            box-shadow: 0 5px 15px rgba(3, 19, 131, 0.3);
+        }
+
+        /* --- Feedback Section --- */
+        .feedback {
+            margin-top: 20px; padding: 20px; border-radius: 18px;
+            display: none; background: #f0fdf4; border: 2px solid var(--success);
+            animation: popIn 0.3s ease-out;
+        }
+        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .ipa-line { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
+        .ipa-text { 
+            color: var(--action); font-weight: 700; 
+            font-family: 'Courier New', monospace; font-size: 1.3rem; 
+            background: #fff0f0; padding: 4px 10px; border-radius: 8px;
+        }
+        
+        .speak-btn {
+            background: var(--primary); color: white; border: none; border-radius: 50%;
+            width: 45px; height: 45px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; transition: 0.2s;
+            box-shadow: 0 4px 0 var(--primary-dark);
+        }
+        .speak-btn:active { transform: translateY(4px); box-shadow: none; }
+
+        /* --- Score Board --- */
+        #scoreBox { 
+            display: none; text-align: center; padding: 40px; 
+            border-radius: 25px; background: var(--primary); 
+            color: white; margin-bottom: 30px;
+            box-shadow: 0 10px 20px rgba(3, 19, 131, 0.25);
+            border: 4px solid var(--accent);
+        }
+        #scoreBox h2 { font-size: 2.5rem; margin: 0 0 10px 0; color: var(--accent); }
+        #scoreBox p { font-size: 1.2rem; opacity: 0.9; }
+
+        @media (max-width: 600px) { 
+            .options { grid-template-columns: 1fr; } 
+            .container { padding: 20px; }
+            .header h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Word Master 🎮</h1>
+        <p>Level up your vocabulary & Pronunciation</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('fileTab', this)">📁 Upload Docx</button>
+        <button class="tab-btn" onclick="switchTab('textTab', this)">✍️ Paste List</button>
+    </div>
+
+    <div id="fileTab" class="pane active">
+        <div class="upload-box" onclick="document.getElementById('fileIn').click()">
+            <span class="upload-icon">📂</span>
+            <strong id="fileInfo" style="font-size: 1.2rem; color: var(--primary);">Tap to upload .docx file</strong>
+            <p style="color: #889; margin-top:5px; font-size: 0.9rem;">Format: Word : Definition</p>
+            <input type="file" id="fileIn" hidden accept=".docx">
+        </div>
+    </div>
+
+    <div id="textTab" class="pane">
+        <textarea id="rawInput" placeholder="Enter your list here. Example format:
+1. Alleviate : to make less severe
+- Ambivalent : having mixed feelings"></textarea>
+        <button class="btn-3d btn-start" onclick="processText()">🚀 Start The Game</button>
+    </div>
+
+    <div id="scoreBox"></div>
+
+    <div id="quizArea" class="quiz-area">
+        <div id="quizContent"></div>
+        <button class="btn-3d btn-submit" onclick="checkAll()">🏆 Submit & View Score</button>
+    </div>
+</div>
+
+<script>
+    // Updated Default Database to English-English for a pure English Interface demo
+    const megaBank = [
+    {w: "Alleviate", i: "/əˈliːvieɪt/", m: "Làm giảm bớt mức độ nghiêm trọng", e: "The new medicine helps to alleviate the symptoms of the flu."},
+    {w: "Ambivalent", i: "/æmˈbɪvələnt/", m: "Có cảm giác đan xen, vừa thích vừa không", e: "He felt ambivalent about his new job; he loved the pay but hated the hours."},
+    {w: "Anomaly", i: "/əˈnɒməli/", m: "Điều bất thường hoặc ngoại lệ", e: "The scientific results were an anomaly and didn't fit the pattern."},
+    {w: "Articulate", i: "/ɑːˈtɪkjuleɪt/", m: "Diễn đạt ý tưởng rõ ràng và lưu loát", e: "She is an articulate speaker who explains complex ideas clearly."},
+    {w: "Assertive", i: "/əˈsɜːtɪv/", m: "Tự tin và quyết đoán trong việc bày tỏ ý kiến", e: "Being assertive means standing up for what you believe in."},
+    {w: "Autonomous", i: "/ɔːˈtɒnəməs/", m: "Tự chủ, hoạt động độc lập", e: "Teachers want their students to become more autonomous learners."},
+    {w: "Benevolent", i: "/bəˈnevələnt/", m: "Tử tế và hay giúp đỡ người khác", e: "A benevolent uncle paid for her college tuition."},
+    {w: "Coherent", i: "/kəʊˈhɪərənt/", m: "Mạch lạc, hợp lý và nhất quán", e: "He was so drunk he wasn't making any coherent sense."},
+    {w: "Complacent", i: "/kəmˈpleɪsnt/", m: "Tự mãn, quá hài lòng với thành tích", e: "We cannot afford to become complacent about our success."},
+    {w: "Concede", i: "/kənˈsiːd/", m: "Thừa nhận điều gì đó là đúng hoặc nhường bộ", e: "The government has finally conceded that its policies were wrong."},
+    {w: "Conspicuous", i: "/kənˈspɪkjuəs/", m: "Dễ thấy, nổi bật", e: "The bird has a conspicuous red head."},
+    {w: "Corroborate", i: "/kəˈrɒbəreɪt/", m: "Xác nhận, cung cấp thêm bằng chứng hỗ trợ", e: "Recent research seems to corroborate his theory."},
+    {w: "Cursory", i: "/ˈkɜːsəri/", m: "Qua loa, nhanh chóng và không kỹ lưỡng", e: "He gave the report a cursory glance before the meeting."},
+    {w: "Dearth", i: "/dɜːθ/", m: "Sự thiếu hụt, khan hiếm", e: "There is a dearth of reliable information on the subject."},
+    {w: "Debilitate", i: "/dɪˈbɪlɪteɪt/", m: "Làm suy yếu, làm kiệt sức", e: "The disease can debilitate the patient for many weeks."},
+    {w: "Deference", i: "/ˈdefərəns/", m: "Thái độ tôn trọng và lễ phép", e: "He treats her with great deference because of her age."},
+    {w: "Deleterious", i: "/ˌdelɪˈtɪəriəs/", m: "Có hại cho sức khỏe hoặc hạnh phúc", e: "Smoking has a deleterious effect on your health."},
+    {w: "Delineate", i: "/dɪˈlɪnieɪt/", m: "Mô tả hoặc phác thảo một cách chính xác", e: "The report clearly delineates the steps that must be taken."},
+    {w: "Denounce", i: "/dɪˈnaʊns/", m: "Lên án, chỉ trích công khai", e: "The dictator's actions were denounced by world leaders."},
+    {w: "Deplore", i: "/dɪˈplɔː(r)/", m: "Lên án, phản đối kịch liệt", e: "We deplore all forms of violence."},
+    {w: "Detached", i: "/dɪˈtætʃt/", m: "Tách biệt, không để cảm xúc cá nhân ảnh hưởng", e: "He tries to remain detached from the office politics."},
+    {w: "Deterrent", i: "/dɪˈterənt/", m: "Yếu tố ngăn cản, làm nản lòng", e: "Tougher prison sentences may act as a deterrent to crime."},
+    {w: "Deviate", i: "/ˈdiːvieɪt/", m: "Đi chệch hướng, không tuân theo", e: "Never deviate from the original plan."},
+    {w: "Didactic", i: "/daɪˈdæktɪk/", m: "Mang tính giáo huấn, có mục đích dạy bảo", e: "The story is didactic, intended to teach a moral lesson."},
+    {w: "Diligent", i: "/ˈdɪlɪdʒənt/", m: "Chăm chỉ, cần mẫn", e: "He is a diligent worker who never misses a deadline."},
+    {w: "Discrepancy", i: "/dɪˈskrepənsi/", m: "Sự khác biệt, mâu thuẫn giữa các sự kiện", e: "There is a discrepancy between the two witnesses' accounts."},
+    {w: "Eclectic", i: "/ɪˈklektɪk/", m: "Được lựa chọn từ nhiều nguồn khác nhau", e: "She has an eclectic taste in music, from classical to hip-hop."},
+    {w: "Eloquent", i: "/ˈeləkwənt/", m: "Hùng hồn, diễn đạt lưu loát và thuyết phục", e: "Her eloquent speech moved the entire audience."},
+    {w: "Empathy", i: "/ˈempəθi/", m: "Khả năng thấu hiểu và chia sẻ cảm xúc với người khác", e: "A good doctor needs to have empathy for her patients."},
+    {w: "Empirical", i: "/ɪmˈpɪrɪkl/", m: "Dựa trên quan sát hoặc thí nghiệm thực tế", e: "They gathered empirical evidence to support their hypothesis."},
+    {w: "Enhance", i: "/ɪnˈhɑːns/", m: "Nâng cao, cải thiện chất lượng hoặc giá trị", e: "The spices enhanced the flavor of the dish."},
+    {w: "Ephemeral", i: "/ɪˈfemərəl/", m: "Ngắn ngủi, chỉ tồn tại trong thời gian ngắn", e: "The ephemeral beauty of cherry blossoms attracts many tourists."},
+    {w: "Equivocal", i: "/ɪˈkwɪvəkl/", m: "Mơ hồ, không rõ ràng và có thể hiểu theo nhiều cách", e: "His equivocal answer left everyone confused."},
+    {w: "Erratic", i: "/ɪˈrætɪk/", m: "Thất thường, không ổn định và khó dự đoán", e: "The stock market has been erratic this week."},
+    {w: "Exacerbate", i: "/ɪɡˈzæsəbeɪt/", m: "Làm trầm trọng thêm, làm tệ hơn", e: "His comments only exacerbated the conflict."},
+    {w: "Exemplary", i: "/ɪɡˈzempləri/", m: "Kiểu mẫu, xuất sắc và đáng được noi theo", e: "Her exemplary conduct earned her a promotion."},
+    {w: "Exhaustive", i: "/ɪɡˈzɔːstɪv/", m: "Toàn diện, bao quát mọi khía cạnh", e: "They conducted an exhaustive investigation into the matter."},
+    {w: "Explicit", i: "/ɪkˈsplɪsɪt/", m: "Được nói rõ ràng, chi tiết, không che giấu", e: "The contract contains explicit instructions about data use."},
+    {w: "Facilitate", i: "/fəˈsɪlɪteɪt/", m: "Tạo điều kiện thuận lợi, làm cho dễ dàng hơn", e: "The new software facilitates online collaboration."},
+    {w: "Fallacious", i: "/fəˈleɪʃəs/", m: "Sai lầm, dựa trên một niềm tin không đúng sự thật", e: "His argument was based on fallacious reasoning."},
+    {w: "Frugal", i: "/ˈfruːɡl/", m: "Tiết kiệm, ít tiêu xài", e: "Despite being wealthy, he leads a frugal lifestyle."},
+    {w: "Futile", i: "/ˈfjuːtaɪl/", m: "Vô ích, không có cơ hội thành công", e: "It is futile to resist the new regulations."},
+    {w: "Garrulous", i: "/ˈɡærələs/", m: "Ba hoa, nói nhiều về những chuyện không quan trọng", e: "The garrulous taxi driver talked non-stop throughout the ride."},
+    {w: "Gregarious", i: "/ɡrɪˈɡeəriəs/", m: "Hòa đồng, thích giao du", e: "She's very gregarious and loves hosting parties."},
+    {w: "Hapless", i: "/ˈhæpləs/", m: "Bất hạnh, không may mắn", e: "The hapless tourists lost their passports on the first day."},
+    {w: "Harangue", i: "/həˈræŋ/", m: "Bài diễn thuyết dài, gay gắt, mang tính chất công kích", e: "The manager delivered a long harangue about punctuality."},
+    {w: "Hedonist", i: "/ˈhiːdənɪst/", m: "Người theo chủ nghĩa khoái lạc, tìm kiếm niềm vui", e: "As a hedonist, his only goal in life is pleasure."},
+    {w: "Hierarchy", i: "/ˈhaɪərɑːki/", m: "Hệ thống phân cấp, thứ bậc", e: "The company has a strict hierarchy."},
+    {w: "Hypothetical", i: "/ˌhaɪpəˈθetɪkl/", m: "Giả định, mang tính chất giả thuyết", e: "Let's consider a hypothetical situation for this debate."},
+    {w: "Idealistic", i: "/ˌaɪdɪəˈlɪstɪk/", m: "Lý tưởng hóa, có niềm tin vào những tiêu chuẩn hoàn hảo", e: "His idealistic views were challenged by harsh reality."},
+    {w: "Idiosyncratic", i: "/ˌɪdiəsɪŋˈkrætɪk/", m: "Có đặc điểm hoặc thói quen riêng biệt, khác thường", e: "She has an idiosyncratic way of dressing."},
+    {w: "Impetuous", i: "/ɪmˈpetʃuəs/", m: "Hấp tấp, hành động thiếu suy nghĩ", e: "His impetuous decision led to financial loss."},
+    {w: "Incessant", i: "/ɪnˈsesnt/", m: "Không ngừng, liên tục (thường theo nghĩa tiêu cực)", e: "The incessant noise from the construction site was unbearable."},
+    {w: "Inconsequential", i: "/ɪnˌkɒnsɪˈkwenʃl/", m: "Không quan trọng, không đáng kể", e: "The details are inconsequential to the main argument."},
+    {w: "Inevitable", i: "/ɪnˈevɪtəbl/", m: "Chắc chắn xảy ra, không thể tránh khỏi", e: "Conflict between them seemed inevitable."},
+    {w: "Innate", i: "/ɪˈneɪt/", m: "Bẩm sinh, có từ khi sinh ra", e: "She has an innate talent for music."},
+    {w: "Innovative", i: "/ˈɪnəveɪtɪv/", m: "Đổi mới, sáng tạo", e: "The company is known for its innovative products."},
+    {w: "Insatiable", i: "/ɪnˈseɪʃəbl/", m: "Không thể thỏa mãn, không bao giờ đủ", e: "He has an insatiable curiosity about the universe."},
+    {w: "Integrity", i: "/ɪnˈteɡrəti/", m: "Sự chính trực, nguyên tắc đạo đức mạnh mẽ", e: "She is a person of great integrity and honesty."},
+    {w: "Juxtaposition", i: "/ˌdʒʌkstəpəˈzɪʃn/", m: "Sự đặt cạnh nhau để so sánh hoặc tương phản", e: "The juxtaposition of old and new architecture is striking."},
+    {w: "Laconic", i: "/ləˈkɒnɪk/", m: "Ngắn gọn, súc tích, dùng rất ít lời", e: "He gave a laconic reply: 'No.'"},
+    {w: "Lament", i: "/ləˈment/", m: "Than thở, thể hiện nỗi buồn hoặc hối tiếc", e: "The poem laments the loss of a golden age."},
+    {w: "Laudable", i: "/ˈlɔːdəbl/", m: "Đáng khen ngợi, ca ngợi", e: "Her efforts to help the homeless are laudable."},
+    {w: "Lethargic", i: "/ləˈθɑːdʒɪk/", m: "Uể oải, thiếu năng lượng", e: "The hot weather made everyone feel lethargic."},
+    {w: "Magnanimous", i: "/mæɡˈnænɪməs/", m: "Rộng lượng, cao thượng", e: "The magnanimous winner praised his opponent."},
+    {w: "Meticulous", i: "/məˈtɪkjələs/", m: "Tỉ mỉ, cẩn thận đến từng chi tiết", e: "She is meticulous about planning every event."},
+    {w: "Mitigate", i: "/ˈmɪtɪɡeɪt/", m: "Làm giảm nhẹ mức độ nghiêm trọng", e: "Planting trees can help mitigate climate change."},
+    {w: "Novel", i: "/ˈnɒvl/", m: "Mới lạ, khác thường", e: "He proposed a novel approach to the problem."},
+    {w: "Oblivious", i: "/əˈblɪviəs/", m: "Không ý thức được, không để ý tới", e: "He was oblivious to the fact that everyone was staring at him."},
+    {w: "Obsolete", i: "/ˈɒbsəliːt/", m: "Lỗi thời, không còn được sử dụng", e: "Floppy disks are now obsolete technology."},
+    {w: "Ostensible", i: "/ɒˈstensəbl/", m: "Bề ngoài, được đưa ra làm lý do chính thức nhưng có thể không phải thật", e: "His ostensible reason for visiting was to discuss business."},
+    {w: "Paradigm", i: "/ˈpærədaɪm/", m: "Mô hình, khuôn mẫu để suy nghĩ", e: "This discovery caused a paradigm shift in physics."},
+    {w: "Paramount", i: "/ˈpærəmaʊnt/", m: "Tối quan trọng, trên hết", e: "Safety is of paramount importance in this factory."},
+    {w: "Pragmatic", i: "/præɡˈmætɪk/", m: "Thực tế, tập trung vào kết quả hơn là lý thuyết", e: "She took a pragmatic approach to solving the crisis."},
+    {w: "Precarious", i: "/prɪˈkeəriəs/", m: "Bấp bênh, không ổn định và nguy hiểm", e: "He was in a precarious financial situation."},
+    {w: "Proficient", i: "/prəˈfɪʃnt/", m: "Thành thạo, có kỹ năng cao", e: "She is proficient in three languages."},
+    {w: "Prolific", i: "/prəˈlɪfɪk/", m: "Sản xuất nhiều (tác phẩm, ý tưởng)", e: "He was a prolific writer, publishing over 50 novels."},
+    {w: "Prudent", i: "/ˈpruːdnt/", m: "Thận trọng, khôn ngoan, biết nhìn xa", e: "It would be prudent to save some money for emergencies."},
+    {w: "Quintessential", i: "/ˌkwɪntɪˈsenʃl/", m: "Điển hình nhất, thuần túy nhất của cái gì", e: "He is the quintessential English gentleman."},
+    {w: "Radical", i: "/ˈrædɪkl/", m: "Triệt để, cơ bản; người theo chủ nghĩa cấp tiến", e: "The company needs radical changes to survive."},
+    {w: "Revere", i: "/rɪˈvɪə(r)/", m: "Tôn kính, ngưỡng mộ sâu sắc", e: "He is revered as a national hero."},
+    {w: "Rhetoric", i: "/ˈretərɪk/", m: "Nghệ thuật hùng biện; lời nói có tính chất phô trương", e: "His speech was full of empty political rhetoric."},
+    {w: "Scrutinize", i: "/ˈskruːtənaɪz/", m: "Xem xét kỹ lưỡng, nghiên cứu tỉ mỉ", e: "The committee will scrutinize every detail of the proposal."},
+    {w: "Spontaneous", i: "/spɒnˈteɪniəs/", m: "Tự phát, không có kế hoạch trước", e: "We made a spontaneous decision to go to the beach."},
+    {w: "Substantiate", i: "/səbˈstænʃieɪt/", m: "Cung cấp bằng chứng chứng minh", e: "Can you substantiate your claim with any data?"},
+    {w: "Subtle", i: "/ˈsʌtl/", m: "Tinh tế, khó nhận thấy", e: "There is a subtle difference between these two shades of blue."},
+    {w: "Superficial", i: "/ˌsuːpəˈfɪʃl/", m: "Hời hợt, chỉ trên bề mặt; không sâu sắc", e: "She has only a superficial knowledge of the subject."},
+    {w: "Tangible", i: "/ˈtændʒəbl/", m: "Hữu hình, có thể chạm vào; rõ ràng", e: "We need tangible results, not just promises."},
+    {w: "Tenacious", i: "/təˈneɪʃəs/", m: "Kiên định, bám giữ chặt chẽ", e: "She is a tenacious competitor who never gives up."},
+    {w: "Transient", i: "/ˈtrænziənt/", m: "Tạm thời, thoáng qua", e: "His happiness was only transient."},
+    {w: "Ubiquitous", i: "/juːˈbɪkwɪtəs/", m: "Có mặt ở khắp mọi nơi", e: "Mobile phones are now ubiquitous."},
+    {w: "Unprecedented", i: "/ʌnˈpresɪdentɪd/", m: "Chưa từng có tiền lệ", e: "The pandemic caused an unprecedented global crisis."},
+    {w: "Validate", i: "/ˈvælɪdeɪt/", m: "Xác nhận, chứng thực là đúng", e: "This experiment validates our original theory."},
+    {w: "Vehement", i: "/ˈviːəmənt/", m: "Mãnh liệt, đầy cảm xúc mạnh mẽ", e: "She was vehement in her denial of the accusations."},
+    {w: "Viable", i: "/ˈvaɪəbl/", m: "Khả thi, có thể thành công", e: "Solar power is a viable alternative energy source."},
+    {w: "Vindicate", i: "/ˈvɪndɪkeɪt/", m: "Chứng minh là đúng, minh oan", e: "The new evidence completely vindicated him."},
+    {w: "Volatile", i: "/ˈvɒlətaɪl/", m: "Dễ thay đổi, không ổn định; dễ bay hơi", e: "The political situation in the region is highly volatile."},
+    {w: "Wary", i: "/ˈweəri/", m: "Thận trọng, cảnh giác", e: "Be wary of strangers offering you money."},
+    {w: "Whimsical", i: "/ˈwɪmzɪkl/", m: "Đỏng đảnh, kỳ lạ một cách vui vẻ", e: "She has a whimsical sense of humor."},
+    {w: "Zealous", i: "/ˈzeləs/", m: "Hăng hái, nhiệt thành", e: "He is a zealous supporter of environmental causes."}
+];
+
+    const synth = window.speechSynthesis;
+    let userVocab = [];
+
+    // --- HELPER FUNCTIONS ---
+    function isMobile() {
+        return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+
+    function capitalize(str) {
+        if (!str) return "";
+        str = str.trim();
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function cleanPrefix(str) {
+        return str.replace(/^[\s\d.\-\*)\>]+/, "").trim();
+    }
+
+    // --- AUDIO LOGIC (HYBRID) ---
+    function speak(text) {
+        synth.cancel();
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'en-US';
+
+        if (isMobile()) {
+            setTimeout(() => {
+                const voices = synth.getVoices();
+                const bestVoice = voices.find(v => v.name.includes('Google') && v.lang.includes('en-US')) ||
+                                 voices.find(v => v.name.includes('Siri') && v.lang.includes('en-US')) ||
+                                 voices.find(v => v.lang.includes('en-US'));
+                if(bestVoice) msg.voice = bestVoice;
+                msg.rate = 0.85;
+                synth.speak(msg);
+            }, 50);
+        } else {
+            msg.rate = 0.8;
+            synth.speak(msg);
+        }
+    }
+
+    function unlockAudio() {
+        if (isMobile()) {
+            const ut = new SpeechSynthesisUtterance(' ');
+            ut.volume = 0;
+            synth.speak(ut);
+        }
+    }
+
+    // --- CORE LOGIC ---
+    function parseLines(text) {
+        userVocab = [];
+        text.split('\n').forEach(line => {
+            if(line.includes(':')) {
+                const parts = line.split(':');
+                let rawWord = cleanPrefix(parts[0]);
+                let rawMeaning = parts[1].trim();
+
+                if (rawWord && rawMeaning) {
+                    userVocab.push({
+                        w: capitalize(rawWord),
+                        m: capitalize(rawMeaning),
+                        e: "Practice makes perfect!" // Default example for custom uploads
+                    });
+                }
+            }
+        });
+        if(userVocab.length > 0) {
+            unlockAudio();
+            generateQuiz();
+        } else {
+            alert("Could not find any vocabulary. Ensure format is 'Word : Definition'");
+        }
+    }
+
+    function processText() {
+        const val = document.getElementById('rawInput').value;
+        if(!val) return alert("Please paste your vocabulary list first!");
+        parseLines(val);
+    }
+
+    document.getElementById('fileIn').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+        document.getElementById('fileInfo').innerText = "Loaded: " + file.name;
+        document.getElementById('fileInfo').style.color = "var(--success)";
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            mammoth.extractRawText({ arrayBuffer: ev.target.result }).then(res => parseLines(res.value));
+        };
+        reader.readAsArrayBuffer(file);
+    });
+
+    function generateQuiz() {
+        const container = document.getElementById('quizContent');
+        container.innerHTML = '';
+        document.getElementById('scoreBox').style.display = 'none';
+        document.getElementById('quizArea').style.display = 'block';
+
+        let pool = [...userVocab];
+        // Fill up to 20 questions from MegaBank if user list is short
+        if(pool.length < 20) {
+            let shuffledBank = [...megaBank].sort(() => 0.5 - Math.random());
+            for(let item of shuffledBank) {
+                if(pool.length >= 20) break;
+                if(!pool.some(x => x.w.toLowerCase() === item.w.toLowerCase())) {
+                    pool.push(item);
+                }
+            }
+        }
+        
+        let quiz20 = pool.sort(() => 0.5 - Math.random()).slice(0, 20);
+
+        quiz20.forEach((item, idx) => {
+            const isEngQ = Math.random() > 0.5;
+            const qTxt = isEngQ ? `What is the meaning of "<span style='text-decoration:underline; text-decoration-color:var(--accent)'>${item.w}</span>"?` : `Which word means: "${item.m}"?`;
+            const correctAns = isEngQ ? item.m : item.w;
+            
+            let others = quiz20.filter(x => x.w !== item.w).map(x => isEngQ ? x.m : x.w);
+            let opts = [correctAns, ...others.sort(() => 0.5 - Math.random()).slice(0, 3)].sort(() => 0.5 - Math.random());
+
+            container.innerHTML += `
+                <div class="q-card" data-correct="${correctAns}">
+                    <span class="q-number">Question ${idx+1}</span>
+                    <div class="q-text">${qTxt}</div>
+                    <div class="options">
+                        ${opts.map(o => `<div class="opt" onclick="selectOpt(this)">${o}</div>`).join('')}
+                    </div>
+                    <div class="feedback">
+                        <div class="ipa-line">
+                            <span class="ipa-text">${item.w}</span>
+                            <button class="speak-btn" title="Listen" onclick="speak('${item.w}')">🔊</button>
+                        </div>
+                        <p><strong>Example:</strong> ${item.e}</p>
+                    </div>
+                </div>
+            `;
+        });
+        window.scrollTo({ top: document.getElementById('quizArea').offsetTop, behavior: 'smooth' });
+    }
+
+    function selectOpt(el) {
+        el.parentElement.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    function checkAll() {
+        const cards = document.querySelectorAll('.q-card');
+        let score = 0;
+        cards.forEach(card => {
+            const sel = card.querySelector('.opt.selected');
+            const cor = card.getAttribute('data-correct');
+            const fb = card.querySelector('.feedback');
+            
+            fb.style.display = 'block';
+
+            if(sel && sel.innerText === cor) {
+                score++;
+                fb.style.borderColor = "var(--success)";
+                fb.style.background = "#f0fdf4";
+                // Add a checkmark visual
+                if(!sel.innerHTML.includes('✅')) sel.innerHTML += ' ✅';
+                sel.style.backgroundColor = "var(--success)";
+                sel.style.borderColor = "var(--success)";
+            } else {
+                fb.style.borderColor = "var(--danger)";
+                fb.style.background = "#fff1f2";
+                fb.innerHTML = `<div style="color:var(--danger); font-weight:bold; margin-bottom:8px;">❌ Oops! Correct answer: ${cor}</div>` + fb.innerHTML;
+                
+                // Highlight the user's wrong choice
+                if(sel) {
+                    sel.style.backgroundColor = "var(--danger)";
+                    sel.style.borderColor = "var(--danger)";
+                    sel.style.color = "white";
+                }
+            }
+        });
+
+        const box = document.getElementById('scoreBox');
+        box.style.display = 'block';
+        
+        let msg = "Keep Practicing! 💪";
+        if(score > 15) msg = "Excellent Job! 🌟";
+        if(score === 20) msg = "Perfect Score! 👑";
+
+        box.innerHTML = `<h2>${score}/20</h2><p>${msg}</p><p style="margin-top:10px; font-size:1rem">Tap 🔊 on the cards below to review pronunciation.</p>`;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function switchTab(id, btn) {
+        document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+    }
+</script>
+
+</body>
+</html>
