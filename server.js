@@ -13,7 +13,6 @@ app.use(cors());
 app.use(express.json()); 
 
 // --- 2. DATABASE SETUP ---
-// Đã xóa dấu < > ở mật khẩu
 const mongoURI = "mongodb+srv://beheard:10032026@cluster0.2qyx0oo.mongodb.net/myLMS?retryWrites=true&w=majority";
 
 mongoose.connect(mongoURI)
@@ -47,10 +46,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // --- 4. ROUTES & API ---
-
-// Serve file tĩnh từ thư mục public
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API lấy danh sách game
 app.get('/games', async (req, res) => {
@@ -90,25 +85,23 @@ app.post('/upload-game', upload.fields([{ name: 'gameFile', maxCount: 1 }, { nam
     }
 });
 
-// --- ĐIỀU HƯỚNG TRANG (ROUTING) ---
+// --- 5. ĐIỀU HƯỚNG TRANG (ROUTING) - QUAN TRỌNG: ĐẶT TRÊN STATIC ---
 
-// 1. Trang chủ (Link gốc) -> Hiện trang cho học sinh chơi game
+// Ép trang chủ hiện users.html cho học sinh
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'users.html'));
 });
 
-// 2. Trang bí mật cho giáo viên -> Hiện trang để upload file
-// Bạn có thể đổi '/teacher-zone' thành bất cứ đuôi nào bạn thích
+// Trang để giáo viên upload
 app.get('/teacher-zone', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// 3. Dự phòng cho trang users
-app.get('/users', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'users.html'));
-});
+// Phục vụ các file tĩnh (CSS, JS, hình ảnh) sau khi đã check các đường dẫn trên
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// --- 5. START ---
+// --- 6. START ---
 app.listen(PORT, () => {
     console.log(`🚀 Server is flying at http://localhost:${PORT}`);
 });
