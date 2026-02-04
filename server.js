@@ -90,13 +90,22 @@ app.post('/upload-game', upload.fields([{ name: 'gameFile', maxCount: 1 }, { nam
     }
 });
 
-// PHẦN QUAN TRỌNG: Điều hướng học sinh vào users.html
+// --- ĐIỀU HƯỚNG TRANG (ROUTING) ---
+
+// 1. Trang chủ (Link gốc) -> Hiện trang cho học sinh chơi game
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'users.html'));
 });
 
-app.get('/admin', (req, res) => {
+// 2. Trang bí mật cho giáo viên -> Hiện trang để upload file
+// Bạn có thể đổi '/teacher-zone' thành bất cứ đuôi nào bạn thích
+app.get('/teacher-zone', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// 3. Dự phòng cho trang users
+app.get('/users', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'users.html'));
 });
 
 // --- 5. START ---
