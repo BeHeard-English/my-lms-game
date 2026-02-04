@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be Heard | Grammar Master</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #031383;
+            --primary-light: #1a2a9e;
+            --accent: #FFD700; /* Sunny Gold for game buttons */
+            --accent-hover: #ffc400;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --bg: #f0f7ff;
+            --card: #ffffff;
+            --text-main: #031383;
+            --text-light: #5a6b8d;
+            --border: #d1dae5;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            background-image: radial-gradient(#d1dae5 2px, transparent 2px);
+            background-size: 30px 30px;
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card);
+            padding: 40px;
+            border-radius: 35px;
+            box-shadow: 0 20px 0px rgba(3, 19, 131, 0.1);
+            border: 4px solid var(--primary);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 5px;
+            font-size: 2.8rem;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-light);
+            font-weight: 600;
+            margin-bottom: 35px;
+            font-size: 1.1rem;
+        }
+
+        /* Mission Selection Section */
+        .selection-box {
+            background: #f8fbff;
+            padding: 30px;
+            border: 3px solid var(--border);
+            border-radius: 25px;
+            margin-bottom: 25px;
+        }
+
+        .selection-box h3 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .grid-checkboxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 700;
+            color: var(--primary-light);
+        }
+
+        .checkbox-wrapper:hover {
+            border-color: var(--primary);
+            background-color: #f0f3ff;
+            transform: translateY(-2px);
+        }
+
+        .checkbox-wrapper input {
+            margin-right: 12px;
+            accent-color: var(--primary);
+            transform: scale(1.4);
+        }
+
+        /* Buttons (3D Bouncy Style) */
+        .btn {
+            background-color: var(--accent);
+            color: var(--primary);
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.4rem;
+            font-weight: 800;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.1s;
+            box-shadow: 0 8px 0px #b28900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(2px);
+            box-shadow: 0 6px 0px #b28900;
+        }
+
+        .btn:active {
+            transform: translateY(8px);
+            box-shadow: 0 0px 0px #b28900;
+        }
+
+        /* Question Cards */
+        .question-card {
+            background: white;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 25px;
+            border: 3px solid var(--border);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transition: border-color 0.3s;
+        }
+
+        .question-card:hover { border-color: var(--primary); }
+
+        .q-title {
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        /* Multiple Choice */
+        .mc-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .mc-label {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .mc-label:hover {
+            border-color: var(--primary);
+            background-color: #f4f7ff;
+        }
+
+        /* Reordering Area */
+        .reorder-area {
+            background-color: #fcfdfe;
+            border: 3px dashed var(--primary);
+            border-radius: 20px;
+            min-height: 80px;
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .word-bank {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 10px 0;
+        }
+
+        .word-chip {
+            background-color: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 12px 22px;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 5px 0 var(--primary);
+        }
+
+        .word-chip:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 var(--primary);
+        }
+
+        .word-chip.in-answer {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: none;
+        }
+
+        /* Feedback & Score */
+        .score-panel {
+            background: linear-gradient(135deg, var(--primary), #4a90e2);
+            color: white;
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            margin-bottom: 40px;
+            border: 5px solid var(--accent);
+            display: none;
+            animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .feedback-box {
+            margin-top: 15px;
+            padding: 20px;
+            border-radius: 18px;
+            display: none;
+            font-weight: 600;
+        }
+
+        .feedback-correct { background: #e8fcf0; border: 2px solid var(--success); color: #1e6b3e; }
+        .feedback-wrong { background: #fff1f1; border: 2px solid var(--error); color: #912424; }
+
+        .explanation-text {
+            font-size: 0.95rem;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed rgba(0,0,0,0.1);
+            color: #444;
+            font-style: italic;
+        }
+
+        .hidden { display: none; }
+
+        @media (max-width: 600px) {
+            .mc-options { grid-template-columns: 1fr; }
+            .container { padding: 20px; }
+            h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🚀 Grammar Master</h1>
+    <p class="subtitle">Ready to level up your English skills?</p>
+
+    <div id="setup-view">
+        <div class="selection-box">
+            <h3>🎯 Choose Your Missions</h3>
+            <p style="color: var(--text-light); font-weight: 600;">Pick 1 to 3 topics to generate your custom test:</p>
+            
+            <p style="color: var(--error); font-weight: 800; display:none; text-align:center;" id="selection-error">⚠️ Please select 1 to 3 topics!</p>
+            
+            <div class="grid-checkboxes">
+                <label class="checkbox-wrapper"><input type="checkbox" name="grammar" value="present_simple"> Present Simple</label>
+                <label class="checkbox-wrapper"><input type="checkbox" name="grammar" value="past_simple"> Past Simple</label>
+                <label class="checkbox-wrapper"><input type="checkbox" name="grammar" value="future_simple"> Future Simple</label>
+                <label class="checkbox-wrapper"><input type="checkbox" name="grammar" value="present_cont"> Present Continuous</label>
+                <label class="checkbox-wrapper"><input type="checkbox" name="grammar" value="present_perf"> Present Perfect</label>
+                <label class="checkbox-wrapper"><input type="checkbox" name="grammar" value="past_perf"> Past Perfect</label>
+                <label class="checkbox-wrapper"><input type="checkbox" name="grammar" value="cond_3"> Conditional Type 3</label>
+                <label class="checkbox-wrapper"><input type="checkbox" name="grammar" value="wish"> Wish Sentences</label>
+                <label class="checkbox-wrapper"><input type="checkbox" name="grammar" value="passive"> Passive Voice</label>
+                <label class="checkbox-wrapper"><input type="checkbox" name="grammar" value="comp_adj"> Comparative</label>
+                <label class="checkbox-wrapper"><input type="checkbox" name="grammar" value="sup_adj"> Superlative</label>
+                <label class="checkbox-wrapper"><input type="checkbox" name="grammar" value="possessive"> Possessive Case</label>
+            </div>
+            
+            <button class="btn" onclick="startTest()">Start Adventure! 🎮</button>
+        </div>
+    </div>
+
+    <div id="test-view" class="hidden">
+        <div id="score-panel" class="score-panel">
+            <h2 style="color:white; border:none; margin:0; justify-content: center; font-size: 1.8rem;">Quest Completed! 🏆</h2>
+            <div id="final-score" style="font-size: 1.5rem; margin-top: 10px;">Score: 0/20</div>
+            <div id="score-percent" style="font-size: 3rem; font-weight: 800; margin-top: 10px; color: var(--accent);">0%</div>
+            <div id="encouragement" style="font-size: 1.2rem; margin-top: 10px; font-weight: 600;"></div>
+        </div>
+
+        <div id="quiz-content">
+            <h2 style="margin-top:0; color: var(--primary);">Part 1: Multiple Choice</h2>
+            <div id="mc-container"></div>
+
+            <h2 style="color: var(--primary); margin-top: 40px;">Part 2: Sentence Reordering</h2>
+            <p style="font-weight: 600; color: var(--text-light); margin-bottom: 20px;">Tap the words in the correct order to build the sentence.</p>
+            <div id="order-container"></div>
+        </div>
+
+        <button class="btn" id="submit-btn" onclick="submitAnswers()">Finish & Review ✨</button>
+        <button class="btn hidden" id="retry-btn" style="background-color: var(--primary); color: white; box-shadow: 0 8px 0px #010a4d;" onclick="location.reload()">New Quest 🔄</button>
+    </div>
+</div>
+
+<script>
+    /* --- DATABASE --- 
+       Lưu ý: Bạn hãy thêm đầy đủ các câu hỏi vào mảng db này theo cấu trúc bên dưới.
+    */
+    const db = [
+    // PRESENT SIMPLE - 10 MC, 10 Order (ĐÃ SỬA LỖI)
+    { type: 'mc', tag: 'present_simple', q: "He ____ his teeth twice a day.", opts: ["brush", "brushes", "brushing", "is brush"], a: "B", exp: "Động từ tận cùng bằng 'sh' + chủ ngữ số ít -> thêm 'es'.", trans: "Anh ấy đánh răng hai lần một ngày." },
+    { type: 'mc', tag: 'present_simple', q: "The Earth ____ around the Sun.", opts: ["move", "moves", "moving", "moved"], a: "B", exp: "Sự thật hiển nhiên (Facts) -> Hiện tại đơn, chủ ngữ số ít thêm 's'.", trans: "Trái đất quay quanh Mặt trời." },
+    { type: 'mc', tag: 'present_simple', q: "____ your father work in a bank?", opts: ["Do", "Is", "Does", "Are"], a: "C", exp: "Câu hỏi với động từ thường, chủ ngữ 'your father' (số ít) -> dùng 'Does'.", trans: "Bố bạn có làm việc ở ngân hàng không?" },
+    { type: 'mc', tag: 'present_simple', q: "Our classes ____ at 8:00 AM every morning.", opts: ["start", "starts", "starting", "started"], a: "A", exp: "Lịch trình cố định. Chủ ngữ 'Our classes' (số nhiều) -> giữ nguyên mẫu.", trans: "Các tiết học của chúng tôi bắt đầu lúc 8 giờ sáng mỗi ngày." },
+    { type: 'mc', tag: 'present_simple', q: "She ____ to the cinema very often.", opts: ["don't go", "doesn't goes", "doesn't go", "not go"], a: "C", exp: "Phủ định: Does + not + V-nguyên mẫu (không thêm s/es vào động từ chính nữa).", trans: "Cô ấy không thường xuyên đi xem phim." },
+    { type: 'mc', tag: 'present_simple', q: "A baby ____ when it is hungry.", opts: ["cry", "cries", "crying", "is cry"], a: "B", exp: "Động từ tận cùng là phụ âm + 'y' -> đổi 'y' thành 'i' rồi thêm 'es'.", trans: "Em bé khóc khi nó thấy đói." },
+    { type: 'mc', tag: 'present_simple', q: "I ____ breakfast at home every day.", opts: ["have", "has", "having", "had"], a: "A", exp: "Chủ ngữ 'I' dùng động từ nguyên mẫu 'have'.", trans: "Tôi ăn sáng tại nhà mỗi ngày." },
+    { type: 'mc', tag: 'present_simple', q: "Rice ____ in tropical climates.", opts: ["grow", "grows", "growing", "is grow"], a: "B", exp: "Sự thật hiển nhiên. 'Rice' là danh từ không đếm được -> dùng số ít.", trans: "Lúa gạo mọc ở những vùng khí hậu nhiệt đới." },
+    { type: 'mc', tag: 'present_simple', q: "What ____ 'stewardess' mean?", opts: ["do", "is", "does", "are"], a: "C", exp: "Câu hỏi Wh-. 'stewardess' là danh từ số ít -> dùng trợ động từ 'does'.", trans: "Từ 'stewardess' có nghĩa là gì?" },
+    { type: 'mc', tag: 'present_simple', q: "They ____ very happy together.", opts: ["be", "is", "are", "am"], a: "C", exp: "Động từ 'To be' đi với chủ ngữ số nhiều 'They' là 'are'.", trans: "Họ rất hạnh phúc khi ở bên nhau." },
+    { type: 'order', tag: 'present_simple', q: "often / how / you / do / exercise / ?", a: "How often do you exercise?", exp: "Cấu trúc hỏi về tần suất: How often + do/does + S + V?", trans: "Bạn có thường xuyên tập thể dục không?" },
+    { type: 'order', tag: 'present_simple', q: "usually / is / for / late / school / he", a: "He is usually late for school.", exp: "Trạng từ tần suất đứng SAU động từ 'to be'.", trans: "Cậu ấy thường xuyên đi học muộn." },
+    { type: 'order', tag: 'present_simple', q: "not / watch / do / they / horror / movies", a: "They do not watch horror movies.", exp: "Cấu trúc phủ định với động từ thường.", trans: "Họ không xem phim kinh dị." },
+    { type: 'order', tag: 'present_simple', q: "on / she / always / time / arrives", a: "She always arrives on time.", exp: "Trạng từ tần suất đứng TRƯỚC động từ thường.", trans: "Cô ấy luôn luôn đến đúng giờ." },
+    { type: 'order', tag: 'present_simple', q: "your / does / live / sister / where / ?", a: "Where does your sister live?", exp: "Câu hỏi Wh- với ngôi thứ 3 số ít.", trans: "Em gái bạn sống ở đâu?" },
+    { type: 'order', tag: 'present_simple', q: "Sunday / on / work / doesn't / he", a: "He doesn't work on Sunday.", exp: "S + doesn't + V-inf. 'On + thứ' dùng giới từ 'on'.", trans: "Anh ấy không làm việc vào ngày Chủ Nhật." },
+    { type: 'order', tag: 'present_simple', q: "in / we / sometimes / the / park / walk", a: "We sometimes walk in the park.", exp: "Vị trí trạng từ chỉ tần suất 'sometimes'.", trans: "Thỉnh thoảng chúng tôi đi dạo trong công viên." },
+    { type: 'order', tag: 'present_simple', q: "best / drinks / my / friend / never / tea", a: "My best friend never drinks tea.", exp: "Dấu hiệu 'never' và chia động từ 'drinks' theo 'my best friend'.", trans: "Bạn thân của tôi không bao giờ uống trà." },
+    { type: 'order', tag: 'present_simple', q: "parents / do / what / your / do / ?", a: "What do your parents do?", exp: "Câu hỏi về nghề nghiệp: What + do/does + S + do?", trans: "Bố mẹ bạn làm nghề gì?" },
+    { type: 'order', tag: 'present_simple', q: "English / children / simple / learn / songs", a: "Children learn simple English songs.", exp: "Tính từ 'simple English' đứng trước danh từ 'songs'.", trans: "Trẻ em học những bài hát tiếng Anh đơn giản." },
+    
+    // PAST SIMPLE - 10 MC, 10 Order (ĐÃ SỬA LỖI)
+    { type: 'mc', tag: 'past_simple', q: "They ____ a new car yesterday.", opts: ["buy", "bought", "buying", "buys"], a: "B", exp: "Dấu hiệu 'yesterday' -> Quá khứ đơn. Bất quy tắc: buy -> bought.", trans: "Họ đã mua xe mới hôm qua." },
+    { type: 'mc', tag: 'past_simple', q: "I ____ see him at the party last night.", opts: ["didn't", "don't", "wasn't", "not"], a: "A", exp: "Phủ định quá khứ: didn't + V-nguyên mẫu (see).", trans: "Tôi không thấy anh ấy ở bữa tiệc tối qua." },
+    { type: 'mc', tag: 'past_simple', q: "Where ____ you go last summer?", opts: ["do", "did", "were", "are"], a: "B", exp: "Câu hỏi có động từ thường (go) -> dùng trợ động từ 'did'.", trans: "Bạn đã đi đâu mùa hè trước?" },
+    { type: 'mc', tag: 'past_simple', q: "She ____ home early last night.", opts: ["come", "came", "comes", "coming"], a: "B", exp: "Bất quy tắc: come -> came.", trans: "Cô ấy về nhà sớm tối qua." },
+    { type: 'mc', tag: 'past_simple', q: "We ____ to Paris two years ago.", opts: ["travel", "traveled", "travels", "traveling"], a: "B", exp: "Dấu hiệu 'ago' -> dùng V2/ed.", trans: "Chúng tôi đã đi du lịch Paris hai năm trước." },
+    { type: 'mc', tag: 'past_simple', q: "____ the weather good yesterday?", opts: ["Did", "Was", "Were", "Is"], a: "B", exp: "Câu hỏi với tính từ (good), chủ ngữ số ít -> dùng 'Was'. Không dùng 'Did' vì không có động từ thường.", trans: "Hôm qua thời tiết có tốt không?" },
+    { type: 'mc', tag: 'past_simple', q: "He ____ his phone at the restaurant.", opts: ["leave", "leaves", "left", "leaved"], a: "C", exp: "Bất quy tắc: leave -> left.", trans: "Anh ấy đã để quên điện thoại ở nhà hàng." },
+    { type: 'mc', tag: 'past_simple', q: "They ____ married in 2020.", opts: ["get", "got", "gotten", "getting"], a: "B", exp: "Sự việc đã kết thúc trong quá khứ (2020). Bất quy tắc: get -> got.", trans: "Họ đã kết hôn năm 2020." },
+    { type: 'mc', tag: 'past_simple', q: "I ____ a letter to my friend last week.", opts: ["write", "wrote", "written", "writing"], a: "B", exp: "Bất quy tắc: write -> wrote.", trans: "Tôi đã viết thư cho bạn tôi tuần trước." },
+    { type: 'mc', tag: 'past_simple', q: "The movie ____ at 8 PM and finished at 10 PM.", opts: ["start", "starts", "started", "starting"], a: "C", exp: "Hành động đã hoàn thành trong quá khứ.", trans: "Bộ phim đã bắt đầu lúc 8 giờ và kết thúc lúc 10 giờ tối." },
+    { type: 'order', tag: 'past_simple', q: "late / was / I / work / for / yesterday", a: "I was late for work yesterday.", exp: "To be ở quá khứ: I + was.", trans: "Hôm qua tôi đã đi làm muộn." },
+    { type: 'order', tag: 'past_simple', q: "did / watch / you / match / the / ?", a: "Did you watch the match?", exp: "Câu hỏi Yes/No: Did + S + V-inf?", trans: "Bạn đã xem trận đấu đó chưa?" },
+    { type: 'order', tag: 'past_simple', q: "pizza / ate / we / night / last", a: "We ate pizza last night.", exp: "Bất quy tắc: eat -> ate.", trans: "Chúng tôi đã ăn pizza tối qua." },
+    { type: 'order', tag: 'past_simple', q: "born / was / she / 1990 / in", a: "She was born in 1990.", exp: "Cấu trúc 'was born' luôn dùng ở quá khứ đơn.", trans: "Cô ấy sinh năm 1990." },
+    { type: 'order', tag: 'past_simple', q: "didn't / like / I / movie / the", a: "I didn't like the movie.", exp: "Phủ định: S + didn't + V-inf.", trans: "Tôi không thích bộ phim đó." },
+    { type: 'order', tag: 'past_simple', q: "when / arrive / you / did / ?", a: "When did you arrive?", exp: "Câu hỏi Wh-: Wh-word + did + S + V-inf?", trans: "Bạn đã đến khi nào?" },
+    { type: 'order', tag: 'past_simple', q: "home / walked / they / school / from", a: "They walked home from school.", exp: "Hành động đã xảy ra và kết thúc.", trans: "Họ đã đi bộ về nhà từ trường." },
+    { type: 'order', tag: 'past_simple', q: "it / rained / heavily / yesterday", a: "It rained heavily yesterday.", exp: "Dấu hiệu 'yesterday'.", trans: "Hôm qua trời mưa rất to." },
+    { type: 'order', tag: 'past_simple', q: "finished / work / he / at / 5", a: "He finished work at 5.", exp: "Thêm 'ed' cho động từ có quy tắc.", trans: "Anh ấy đã xong việc lúc 5 giờ." },
+    { type: 'order', tag: 'past_simple', q: "did / why / leave / early / she / ?", a: "Why did she leave early?", exp: "Wh-word + did + S + V-inf?", trans: "Tại sao cô ấy lại rời đi sớm?" },
+    
+    // FUTURE SIMPLE - 10 MC, 10 Order (ĐÃ SỬA LỖI)
+    { type: 'mc', tag: 'future_simple', q: "I think it ____ rain tomorrow.", opts: ["will", "is going to", "is", "shall"], a: "A", exp: "Dự đoán dựa trên quan điểm cá nhân (I think) -> Dùng 'Will'.", trans: "Tôi nghĩ ngày mai trời sẽ mưa." },
+    { type: 'mc', tag: 'future_simple', q: "Look at the clouds! It ____ rain.", opts: ["will", "is going to", "wills", "going to"], a: "B", exp: "Dự đoán có bằng chứng cụ thể ở hiện tại (clouds) -> Dùng 'Be going to'.", trans: "Nhìn mây kìa! Trời sắp mưa rồi." },
+    { type: 'mc', tag: 'future_simple', q: "I promise I ____ help you.", opts: ["am going to", "will", "am", "do"], a: "B", exp: "Lời hứa (Promise) -> Dùng 'Will'.", trans: "Tôi hứa tôi sẽ giúp bạn." },
+    { type: 'mc', tag: 'future_simple', q: "They ____ arrive at 8 PM.", opts: ["will", "is going to", "go to", "shall"], a: "A", exp: "Diễn tả một sự kiện sẽ xảy ra trong tương lai (Future fact).", trans: "Họ sẽ đến lúc 8 giờ tối." },
+    { type: 'mc', tag: 'future_simple', q: "I have to go now. I ____ call you later.", opts: ["am", "will", "am going", "going to"], a: "B", exp: "Quyết định đưa ra ngay lúc nói (Spontaneous decision) -> Dùng 'Will'.", trans: "Tôi phải đi rồi. Tôi sẽ gọi lại cho bạn sau." },
+    { type: 'mc', tag: 'future_simple', q: "We ____ have a meeting tomorrow morning.", opts: ["are going to", "wills", "go to", "shall"], a: "A", exp: "Kế hoạch/Dự định đã có từ trước (Plan) -> Dùng 'Be going to'.", trans: "Chúng tôi định sẽ có cuộc họp vào sáng mai." },
+    { type: 'mc', tag: 'future_simple', q: "She ____ study abroad next year.", opts: ["is", "is going to", "goes to", "shall"], a: "B", exp: "Kế hoạch chắc chắn trong tương lai -> Dùng 'Be going to'.", trans: "Cô ấy dự định đi du học vào năm sau." },
+    { type: 'mc', tag: 'future_simple', q: "____ you help me with this box?", opts: ["Will", "Are", "Do", "Shall"], a: "A", exp: "Câu yêu cầu/đề nghị (Request) -> Dùng 'Will'.", trans: "Bạn giúp tôi bê cái hộp này được không?" },
+    { type: 'mc', tag: 'future_simple', q: "Don't worry, I ____ be there on time.", opts: ["am", "will", "am going", "going to"], a: "B", exp: "Lời hứa/Sự đảm bảo (Assurance) -> Dùng 'Will'.", trans: "Đừng lo, tôi sẽ có mặt đúng giờ." },
+    { type: 'mc', tag: 'future_simple', q: "I think they ____ not come to the party.", opts: ["will", "are", "do", "is"], a: "A", exp: "Phủ định của tương lai đơn: Will not (Won't).", trans: "Tôi nghĩ họ sẽ không đến bữa tiệc đâu." },
+    { type: 'order', tag: 'future_simple', q: "travel / will / to / Japan / next / I / year", a: "I will travel to Japan next year.", exp: "Cấu trúc tương lai đơn: S + will + V.", trans: "Tôi sẽ đi Nhật vào năm sau." },
+    { type: 'order', tag: 'future_simple', q: "are / visit / going / to / we / our mom", a: "We are going to visit our mom.", exp: "Dự định: S + be going to + V.", trans: "Chúng tôi định đi thăm mẹ." },
+    { type: 'order', tag: 'future_simple', q: "call / you / I / back / later / will", a: "I will call you back later.", exp: "Quyết định tức thì: Will.", trans: "Tôi sẽ gọi lại cho bạn sau." },
+    { type: 'order', tag: 'future_simple', q: "going / is / to / she / doctor / the / see", a: "She is going to see the doctor.", exp: "Kế hoạch đi khám bệnh -> Dùng Be going to.", trans: "Cô ấy định đi gặp bác sĩ." },
+    { type: 'order', tag: 'future_simple', q: "will / tomorrow / what / you / do / ?", a: "What will you do tomorrow?", exp: "Câu hỏi Wh- với Will.", trans: "Ngày mai bạn sẽ làm gì?" },
+    { type: 'order', tag: 'future_simple', q: "not / I / going / am / to / that / eat", a: "I am not going to eat that.", exp: "Phủ định của tương lai gần: Be + not + going to.", trans: "Tôi không định ăn cái đó đâu." },
+    { type: 'order', tag: 'future_simple', q: "rain / it / will / tonight / ?", a: "Will it rain tonight?", exp: "Câu hỏi Yes/No về dự đoán.", trans: "Liệu tối nay trời có mưa không?" },
+    { type: 'order', tag: 'future_simple', q: "probably / will / he / late / be", a: "He will probably be late.", exp: "Vị trí trạng từ: Will + probably + V.", trans: "Anh ấy có lẽ sẽ đến muộn." },
+    { type: 'order', tag: 'future_simple', q: "are / to / we / movie / a / going / watch", a: "We are going to watch a movie.", exp: "Kế hoạch giải trí -> Be going to.", trans: "Chúng tôi định đi xem phim." },
+    { type: 'order', tag: 'future_simple', q: "will / when / arrive / guests / our / ?", a: "When will our guests arrive?", exp: "Câu hỏi về thời gian trong tương lai.", trans: "Khi nào khách của chúng ta sẽ đến?" },
+    
+    // PRESENT CONTINUOUS - 10 MC, 10 Order (ĐÃ KIỂM TRA - OK)
+    { type: 'mc', tag: 'present_cont', q: "Listen! Someone ____ the piano.", opts: ["play", "plays", "is playing", "played"], a: "C", exp: "Dấu hiệu mệnh lệnh 'Listen!' -> Hành động đang xảy ra ngay lúc nói.", trans: "Nghe kìa! Có ai đó đang chơi đàn piano." },
+    { type: 'mc', tag: 'present_cont', q: "We ____ dinner at the moment.", opts: ["have", "are having", "had", "having"], a: "B", exp: "'At the moment' -> Hiện tại tiếp diễn. 'Have' ở đây nghĩa là 'ăn' nên được chia V-ing.", trans: "Chúng tôi đang dùng bữa tối ngay lúc này." },
+    { type: 'mc', tag: 'present_cont', q: "He ____ working today, he is sick.", opts: ["isn't", "doesn't", "not", "aren't"], a: "A", exp: "Hành động mang tính tạm thời (hôm nay nghỉ). Phủ định với 'is' -> isn't.", trans: "Hôm nay anh ấy không đi làm, anh ấy bị ốm." },
+    { type: 'mc', tag: 'present_cont', q: "____ you waiting for someone?", opts: ["Do", "Are", "Is", "Does"], a: "B", exp: "Câu hỏi Yes/No: Are + S + V-ing?", trans: "Bạn đang đợi ai đó phải không?" },
+    { type: 'mc', tag: 'present_cont', q: "She ____ a book right now.", opts: ["read", "reads", "is reading", "reading"], a: "C", exp: "Dấu hiệu 'Right now' -> Đang xảy ra.", trans: "Cô ấy đang đọc sách ngay bây giờ." },
+    { type: 'mc', tag: 'present_cont', q: "They ____ to London tomorrow.", opts: ["travel", "are traveling", "travels", "traveling"], a: "B", exp: "Kế hoạch tương lai đã được sắp xếp (Future arrangement) -> Dùng HTTD.", trans: "Họ sẽ đi London vào ngày mai (đã lên lịch)." },
+    { type: 'mc', tag: 'present_cont', q: "I ____ my homework now.", opts: ["do", "doing", "am doing", "does"], a: "C", exp: "Chủ ngữ 'I' đi với 'am' + doing.", trans: "Bây giờ tôi đang làm bài tập." },
+    { type: 'mc', tag: 'present_cont', q: "What ____ you doing?", opts: ["are", "is", "do", "does"], a: "A", exp: "Câu hỏi Wh-: Wh + be + S + V-ing?", trans: "Bạn đang làm cái gì thế?" },
+    { type: 'mc', tag: 'present_cont', q: "He ____ not coming to the party.", opts: ["is", "are", "am", "does"], a: "A", exp: "Chủ ngữ 'He' (số ít) -> dùng trợ động từ 'is'.", trans: "Anh ấy sẽ không đến bữa tiệc đâu." },
+    { type: 'mc', tag: 'present_cont', q: "The kids ____ in the garden.", opts: ["play", "plays", "are playing", "played"], a: "C", exp: "Hành động đang diễn ra. 'The kids' là số nhiều -> are playing.", trans: "Bọn trẻ đang chơi ngoài vườn." },
+    { type: 'order', tag: 'present_cont', q: "is / she / book / reading / a / now", a: "She is reading a book now.", exp: "Cấu trúc khẳng định: S + be + V-ing.", trans: "Cô ấy đang đọc một cuốn sách." },
+    { type: 'order', tag: 'present_cont', q: "why / crying / are / you / ?", a: "Why are you crying?", exp: "Câu hỏi Wh-: Tại sao bạn đang khóc?", trans: "Tại sao bạn lại khóc?" },
+    { type: 'order', tag: 'present_cont', q: "sleeping / baby / the / is / Shh!", a: "Shh! The baby is sleeping.", exp: "Câu mệnh lệnh cảnh báo + hành động đang xảy ra.", trans: "Suỵt! Em bé đang ngủ." },
+    { type: 'order', tag: 'present_cont', q: "am / I / TV / watching / not", a: "I am not watching TV.", exp: "Câu phủ định: I + am not + V-ing.", trans: "Tôi đang không xem TV." },
+    { type: 'order', tag: 'present_cont', q: "are / what / doing / you / tonight / ?", a: "What are you doing tonight?", exp: "Hỏi về kế hoạch tối nay.", trans: "Tối nay bạn định làm gì?" },
+    { type: 'order', tag: 'present_cont', q: "cooking / dinner / mom / is / my", a: "My mom is cooking dinner.", exp: "Hành động đang xảy ra tại thời điểm nói.", trans: "Mẹ tôi đang nấu bữa tối." },
+    { type: 'order', tag: 'present_cont', q: "they / are / where / going / ?", a: "Where are they going?", exp: "Câu hỏi về hướng di chuyển hiện tại.", trans: "Họ đang đi đâu vậy?" },
+    { type: 'order', tag: 'present_cont', q: "getting / is / dark / it", a: "It is getting dark.", exp: "Diễn tả sự thay đổi dần dần (Process of change).", trans: "Trời đang tối dần." },
+    { type: 'order', tag: 'present_cont', q: "not / working / computer / my / is", a: "My computer is not working.", exp: "Diễn tả tình trạng hỏng hóc/không hoạt động tạm thời.", trans: "Máy tính của tôi đang không chạy." },
+    { type: 'order', tag: 'present_cont', q: "waiting / who / for / you / are / ?", a: "Who are you waiting for?", exp: "Giới từ 'for' đặt cuối câu trong câu hỏi Wh-.", trans: "Bạn đang đợi ai thế?" },
+    
+    // PRESENT PERFECT - 10 MC, 10 Order (ĐÃ KIỂM TRA - OK)
+    { type: 'mc', tag: 'present_perf', q: "I can't find my wallet. I ____ lost it.", opts: ["have", "has", "had", "did"], a: "A", exp: "Hành động xảy ra trong quá khứ nhưng để lại hậu quả ở hiện tại (chưa tìm thấy).", trans: "Tôi không tìm thấy ví. Tôi đã làm mất nó rồi." },
+    { type: 'mc', tag: 'present_perf', q: "She ____ visited London twice.", opts: ["have", "has", "is", "did"], a: "B", exp: "Nói về trải nghiệm trong đời (Life experience) -> Has + V3.", trans: "Cô ấy đã đến thăm London 2 lần." },
+    { type: 'mc', tag: 'present_perf', q: "We haven't ____ the movie yet.", opts: ["see", "saw", "seen", "seeing"], a: "C", exp: "Sau Have/Has phải là động từ ở cột 3 (V3/Past Participle).", trans: "Chúng tôi vẫn chưa xem bộ phim đó." },
+    { type: 'mc', tag: 'present_perf', q: "____ you ever been to Japan?", opts: ["Have", "Has", "Did", "Do"], a: "A", exp: "Câu hỏi về trải nghiệm: Have + S + ever + V3?", trans: "Bạn đã từng đến Nhật Bản bao giờ chưa?" },
+    { type: 'mc', tag: 'present_perf', q: "They ____ just arrived at the airport.", opts: ["have", "has", "had", "are"], a: "A", exp: "'Just' (vừa mới) chỉ hành động vừa xảy ra -> Have/Has + just + V3.", trans: "Họ vừa mới đến sân bay." },
+    { type: 'mc', tag: 'present_perf', q: "He ____ lived here since 2010.", opts: ["have", "has", "had", "is"], a: "B", exp: "'Since' + mốc thời gian (2010). Chủ ngữ 'He' dùng 'Has'.", trans: "Anh ấy đã sống ở đây từ năm 2010." },
+    { type: 'mc', tag: 'present_perf', q: "I ____ finished my homework, can I go out?", opts: ["have", "has", "am", "did"], a: "A", exp: "Hành động đã hoàn thành và quan trọng là kết quả hiện tại (xong rồi).", trans: "Con đã làm xong bài tập, con đi chơi được không?" },
+    { type: 'mc', tag: 'present_perf', q: "____ she eaten lunch yet?", opts: ["Has", "Have", "Did", "Does"], a: "A", exp: "Câu hỏi với 'Yet' ở cuối câu -> Thì hiện tại hoàn thành.", trans: "Cô ấy đã ăn trưa chưa?" },
+    { type: 'mc', tag: 'present_perf', q: "We ____ never seen that movie.", opts: ["have", "has", "had", "did"], a: "A", exp: "Dấu hiệu 'Never'. Vị trí: Have + never + V3.", trans: "Chúng tôi chưa bao giờ xem bộ phim đó." },
+    { type: 'mc', tag: 'present_perf', q: "How long ____ you known her?", opts: ["have", "has", "did", "do"], a: "A", exp: "Câu hỏi 'How long' (Bao lâu) thường đi với thì HTHT với động từ tri giác (know).", trans: "Bạn biết cô ấy được bao lâu rồi?" },
+    { type: 'order', tag: 'present_perf', q: "lived / have / I / here / years / for / two", a: "I have lived here for two years.", exp: "For + period of time.", trans: "Tôi đã sống ở đây 2 năm." },
+    { type: 'order', tag: 'present_perf', q: "just / has / he / finished / work", a: "He has just finished work.", exp: "'Just' comes between has and V3.", trans: "Anh ấy vừa mới xong việc." },
+    { type: 'order', tag: 'present_perf', q: "you / ever / eaten / sushi / have / ?", a: "Have you ever eaten sushi?", exp: "Experience question: Have + S + ever + V3?", trans: "Bạn đã bao giờ ăn sushi chưa?" },
+    { type: 'order', tag: 'present_perf', q: "has / she / not / yet / arrived", a: "She has not arrived yet.", exp: "'Yet' in negative present perfect.", trans: "Cô ấy vẫn chưa đến." },
+    { type: 'order', tag: 'present_perf', q: "since / known / I / have / him / 2015", a: "I have known him since 2015.", exp: "'Since' with specific point in time.", trans: "Tôi biết anh ấy từ năm 2015." },
+    { type: 'order', tag: 'present_perf', q: "been / have / where / you / ?", a: "Where have you been?", exp: "Question about recent whereabouts.", trans: "Bạn đã ở đâu?" },
+    { type: 'order', tag: 'present_perf', q: "already / seen / have / movie / I / that", a: "I have already seen that movie.", exp: "'Already' comes between have and V3.", trans: "Tôi đã xem bộ phim đó rồi." },
+    { type: 'order', tag: 'present_perf', q: "how / books / many / read / you / have / ?", a: "How many books have you read?", exp: "Question about quantity with present perfect.", trans: "Bạn đã đọc bao nhiêu quyển sách?" },
+    { type: 'order', tag: 'present_perf', q: "never / traveled / have / I / plane / by", a: "I have never traveled by plane.", exp: "'Never' with present perfect.", trans: "Tôi chưa bao giờ đi du lịch bằng máy bay." },
+    { type: 'order', tag: 'present_perf', q: "already / saved / have / money / we / enough", a: "We have already saved enough money.", exp: "'already' dùng cho hành động đã làm rồi, thường đứng sau 'have'.", trans: "Chúng tôi đã tiết kiệm đủ tiền rồi." },
+    
+    // PAST PERFECT - 10 MC, 10 Order (ĐÃ SỬA LỖI)
+    { type: 'mc', tag: 'past_perf', q: "When I arrived at the station, the train ____ already left.", opts: ["has", "have", "had", "was"], a: "C", exp: "Hành động tàu đi xảy ra TRƯỚC hành động 'đến' (quá khứ của quá khứ) -> Had + V3.", trans: "Khi tôi đến ga, tàu đã đi mất rồi." },
+    { type: 'mc', tag: 'past_perf', q: "She was hungry because she ____ eaten anything all day.", opts: ["hasn't", "hadn't", "didn't", "wouldn't"], a: "B", exp: "Nguyên nhân (chưa ăn) xảy ra trước kết quả trong quá khứ (thấy đói).", trans: "Cô ấy đói vì trước đó cô ấy chưa ăn gì cả." },
+    { type: 'mc', tag: 'past_perf', q: "They ____ finished the project before the deadline yesterday.", opts: ["have", "has", "had", "were"], a: "C", exp: "Hoàn thành trước một mốc thời gian cụ thể trong quá khứ.", trans: "Họ đã hoàn thành dự án trước hạn chót ngày hôm qua." },
+    { type: 'mc', tag: 'past_perf', q: "I ____ never seen such a beautiful sunset before that trip.", opts: ["have", "has", "had", "did"], a: "C", exp: "Trải nghiệm tính đến một thời điểm trong quá khứ -> Dùng Had + never + V3.", trans: "Trước chuyến đi đó, tôi chưa từng thấy hoàng hôn nào đẹp như vậy." },
+    { type: 'mc', tag: 'past_perf', q: "____ you visited Paris before you moved to France?", opts: ["Have", "Had", "Did", "Were"], a: "B", exp: "Hỏi về một hành động xảy ra trước một hành động quá khứ khác (moved).", trans: "Bạn đã từng thăm Paris trước khi bạn chuyển sang Pháp sống chưa?" },
+    { type: 'mc', tag: 'past_perf', q: "He suddenly realized he ____ his wallet at home.", opts: ["forget", "forgot", "had forgotten", "has forgotten"], a: "C", exp: "Việc 'quên' xảy ra trước việc 'nhận ra'.", trans: "Anh ấy đột nhiên nhận ra mình đã quên ví ở nhà." },
+    { type: 'mc', tag: 'past_perf', q: "After they ____ dinner, they went out for a walk.", opts: ["had", "have", "had had", "have had"], a: "C", exp: "Cấu trúc: After + S + Had + V3. Ở đây V3 của 'have' (ăn) chính là 'had'.", trans: "Sau khi họ ăn tối xong, họ đã đi dạo." },
+    { type: 'mc', tag: 'past_perf', q: "She ____ already left the office when I called her.", opts: ["has", "have", "had", "was"], a: "C", exp: "Hành động 'rời đi' hoàn thành trước hành động 'gọi'.", trans: "Cô ấy đã rời văn phòng rồi khi tôi gọi cho cô ấy." },
+    { type: 'mc', tag: 'past_perf', q: "We ____ never met before that fateful day.", opts: ["have", "has", "had", "did"], a: "C", exp: "Dùng Had + never + V3 để nói về việc chưa từng làm trước một mốc quá khứ.", trans: "Chúng tôi chưa từng gặp nhau trước ngày định mệnh đó." },
+    { type: 'mc', tag: 'past_perf', q: "By the time we arrived at the cinema, the show ____.", opts: ["start", "started", "had started", "has started"], a: "C", exp: "Cấu trúc 'By the time + QKĐ, S + QKHT'.", trans: "Vào lúc chúng tôi đến rạp, buổi diễn đã bắt đầu rồi." },
+    { type: 'order', tag: 'past_perf', q: "had / finished / We / dinner / he / before / arrived", a: "We had finished dinner before he arrived.", exp: "Hành động ăn xong xảy ra trước khi anh ấy đến.", trans: "Chúng tôi đã ăn xong trước khi anh ấy đến." },
+    { type: 'order', tag: 'past_perf', q: "never / she / been / had / abroad / before", a: "She had never been abroad before.", exp: "Vị trí trạng từ: Had + never + V3.", trans: "Trước đó cô ấy chưa bao giờ ra nước ngoài." },
+    { type: 'order', tag: 'past_perf', q: "had / left / They / already / when / came / I", a: "They had already left when I came.", exp: "Already đứng giữa Had và V3.", trans: "Họ đã rời đi khi tôi đến." },
+    { type: 'order', tag: 'past_perf', q: "left / I / had / keys / my / home / at", a: "I had left my keys at home.", exp: "Cấu trúc khẳng định thì Quá khứ hoàn thành.", trans: "Tôi đã để quên chìa khóa ở nhà." },
+    { type: 'order', tag: 'past_perf', q: "had / she / studied / before / the / test", a: "She had studied before the test.", exp: "Hoàn thành việc học trước khi kỳ thi diễn ra.", trans: "Cô ấy đã ôn tập trước khi bài kiểm tra bắt đầu." },
+    { type: 'order', tag: 'past_perf', q: "had / he / never / flown / before / that", a: "He had never flown before that.", exp: "Kể về một trải nghiệm đầu tiên trong quá khứ.", trans: "Trước đó anh ấy chưa bao giờ đi máy bay." },
+    { type: 'order', tag: 'past_perf', q: "lost / had / weight / he / before / wedding / the", a: "He had lost weight before the wedding.", exp: "Hành động hoàn thành trước một sự kiện quá khứ.", trans: "Anh ấy đã giảm cân trước khi đám cưới diễn ra." },
+    { type: 'order', tag: 'past_perf', q: "finished / work / had / I / by / 6", a: "I had finished work by 6.", exp: "By + mốc thời gian quá khứ -> dùng QKHT.", trans: "Tôi đã xong việc vào lúc 6 giờ." },
+    { type: 'order', tag: 'past_perf', q: "met / had / they / before / never / that", a: "They had never met before that.", exp: "Phủ định trải nghiệm trong quá khứ.", trans: "Trước đó họ chưa từng gặp nhau." },
+    { type: 'order', tag: 'past_perf', q: "had / seen / movie / I / that / already", a: "I had already seen that movie.", exp: "S + had + already + V3.", trans: "Tôi đã xem bộ phim đó trước lúc ấy rồi." },
+    
+    // CONDITIONAL 3 - 10 MC, 10 Order (ĐÃ SỬA LỖI)
+    { type: 'mc', tag: 'cond_3', q: "If I had known about the problem, I ____ told you.", opts: ["would", "will", "would have", "had"], a: "C", exp: "Câu điều kiện loại 3 (trái với quá khứ): If + S + had + V3, S + would have + V3.", trans: "Nếu lúc đó tôi biết thì tôi đã nói với bạn rồi." },
+    { type: 'mc', tag: 'cond_3', q: "If it hadn't rained yesterday, we ____ to the beach.", opts: ["went", "would go", "would have gone", "will go"], a: "C", exp: "Vế kết quả loại 3: diễn tả một việc đã không xảy ra trong quá khứ.", trans: "Nếu hôm qua trời không mưa, chúng tôi đã đi biển rồi." },
+    { type: 'mc', tag: 'cond_3', q: "She would have passed the exam if she ____ harder.", opts: ["studied", "had studied", "would study", "studies"], a: "B", exp: "Vế 'If' của câu điều kiện loại 3 luôn chia ở thì Quá khứ hoàn thành (had + V3).", trans: "Cô ấy đã đậu kỳ thi nếu cô ấy học chăm hơn." },
+    { type: 'mc', tag: 'cond_3', q: "If they ____ earlier, they wouldn't have missed the train.", opts: ["left", "had left", "would leave", "leave"], a: "B", exp: "Giả định một việc trái với thực tế đã lỡ tàu: dùng 'had left'.", trans: "Nếu họ rời đi sớm hơn, họ đã không lỡ chuyến tàu." },
+    { type: 'mc', tag: 'cond_3', q: "I ____ you if I had seen you at the mall.", opts: ["would help", "would have helped", "helped", "had helped"], a: "B", exp: "Cấu trúc: would have + V3 diễn tả một hành động có thể đã xảy ra.", trans: "Tôi đã giúp bạn nếu tôi nhìn thấy bạn ở trung tâm thương mại." },
+    { type: 'mc', tag: 'cond_3', q: "If he ____ the instructions, he wouldn't have made mistakes.", opts: ["followed", "had followed", "follows", "would follow"], a: "B", exp: "Diễn tả sự hối tiếc về một việc không làm trong quá khứ.", trans: "Nếu anh ấy làm theo hướng dẫn, anh ấy đã không mắc lỗi." },
+    { type: 'mc', tag: 'cond_3', q: "We ____ lost if we had taken a map with us.", opts: ["wouldn't have", "wouldn't", "hadn't", "didn't"], a: "A", exp: "Lưu ý: 'wouldn't have' + P.P (ở đây P.P 'gotten' được lược bớt hoặc hiểu ngầm).", trans: "Chúng tôi đã không bị lạc nếu chúng tôi mang theo bản đồ." },
+    { type: 'mc', tag: 'cond_3', q: "If she ____ about the meeting, she would have attended.", opts: ["knew", "had known", "knows", "would know"], a: "B", exp: "Sự thật là cô ấy không biết, nên giả định dùng Quá khứ hoàn thành.", trans: "Nếu cô ấy biết về cuộc họp, cô ấy đã tham dự rồi." },
+    { type: 'mc', tag: 'cond_3', q: "They ____ the game if they had practiced more.", opts: ["would win", "would have won", "won", "had won"], a: "B", exp: "Vế kết quả loại 3: would have + won (V3 của win).", trans: "Họ đã thắng trận đấu nếu họ luyện tập nhiều hơn." },
+    { type: 'mc', tag: 'cond_3', q: "If I ____ you were coming, I would have prepared dinner.", opts: ["know", "knew", "had known", "would know"], a: "C", exp: "Dùng để diễn tả một tình huống giả định: If + S + had + V3.", trans: "Nếu tôi biết bạn sẽ đến, tôi đã chuẩn bị bữa tối rồi." },
+    { type: 'order', tag: 'cond_3', q: "passed / you / had / if / studied harder / You / would / have", a: "You would have passed if you had studied harder.", exp: "Vế kết quả đứng trước, không cần dấu phẩy.", trans: "Bạn đã đậu nếu bạn chịu học chăm chỉ hơn." },
+    { type: 'order', tag: 'cond_3', q: "known / I / had / If / I / would / have / called", a: "If I had known I would have called.", exp: "Vế 'If' đứng đầu cần có dấu phẩy ngăn cách.", trans: "Nếu tôi biết, tôi đã gọi điện rồi." },
+    { type: 'order', tag: 'cond_3', q: "rained / hadn't / If / it / gone / we / would / have / out", a: "If it hadn't rained we would have gone out.", exp: "Giả định phủ định trong quá khứ.", trans: "Nếu trời không mưa, chúng tôi đã ra ngoài rồi." },
+    { type: 'order', tag: 'cond_3', q: "would / have / if / he / tried harder / made it / He / had", a: "He would have made it if he had tried harder.", exp: "S + would have + V3 + if + S + had + V3.", trans: "Anh ấy đã làm được nếu anh ấy cố gắng nhiều hơn." },
+    { type: 'order', tag: 'cond_3', q: "time / I'd / had / If / helped / would / have / I / you", a: "If I'd had time I would have helped you.", exp: "Lưu ý 'had had': trợ động từ 'had' và động từ chính 'had' (V3).", trans: "Nếu tôi có thời gian, tôi đã giúp bạn rồi." },
+    { type: 'order', tag: 'cond_3', q: "would / have / told / you / if / had / I / known / I", a: "I would have told you if I had known.", exp: "Cấu trúc thông dụng diễn tả việc lỡ mất cơ hội.", trans: "Tôi đã nói với bạn nếu tôi biết chuyện đó." },
+    { type: 'order', tag: 'cond_3', q: "taken / If / umbrella / wouldn't / have / gotten / you / wet / you / had / an", a: "If you had taken an umbrella you wouldn't have gotten wet.", exp: "Câu điều kiện loại 3 dạng phủ định.", trans: "Nếu bạn mang ô thì bạn đã không bị ướt." },
+    { type: 'order', tag: 'cond_3', q: "had / earlier / left / missed / wouldn't / have / They / flight / the / they / if", a: "They wouldn't have missed the flight if they had left earlier.", exp: "Kết quả đứng trước: wouldn't have + V3.", trans: "Họ đã không lỡ chuyến bay nếu họ rời đi sớm hơn." },
+    { type: 'order', tag: 'cond_3', q: "would / have / they / won / if / practiced / more / They / had", a: "They would have won if they had practiced more.", exp: "Diễn tả một kết quả trái với thực tế đã thua.", trans: "Họ đã thắng nếu họ luyện tập nhiều hơn." },
+    { type: 'order', tag: 'cond_3', q: "hadn't / If / met him / I / moved / wouldn't / have / here / I", a: "If I hadn't met him I wouldn't have moved here.", exp: "Câu điều kiện loại 3 dạng phủ định.", trans: "Nếu tôi không gặp anh ấy, tôi đã không chuyển đến đây." },
+    
+    // WISH - 10 MC, 10 Order (ĐÃ SỬA LỖI)
+    { type: 'mc', tag: 'wish', q: "I don't have enough money. I wish I ____ rich.", opts: ["am", "will be", "were", "been"], a: "C", exp: "Ước trái với hiện tại: to be -> 'were' cho tất cả các ngôi, was có thể được dùng trong văn nói.", trans: "Tôi ước gì mình giàu có (thực tế là đang nghèo)." },
+    { type: 'mc', tag: 'wish', q: "I missed the bus this morning. I wish I ____ up earlier.", opts: ["get", "got", "had got", "have got"], a: "C", exp: "Ước trái với quá khứ (hối tiếc): dùng Quá khứ hoàn thành (Had + V3).", trans: "Tôi ước gì mình đã dậy sớm hơn." },
+    { type: 'mc', tag: 'wish', q: "I wish I ____ speak French fluently.", opts: ["can", "could", "will", "would"], a: "B", exp: "Ước về khả năng/năng lực: lùi 'can' thành 'could'.", trans: "Tôi ước tôi có thể nói tiếng Pháp trôi chảy." },
+    { type: 'mc', tag: 'wish', q: "She wishes she ____ taller to become a model.", opts: ["is", "was", "were", "be"], a: "C", exp: "Ước trái hiện tại với động từ to be -> dùng 'were', was có thể được dùng trong văn nói.", trans: "Cô ấy ước mình cao hơn để làm người mẫu." },
+    { type: 'mc', tag: 'wish', q: "It's so noisy outside. I wish it ____ stop raining.", opts: ["will", "would", "can", "could"], a: "B", exp: "Ước một sự vật/sự việc thay đổi (thường mang tính phàn nàn) -> dùng 'would'.", trans: "Ngoài trời ồn quá. Tôi ước gì trời ngừng mưa (cho đỡ ồn)." },
+    { type: 'mc', tag: 'wish', q: "They wish they ____ bought that house last year.", opts: ["have", "had", "would have", "will have"], a: "B", exp: "Hối tiếc về một việc đã không làm trong quá khứ -> Had + V3.", trans: "Họ ước là họ đã mua ngôi nhà đó vào năm ngoái." },
+    { type: 'mc', tag: 'wish', q: "You are being too loud! I wish you ____ be quiet.", opts: ["will", "would", "can", "could"], a: "B", exp: "Yêu cầu ai đó thay đổi hành vi gây khó chịu -> dùng 'would'.", trans: "Tôi ước gì bạn có thể im lặng một chút." },
+    { type: 'mc', tag: 'wish', q: "He wishes he ____ a supercar like his friend.", opts: ["have", "had", "has", "having"], a: "B", exp: "Ước về sở hữu ở hiện tại: lùi động từ về Quá khứ đơn (had).", trans: "Anh ấy ước mình có một chiếc siêu xe như bạn anh ấy." },
+    { type: 'mc', tag: 'wish', q: "I wish I ____ known the answer during the test.", opts: ["know", "knew", "had known", "would know"], a: "C", exp: "Hành động biết đã xảy ra trong quá khứ (lúc làm bài) -> dùng QKHT.", trans: "Tôi ước gì lúc đó tôi đã biết câu trả lời." },
+    { type: 'mc', tag: 'wish', q: "We wish we ____ on vacation right bây giờ.", opts: ["are", "were", "will be", "would be"], a: "B", exp: "Ước về một tình huống hiện tại đang không có thật.", trans: "Chúng tôi ước gì mình đang đi nghỉ mát." },
+    { type: 'order', tag: 'wish', q: "could / fly / I / wish / I", a: "I wish I could fly.", exp: "Wish for ability: Wish + S + could + V.", trans: "Tôi ước tôi có thể bay." },
+    { type: 'order', tag: 'wish', q: "wish / I / it / would / stop / raining", a: "I wish it would stop raining.", exp: "Wish for change with 'would'.", trans: "Tôi ước trời ngừng mưa." },
+    { type: 'order', tag: 'wish', q: "wish / I / I / knew / answer / the", a: "I wish I knew the answer.", exp: "Wish about present knowledge.", trans: "Tôi ước tôi biết câu trả lời." },
+    { type: 'order', tag: 'wish', q: "wish / you / would / listen / I", a: "I wish you would listen.", exp: "Wish for someone to change behavior.", trans: "Tôi ước bạn sẽ lắng nghe." },
+    { type: 'order', tag: 'wish', q: "wish / they / had / come / they", a: "They wish they had come.", exp: "Regret about past action.", trans: "Họ ước họ đã đến." },
+    { type: 'order', tag: 'wish', q: "wish / I / were / I / taller", a: "I wish I were taller.", exp: "Wish about physical characteristic.", trans: "Tôi ước tôi cao hơn." },
+    { type: 'order', tag: 'wish', q: "wishes / she / could / she / sing / better", a: "She wishes she could sing better.", exp: "Wish for ability.", trans: "Cô ấy ước cô ấy có thể hát hay hơn." },
+    { type: 'order', tag: 'wish', q: "wish / had / I / more / time / I", a: "I wish I had more time.", exp: "Wish about present possession.", trans: "Tôi ước tôi có nhiều thời gian hơn." },
+    { type: 'order', tag: 'wish', q: "wish / we / on / We / were / beach / the", a: "We wish we were on the beach.", exp: "Wish about current location.", trans: "Chúng tôi ước chúng tôi đang ở bãi biển." },
+    { type: 'order', tag: 'wish', q: "wish / had / studied / I / harder / I", a: "I wish I had studied harder.", exp: "Regret about past study.", trans: "Tôi ước tôi đã học chăm chỉ hơn." },
+    
+    // PASSIVE VOICE - 10 MC, 10 Order (ĐÃ SỬA LỖI)
+    { type: 'mc', tag: 'passive', q: "The cake ____ by my mom.", opts: ["bakes", "was baked", "baked", "is baking"], a: "B", exp: "Câu bị động: Be + V3. Có 'by' (bởi ai đó) là dấu hiệu bị động.", trans: "Cái bánh được nướng bởi mẹ tôi." },
+    { type: 'mc', tag: 'passive', q: "English ____ all over the world.", opts: ["speaks", "is spoken", "spoken", "speaking"], a: "B", exp: "Sự thật hiển nhiên dùng bị động Hiện tại đơn: Is/Are + V3.", trans: "Tiếng Anh được nói trên khắp thế giới." },
+    { type: 'mc', tag: 'passive', q: "The letter ____ yesterday.", opts: ["was written", "is written", "wrote", "writing"], a: "A", exp: "Dấu hiệu 'yesterday' -> Bị động Quá khứ đơn: Was/Were + V3.", trans: "Lá thư đã được viết vào ngày hôm qua." },
+    { type: 'mc', tag: 'passive', q: "The house ____ next year.", opts: ["will build", "will be built", "builds", "built"], a: "B", exp: "Bị động Tương lai đơn: Will + be + V3.", trans: "Ngôi nhà sẽ được xây dựng vào năm sau." },
+    { type: 'mc', tag: 'passive', q: "Coffee ____ in Brazil.", opts: ["grows", "is grown", "grown", "growing"], a: "B", exp: "Diễn tả sự thật khách quan ở hiện tại: Is/Are + V3.", trans: "Cà phê được trồng ở Brazil." },
+    { type: 'mc', tag: 'passive', q: "The car ____ at the moment.", opts: ["is repaired", "is being repaired", "repairs", "repaired"], a: "B", exp: "Dấu hiệu 'at the moment' -> Bị động Hiện tại tiếp diễn: Is/Are + being + V3.", trans: "Chiếc xe đang được sửa ngay lúc này." },
+    { type: 'mc', tag: 'passive', q: "The problem ____ by the engineer.", opts: ["solved", "was solved", "solves", "solving"], a: "B", exp: "Chủ ngữ số ít 'The problem' + was + V3.", trans: "Vấn đề đã được giải quyết bởi kỹ sư." },
+    { type: 'mc', tag: 'passive', q: "Lunch ____ right now.", opts: ["is served", "is being served", "serves", "served"], a: "B", exp: "Bị động Hiện tại tiếp diễn: Nhấn mạnh hành động đang diễn ra.", trans: "Bữa trưa đang được phục vụ ngay bây giờ." },
+    { type: 'mc', tag: 'passive', q: "The book ____ by millions of people.", opts: ["reads", "is read", "read", "reading"], a: "B", exp: "Sử dụng bị động hiện tại để nói về một thói quen/sự thật.", trans: "Cuốn sách được đọc bởi hàng triệu người." },
+    { type: 'mc', tag: 'passive', q: "The bridge ____ last month.", opts: ["was completed", "completed", "is completed", "completes"], a: "A", exp: "Bị động Quá khứ đơn với mốc thời gian xác định (last month).", trans: "Cây cầu đã được hoàn thành vào tháng trước." },
+    { type: 'order', tag: 'passive', q: "built / was / house / this / in / 1990", a: "This house was built in 1990.", exp: "Cấu trúc: Chủ ngữ + was/were + V3/ed.", trans: "Ngôi nhà này được xây vào năm 1990." },
+    { type: 'order', tag: 'passive', q: "be / will / work / the / done / tomorrow", a: "The work will be done tomorrow.", exp: "Cấu trúc bị động tương lai: Will + be + V3.", trans: "Công việc sẽ được hoàn thành vào ngày mai." },
+    { type: 'order', tag: 'passive', q: "being / repaired / car / the / is", a: "The car is being repaired.", exp: "Nhớ phải có 'being' trong câu bị động tiếp diễn.", trans: "Chiếc xe đang được sửa chữa." },
+    { type: 'order', tag: 'passive', q: "by / written / was / Shakespeare / play / the", a: "The play was written by Shakespeare.", exp: "By + tác giả (Shakespeare) đứng cuối câu.", trans: "Vở kịch được viết bởi Shakespeare." },
+    { type: 'order', tag: 'passive', q: "is / coffee / grown / where / ?", a: "Where is coffee grown?", exp: "Câu hỏi bị động: Wh- + is/are + S + V3?", trans: "Cà phê được trồng ở đâu?" },
+    { type: 'order', tag: 'passive', q: "being / washed / over there / car / your / is", a: "Your car is being washed over there.", exp: "Bị động hiện tại tiếp diễn.", trans: "Xe của bạn đang được rửa ở đằng kia." },
+    { type: 'order', tag: 'passive', q: "will / be / delivered / package / the / Monday / on", a: "The package will be delivered on Monday.", exp: "S + will be + V3 + thời gian.", trans: "Gói hàng sẽ được giao vào thứ Hai." },
+    { type: 'order', tag: 'passive', q: "from / made / cheese / milk / is", a: "Cheese is made from milk.", exp: "Dùng bị động để nói về nguồn gốc nguyên liệu.", trans: "Phô mai được làm từ sữa." },
+    { type: 'order', tag: 'passive', q: "was / invented / telephone / the / when / ?", a: "When was the telephone invented?", exp: "Câu hỏi bị động trong quá khứ.", trans: "Điện thoại được phát minh khi nào?" },
+    { type: 'order', tag: 'passive', q: "being / cooked / dinner / is / now", a: "Dinner is being cooked now.", exp: "Hiện tại tiếp diễn dạng bị động.", trans: "Bữa tối đang được nấu bây giờ." },
+    
+    // COMPARATIVE ADJECTIVES - 10 MC, 10 Order (ĐÃ KIỂM TRA - OK)
+    { type: 'mc', tag: 'comp_adj', q: "My car is ____ than yours.", opts: ["fast", "faster", "more fast", "fastest"], a: "B", exp: "Tính từ ngắn (1 âm tiết): Adj + er + than.", trans: "Xe của tôi chạy nhanh hơn xe của bạn." },
+    { type: 'mc', tag: 'comp_adj', q: "This problem is ____ than that one.", opts: ["easy", "easier", "more easy", "easiest"], a: "B", exp: "Tính từ kết thúc bằng 'y': Đổi 'y' thành 'i' rồi thêm 'er'.", trans: "Vấn đề này dễ hơn vấn đề kia." },
+    { type: 'mc', tag: 'comp_adj', q: "She is ____ than her sister.", opts: ["more beautiful", "beautifuller", "beautifuler", "beautiful"], a: "A", exp: "Tính từ dài (3 âm tiết): more + Adj + than.", trans: "Cô ấy xinh đẹp hơn chị gái mình." },
+    { type: 'mc', tag: 'comp_adj', q: "Today is ____ than yesterday.", opts: ["cold", "colder", "coldest", "more cold"], a: "B", exp: "Cold là tính từ ngắn -> colder.", trans: "Hôm nay lạnh hơn hôm qua." },
+    { type: 'mc', tag: 'comp_adj', q: "This box is ____ than that one.", opts: ["heavier", "heavy", "heaviest", "more heavy"], a: "A", exp: "Heavy (kết thúc bằng y) -> heavier.", trans: "Cái hộp này nặng hơn cái kia." },
+    { type: 'mc', tag: 'comp_adj', q: "He is ____ than me at math.", opts: ["good", "better", "best", "more good"], a: "B", exp: "Trường hợp bất quy tắc: Good chuyển thành Better.", trans: "Anh ấy giỏi toán hơn tôi." },
+    { type: 'mc', tag: 'comp_adj', q: "The movie was ____ than the book.", opts: ["interesting", "more interesting", "interestinger", "most interesting"], a: "B", exp: "Interesting là tính từ dài -> dùng 'more'.", trans: "Bộ phim thú vị hơn cuốn sách." },
+    { type: 'mc', tag: 'comp_adj', q: "This test is ____ than the last one.", opts: ["difficult", "difficulter", "more difficult", "most difficult"], a: "C", exp: "Difficult là tính từ dài -> more difficult.", trans: "Bài kiểm tra này khó hơn bài trước." },
+    { type: 'mc', tag: 'comp_adj', q: "She is ____ than her brother.", opts: ["tall", "taller", "tallest", "more tall"], a: "B", exp: "Tall là tính từ ngắn -> taller.", trans: "Cô ấy cao hơn anh trai mình." },
+    { type: 'mc', tag: 'comp_adj', q: "My room is ____ than yours.", opts: ["big", "bigger", "biggest", "more big"], a: "B", exp: "Quy tắc 1 nguyên âm kẹp giữa 2 phụ âm: Gấp đôi phụ âm cuối (bigger).", trans: "Phòng của tôi lớn hơn phòng của bạn." },
+    { type: 'order', tag: 'comp_adj', q: "taller / is / Tom / me / than", a: "Tom is taller than me.", exp: "S + be + adj-er + than + O.", trans: "Tom cao hơn tôi." },
+    { type: 'order', tag: 'comp_adj', q: "more / is / beautiful / She / sister / her / than", a: "She is more beautiful than her sister.", exp: "Long adjective: more + adj.", trans: "Cô ấy xinh hơn chị cô ấy." },
+    { type: 'order', tag: 'comp_adj', q: "than / healthier / My mom / is / my dad", a: "My mom is healthier than my dad.", exp: "Đổi y thành i rồi thêm er.", trans: "Mẹ tôi khoẻ mạnh hơn ba tôi." },
+    { type: 'order', tag: 'comp_adj', q: "expensive / car / is / my / yours / than / more", a: "My car is more expensive than yours.", exp: "Comparative with expensive.", trans: "Xe tôi đắt hơn xe bạn." },
+    { type: 'order', tag: 'comp_adj', q: "than / better / am / I / you / at / singing", a: "I am better than you at singing.", exp: "Irregular comparative: good -> better.", trans: "Tôi hát hay hơn bạn." },
+    { type: 'order', tag: 'comp_adj', q: "is / weather / today / The / than / worse / yesterday", a: "The weather today is worse than yesterday.", exp: "Bad -> worse (irregular).", trans: "Thời tiết hôm nay tệ hơn hôm qua." },
+    { type: 'order', tag: 'comp_adj', q: "than / faster / bus / train / the / is / the", a: "The train is faster than the bus.", exp: "Short adjective comparative.", trans: "Tàu nhanh hơn xe buýt." },
+    { type: 'order', tag: 'comp_adj', q: "more / careful / be / you / should", a: "You should be more careful.", exp: "Comparative with modal verb.", trans: "Bạn nên cẩn thận hơn." },
+    { type: 'order', tag: 'comp_adj', q: "want / easier / job / I / an", a: "I want an easier job.", exp: "Easy -> easier (y to i).", trans: "Tôi muốn một công việc dễ hơn." },
+    { type: 'order', tag: 'comp_adj', q: "than / happier / She / is / me", a: "She is happier than me.", exp: "Happy -> happier.", trans: "Cô ấy hạnh phúc hơn tôi." },
+    
+    // SUPERLATIVE ADJECTIVES - 10 MC, 10 Order (ĐÃ KIỂM TRA - OK)
+    { type: 'mc', tag: 'sup_adj', q: "He is the ____ boy in my class.", opts: ["smart", "smarter", "smartest", "most smart"], a: "C", exp: "Tính từ ngắn (1 âm tiết): dùng cấu trúc 'the + Adj-est'.", trans: "Anh ấy là cậu bé thông minh nhất lớp tôi." },
+    { type: 'mc', tag: 'sup_adj', q: "This is the ____ movie I have ever seen.", opts: ["good", "best", "better", "goodest"], a: "B", exp: "Trường hợp bất quy tắc: Good -> Better (hơn) -> Best (nhất).", trans: "Đây là bộ phim hay nhất mà tôi từng xem." },
+    { type: 'mc', tag: 'sup_adj', q: "Mount Everest is the ____ mountain in the world.", opts: ["high", "higher", "highest", "most high"], a: "C", exp: "High là tính từ ngắn: thêm đuôi -est và phải có 'the' phía trước.", trans: "Đỉnh Everest là ngọn núi cao nhất thế giới." },
+    { type: 'mc', tag: 'sup_adj', q: "She is the ____ student in school.", opts: ["intelligent", "most intelligent", "intelligenter", "more intelligent"], a: "B", exp: "Tính từ dài (3 âm tiết): dùng cấu trúc 'the most + Adj'.", trans: "Cô ấy là học sinh thông minh nhất trường." },
+    { type: 'mc', tag: 'sup_adj', q: "This is the ____ day of my life.", opts: ["happy", "happier", "happiest", "most happy"], a: "C", exp: "Tính từ 2 âm tiết kết thúc bằng 'y': đổi 'y' thành 'i' rồi thêm 'est'.", trans: "Đây là ngày hạnh phúc nhất đời tôi." },
+    { type: 'mc', tag: 'sup_adj', q: "It's the ____ building in the city.", opts: ["tall", "taller", "tallest", "most tall"], a: "C", exp: "Tall là tính từ ngắn -> the tallest.", trans: "Đó là tòa nhà cao nhất thành phố." },
+    { type: 'mc', tag: 'sup_adj', q: "This is the ____ chocolate I've ever tasted.", opts: ["bad", "worse", "worst", "most bad"], a: "C", exp: "Trường hợp bất quy tắc: Bad -> Worse (tệ hơn) -> Worst (tệ nhất).", trans: "Đây là loại chocolate tệ nhất tôi từng nếm." },
+    { type: 'mc', tag: 'sup_adj', q: "She told the ____ story at the party.", opts: ["funny", "funnier", "funniest", "most funny"], a: "C", exp: "Funny kết thúc bằng 'y' -> the funniest.", trans: "Cô ấy đã kể câu chuyện buồn cười nhất trong bữa tiệc." },
+    { type: 'mc', tag: 'sup_adj', q: "This is the ____ restaurant in town.", opts: ["expensive", "more expensive", "most expensive", "expensivest"], a: "C", exp: "Expensive là tính từ dài -> dùng 'the most expensive'.", trans: "Đây là nhà hàng đắt nhất thị trấn." },
+    { type: 'mc', tag: 'sup_adj', q: "He's the ____ person I know.", opts: ["kind", "kinder", "kindest", "most kind"], a: "C", exp: "Kind là tính từ ngắn -> dùng 'the kindest'.", trans: "Anh ấy là người tử tế nhất tôi biết." },
+    { type: 'order', tag: 'sup_adj', q: "biggest / the / Russia / country / is", a: "Russia is the biggest country.", exp: "Cấu trúc: S + be + the + Adj-est + Noun.", trans: "Nga là quốc gia lớn nhất." },
+    { type: 'order', tag: 'sup_adj', q: "subject / difficult / most / the / is / Math", a: "Math is the most difficult subject.", exp: "Với tính từ dài, 'the most' luôn đứng trước tính từ.", trans: "Toán là môn học khó nhất." },
+    { type: 'order', tag: 'sup_adj', q: "the / is / best / player / he / team / in / the", a: "He is the best player in the team.", exp: "So sánh nhất bất quy tắc của 'good' là 'the best'.", trans: "Anh ấy là cầu thủ giỏi nhất đội." },
+    { type: 'order', tag: 'sup_adj', q: "the / most / she / is / girl / beautiful", a: "She is the most beautiful girl.", exp: "Sắp xếp: Chủ ngữ + be + the most + tính từ dài + danh từ.", trans: "Cô ấy là cô gái xinh đẹp nhất." },
+    { type: 'order', tag: 'sup_adj', q: "tallest / building / world / the / in / is / the / what / ?", a: "What is the tallest building in the world?", exp: "Câu hỏi với từ để hỏi: Wh- + be + the + Adj-est...?", trans: "Tòa nhà cao nhất thế giới là tòa nhà nào?" },
+    { type: 'order', tag: 'sup_adj', q: "the / funniest / movie / is / this / ever", a: "This is the funniest movie ever.", exp: "'Ever' thường đứng cuối câu trong cấu trúc so sánh nhất để nhấn mạnh.", trans: "Đây là bộ phim hài hước nhất từ trước đến nay." },
+    { type: 'order', tag: 'sup_adj', q: "most / important / thing / the / is / health", a: "Health is the most important thing.", exp: "Tính từ dài 'important' đi với 'the most'.", trans: "Sức khỏe là điều quan trọng nhất." },
+    { type: 'order', tag: 'sup_adj', q: "the / smallest / planet / is / Mercury", a: "Mercury is the smallest planet.", exp: "Small là tính từ ngắn -> the smallest.", trans: "Sao Thủy là hành tinh nhỏ nhất." },
+    { type: 'order', tag: 'sup_adj', q: "the / richest / man / world / in / is / who / the / ?", a: "Who is the richest man in the world?", exp: "Câu hỏi tìm kiếm đối tượng đứng nhất (the richest).", trans: "Ai là người giàu nhất thế giới?" },
+    { type: 'order', tag: 'sup_adj', q: "worst / my / is / day / this / ever", a: "This is my worst day ever.", exp: "Lưu ý: Khi có tính từ sở hữu 'my', chúng ta không dùng 'the' trước 'worst'.", trans: "Đây là ngày tệ nhất của tôi từ trước tới giờ." },
+    
+    // POSSESSIVE CASE - 10 MC, 10 Order (ĐÃ KIỂM TRA - OK)
+    { type: 'mc', tag: 'possessive', q: "This is ____ car.", opts: ["Tom", "Tom's", "Toms", "Toms'"], a: "B", exp: "Sở hữu cách với tên riêng số ít: thêm 's vào sau tên.", trans: "Đây là xe của Tom." },
+    { type: 'mc', tag: 'possessive', q: "The ____ room is messy.", opts: ["children", "childs", "children's", "childrens'"], a: "C", exp: "Danh từ số nhiều bất quy tắc (không có 's' ở cuối): vẫn thêm 's như danh từ số ít.", trans: "Phòng của bọn trẻ rất bừa bộn." },
+    { type: 'mc', tag: 'possessive', q: "Is this ____ bag?", opts: ["you", "your", "yours", "your's"], a: "B", exp: "Tính từ sở hữu (Your) luôn đứng trước danh từ.", trans: "Đây có phải là cái túi của bạn không?" },
+    { type: 'mc', tag: 'possessive', q: "That book is ____.", opts: ["my", "mine", "me", "I"], a: "B", exp: "Đại từ sở hữu (Mine) đứng một mình, dùng để thay thế cho 'my book'.", trans: "Quyển sách đó là của tôi." },
+    { type: 'mc', tag: 'possessive', q: "These are ____ shoes.", opts: ["Johns", "John's", "Johns'", "John"], a: "B", exp: "Sở hữu của John (số ít) -> John's.", trans: "Đây là đôi giày của John." },
+    { type: 'mc', tag: 'possessive', q: "The ____ tails are fluffy.", opts: ["cats", "cat's", "cats'", "cats's"], a: "C", exp: "Danh từ số nhiều có 's': chỉ cần thêm dấu nháy đơn (') vào cuối.", trans: "Đuôi của những con mèo rất mượt." },
+    { type: 'mc', tag: 'possessive', q: "That is ____ house.", opts: ["James", "James'", "James's", "B or C"], a: "D", exp: "Tên riêng kết thúc bằng 's': có thể thêm ' hoặc 's đều đúng ngữ pháp.", trans: "Đó là nhà của James." },
+    { type: 'mc', tag: 'possessive', q: "This pen is ____.", opts: ["her", "hers", "she", "her's"], a: "B", exp: "Đại từ sở hữu (Hers) đứng cuối câu, thay thế cho 'her pen'.", trans: "Cây bút này là của cô ấy." },
+    { type: 'mc', tag: 'possessive', q: "____ parents are doctors.", opts: ["He", "His", "Him", "He's"], a: "B", exp: "Sử dụng tính từ sở hữu (His) đứng trước danh từ 'parents'.", trans: "Bố mẹ anh ấy là bác sĩ." },
+    { type: 'mc', tag: 'possessive', q: "The ____ engine is loud.", opts: ["car", "cars", "car's", "cars'"], a: "C", exp: "Sở hữu của vật số ít: Car + 's.", trans: "Động cơ của chiếc xe rất ồn." },
+    { type: 'order', tag: 'possessive', q: "friend / mine / of / a / is / she", a: "She is a friend of mine.", exp: "Cấu trúc sở hữu kép: a friend of + đại từ sở hữu.", trans: "Cô ấy là một người bạn của tôi." },
+    { type: 'order', tag: 'possessive', q: "tail / dog's / the / wagging / is", a: "The dog's tail is wagging.", exp: "Sở hữu cách: Cái đuôi của con chó.", trans: "Đuôi con chó đang vẫy." },
+    { type: 'order', tag: 'possessive', q: "my / is / this / parents' / house", a: "This is my parents' house.", exp: "Parents là số nhiều có 's' nên chỉ thêm dấu nháy đơn.", trans: "Đây là nhà của bố mẹ tôi." },
+    { type: 'order', tag: 'possessive', q: "whose / book / this / is / ?", a: "Whose book is this?", exp: "Whose dùng để hỏi về sự sở hữu.", trans: "Đây là sách của ai?" },
+    { type: 'order', tag: 'possessive', q: "sister's / My / name / is / Anna", a: "My sister's name is Anna.", exp: "Sở hữu cách cho mối quan hệ: Tên của chị tôi.", trans: "Tên chị tôi là Anna." },
+    { type: 'order', tag: 'possessive', q: "children's / toys / my / are / these", a: "These are my children's toys.", exp: "Children (số nhiều) + 's + toys.", trans: "Đây là đồ chơi của bọn trẻ con tôi." },
+    { type: 'order', tag: 'possessive', q: "car / color / what / is / your / ?", a: "What color is your car?", exp: "Tính từ sở hữu 'your' bổ nghĩa cho 'car'.", trans: "Xe bạn màu gì?" },
+    { type: 'order', tag: 'possessive', q: "boss's / office / My / is / big", a: "My boss's office is big.", exp: "Văn phòng của ông chủ (số ít).", trans: "Văn phòng của ông chủ tôi rất lớn." },
+    { type: 'order', tag: 'possessive', q: "hers / not / is / bag / this", a: "This bag is not hers.", exp: "Sử dụng đại từ sở hữu 'hers' đứng một mình.", trans: "Cái túi này không phải của cô ấy." },
+    { type: 'order', tag: 'possessive', q: "teachers' / lounge / the / is / where / ?", a: "Where is the teachers' lounge?", exp: "Phòng của (nhiều) giáo viên: Teachers + dấu nháy đơn.", trans: "Phòng giáo viên ở đâu?" }
+];
+
+    // Để đảm bảo có đủ 10 câu mỗi loại, code này sẽ nhân bản DB nếu DB của bạn còn ít.
+    const fullDb = [...db, ...JSON.parse(JSON.stringify(db)), ...JSON.parse(JSON.stringify(db))]; 
+
+    let currentQuiz = { mc: [], order: [] };
+
+    function startTest() {
+        const checkboxes = document.querySelectorAll('input[name="grammar"]:checked');
+        const errorMsg = document.getElementById('selection-error');
+        
+        if (checkboxes.length < 1 || checkboxes.length > 3) {
+            errorMsg.style.display = 'block';
+            window.scrollTo({top: 0, behavior: 'smooth'});
+            return;
+        }
+        errorMsg.style.display = 'none';
+
+        const selectedTags = Array.from(checkboxes).map(c => c.value);
+        const relevant = fullDb.filter(item => selectedTags.includes(item.tag));
+        
+        const mcPool = shuffle(relevant.filter(i => i.type === 'mc'));
+        const orderPool = shuffle(relevant.filter(i => i.type === 'order'));
+
+        // Chọn tối đa 10 câu mỗi loại
+        currentQuiz.mc = getUnique(mcPool, 10);
+        currentQuiz.order = getUnique(orderPool, 10);
+
+        renderQuiz();
+    }
+
+    function getUnique(pool, count) {
+        const unique = [];
+        const seen = new Set();
+        for(let item of pool) {
+            if(!seen.has(item.q)) {
+                unique.push(item);
+                seen.add(item.q);
+            }
+            if(unique.length === count) break;
+        }
+        return unique;
+    }
+
+    function shuffle(array) {
+        let currentIndex = array.length, randomIndex;
+        const newArr = [...array];
+        while (currentIndex != 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [newArr[currentIndex], newArr[randomIndex]] = [newArr[randomIndex], newArr[currentIndex]];
+        }
+        return newArr;
+    }
+
+    function renderQuiz() {
+        document.getElementById('setup-view').classList.add('hidden');
+        document.getElementById('test-view').classList.remove('hidden');
+
+        const mcContainer = document.getElementById('mc-container');
+        currentQuiz.mc.forEach((q, idx) => {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.innerHTML = `
+                <div class="q-title"><span>#${idx + 1}. ${q.q}</span></div>
+                <div class="mc-options">
+                    ${q.opts.map((opt, oid) => `
+                        <label class="mc-label">
+                            <input type="radio" name="mc_${idx}" value="${opt}">
+                            ${String.fromCharCode(65+oid)}. ${opt}
+                        </label>
+                    `).join('')}
+                </div>
+                <div id="fb-mc-${idx}" class="feedback-box"></div>
+            `;
+            mcContainer.appendChild(card);
+        });
+
+        const orderContainer = document.getElementById('order-container');
+        currentQuiz.order.forEach((q, idx) => {
+            const words = shuffle(q.q.split(' / ')); 
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.innerHTML = `
+                <div class="q-title"><span>#${idx + 1}. Arrange the words correctly:</span></div>
+                <div class="reorder-area" id="ans-area-${idx}">
+                    <span style="color:#cbd5e1; font-size:0.9em;" id="placeholder-${idx}">Click words below...</span>
+                </div>
+                <div class="word-bank" id="pool-${idx}">
+                    ${words.map((w, wid) => `
+                        <button class="word-chip" id="w-${idx}-${wid}" onclick="selectWord('w-${idx}-${wid}', 'ans-area-${idx}', 'placeholder-${idx}')">${w}</button>
+                    `).join('')}
+                </div>
+                <div id="fb-order-${idx}" class="feedback-box"></div>
+            `;
+            orderContainer.appendChild(card);
+        });
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    window.selectWord = function(wordId, targetAreaId, placeholderId) {
+        const btn = document.getElementById(wordId);
+        const target = document.getElementById(targetAreaId);
+        const placeholder = document.getElementById(placeholderId);
+        target.appendChild(btn);
+        btn.classList.add('in-answer');
+        btn.onclick = function() { removeWord(wordId, placeholderId); };
+        if(placeholder) placeholder.style.display = 'none';
+    };
+
+    window.removeWord = function(wordId, placeholderId) {
+        const parts = wordId.split('-');
+        const realPoolId = `pool-${parts[1]}`;
+        const btn = document.getElementById(wordId);
+        const pool = document.getElementById(realPoolId);
+        const ansArea = btn.parentElement;
+        pool.appendChild(btn);
+        btn.classList.remove('in-answer');
+        btn.onclick = function() { selectWord(wordId, ansArea.id, placeholderId); };
+        if(ansArea.querySelectorAll('.word-chip').length === 0) {
+             const ph = document.getElementById(placeholderId);
+             if(ph) ph.style.display = 'inline';
+        }
+    };
+
+    function submitAnswers() {
+        let score = 0;
+        const totalItems = currentQuiz.mc.length + currentQuiz.order.length;
+
+        currentQuiz.mc.forEach((q, idx) => {
+            const selected = document.querySelector(`input[name="mc_${idx}"]:checked`);
+            const fb = document.getElementById(`fb-mc-${idx}`);
+            const correctIndex = q.a.charCodeAt(0) - 65;
+            const correctText = q.opts[correctIndex];
+            fb.style.display = 'block';
+            if (selected && selected.value === correctText) {
+                score++;
+                fb.className = "feedback-box feedback-correct";
+                fb.innerHTML = `🌟 <strong>Great! Correct.</strong> <div class="explanation-text">💡 ${q.exp}<br>📝 ${q.trans}</div>`;
+            } else {
+                fb.className = "feedback-box feedback-wrong";
+                fb.innerHTML = `❌ <strong>Not quite.</strong> Correct is: <b>${q.a}. ${correctText}</b> <div class="explanation-text">💡 ${q.exp}<br>📝 ${q.trans}</div>`;
+            }
+        });
+
+        currentQuiz.order.forEach((q, idx) => {
+            const ansArea = document.getElementById(`ans-area-${idx}`);
+            const userWords = Array.from(ansArea.querySelectorAll('.word-chip')).map(b => b.innerText);
+            const userSent = userWords.join(' ');
+            const fb = document.getElementById(`fb-order-${idx}`);
+            fb.style.display = 'block';
+            const cleanUser = userSent.toLowerCase().replace(/[^\w\s]/g, '').trim();
+            const cleanCorrect = q.a.toLowerCase().replace(/[^\w\s]/g, '').trim();
+            if (cleanUser === cleanCorrect && cleanUser.length > 0) {
+                score++;
+                fb.className = "feedback-box feedback-correct";
+                fb.innerHTML = `🌟 <strong>Perfect!</strong> <div class="explanation-text">💡 ${q.exp}<br>📝 ${q.trans}</div>`;
+            } else {
+                fb.className = "feedback-box feedback-wrong";
+                fb.innerHTML = `❌ <strong>Incorrect.</strong> Correct answer: <em>"${q.a}"</em> <div class="explanation-text">💡 ${q.exp}<br>📝 ${q.trans}</div>`;
+            }
+        });
+
+        const scorePanel = document.getElementById('score-panel');
+        scorePanel.style.display = 'block';
+        document.getElementById('final-score').innerText = `Score: ${score} / ${totalItems}`;
+        const percentage = Math.round((score / totalItems) * 100);
+        document.getElementById('score-percent').innerText = `${percentage}%`;
+        
+        let msg = percentage >= 80 ? "Excellent Master! 🌟" : percentage >= 50 ? "Good Job! Keep Practice! 💪" : "Keep Learning! You can do it! 📚";
+        document.getElementById('encouragement').innerText = msg;
+        
+        window.scrollTo({top: 0, behavior: 'smooth'});
+        document.getElementById('submit-btn').classList.add('hidden');
+        document.getElementById('retry-btn').classList.remove('hidden');
+        document.querySelectorAll('input, .word-chip').forEach(el => el.style.pointerEvents = 'none');
+    }
+</script>
+
+</body>
+</html>
