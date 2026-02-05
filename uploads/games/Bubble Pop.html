@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Be Heard | Bubble Pop</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Default Theme: Spring */
+            --bg-gradient-home: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            --primary-btn: #ff6b6b;
+            --font-main: 'Nunito', sans-serif;
+        }
+
+        /* THEMES */
+        .theme-spring { 
+            --bg-gradient-home: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%); 
+            --primary-btn: #4facfe; 
+            --game-bg: linear-gradient(135deg, rgba(161, 196, 253, 0.1) 0%, rgba(194, 233, 251, 0.1) 100%);
+        }
+        .theme-summer { 
+            --bg-gradient-home: linear-gradient(120deg, #f6d365 0%, #fda085 100%); 
+            --primary-btn: #fa709a; 
+            --game-bg: linear-gradient(135deg, rgba(246, 211, 101, 0.1) 0%, rgba(253, 160, 133, 0.1) 100%);
+        }
+        .theme-autumn { 
+            --bg-gradient-home: linear-gradient(120deg, #d4fc79 0%, #96e6a1 100%); 
+            --primary-btn: #ff9966; 
+            --game-bg: linear-gradient(135deg, rgba(212, 252, 121, 0.1) 0%, rgba(150, 230, 161, 0.1) 100%);
+        }
+        .theme-winter { 
+            --bg-gradient-home: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%); 
+            --primary-btn: #a18cd1; 
+            --game-bg: linear-gradient(135deg, rgba(224, 195, 252, 0.1) 0%, rgba(142, 197, 252, 0.1) 100%);
+        }
+
+        * { box-sizing: border-box; user-select: none; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        body { 
+            width: 100vw; height: 100vh; overflow: hidden; 
+            font-family: var(--font-main); 
+            background: var(--bg-gradient-home);
+            transition: background 0.5s ease;
+        }
+
+        /* SCREEN & HOME */
+        .screen {
+            display: none; position: absolute; width: 100%; height: 100%;
+            flex-direction: column; align-items: center; justify-content: center;
+            padding: 15px; animation: fadeIn 0.5s; z-index: 10;
+        }
+        .screen.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        #screen-home { overflow-y: auto; }
+        .setup-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: clamp(20px, 4vw, 40px); border-radius: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            width: 95%; max-width: 600px; text-align: center;
+        }
+        h1 { font-size: clamp(2rem, 5vw, 3.5rem); color: #333; margin-bottom: 15px; font-weight: 900; }
+        .section-title { font-size: 1.1rem; color: #555; margin: 15px 0 5px; font-weight: 800; text-align: left; }
+        
+        .theme-selector { display: flex; gap: 15px; justify-content: center; margin: 15px 0; }
+        .theme-btn {
+            width: 45px; height: 45px; border-radius: 50%; cursor: pointer;
+            border: 3px solid white; box-shadow: 0 3px 10px rgba(0,0,0,0.2); transition: 0.2s;
+        }
+        .theme-btn:hover, .theme-btn.active { transform: scale(1.15); border-color: #333; }
+
+        textarea { 
+            width: 100%; height: 120px; border: 2px solid #ddd; border-radius: 15px;
+            padding: 15px; font-size: 1rem; font-family: inherit; font-weight: 600;
+            resize: none; outline: none; margin-bottom: 10px;
+        }
+        .btn-upload {
+            background: #f0f0f0; color: #555; border: 2px dashed #bbb;
+            padding: 12px; border-radius: 12px; cursor: pointer; display: block; width: 100%; font-weight: 700;
+        }
+        .btn-start {
+            background: var(--primary-btn); color: white; border: none;
+            padding: 15px 40px; border-radius: 50px; font-size: 1.5rem; font-weight: 900;
+            cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.2); margin-top: 15px; width: 100%;
+        }
+
+        /* GAME SCREEN (Sử dụng theme từ trang đầu) */
+        #screen-game { 
+            background: var(--game-bg);
+            position: relative;
+            overflow: hidden;
+        }
+        .game-header {
+            position: absolute; top: 0; left: 0; width: 100%;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 20px; z-index: 50; background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(5px); border-bottom: 1px solid #eee;
+        }
+        .stat-box { font-size: clamp(1rem, 2.5vw, 1.4rem); font-weight: 800; color: #333; }
+        .btn-mute {
+            background: #eee; border: none; padding: 8px 15px; border-radius: 20px;
+            font-weight: 700; cursor: pointer; font-family: inherit;
+        }
+        #question-display {
+            position: absolute; top: 12%; width: 90%; text-align: center;
+            font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 900; color: #333; z-index: 40;
+            padding: 10px; background: rgba(240, 240, 240, 0.5); border-radius: 20px;
+        }
+
+        /* --- BUBBLE STYLE (GLOSSY & REALISTIC) --- */
+        .answer-bubble {
+            position: absolute;
+            width: clamp(130px, 22vw, 200px);
+            height: clamp(130px, 22vw, 200px);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            text-align: center; padding: 10px;
+            
+            /* Text Style với viền glow trắng */
+            color: #000;
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            font-weight: 800;
+            line-height: 1.1;
+            word-break: break-word;
+            text-shadow: 
+                0 0 8px rgba(255, 255, 255, 0.9),
+                0 0 12px rgba(255, 255, 255, 0.7),
+                0 0 20px rgba(255, 255, 255, 0.5);
+            
+            /* Hiệu ứng thủy tinh cầu nâng cao */
+            background: radial-gradient(
+                circle at 25% 25%, 
+                rgba(255, 255, 255, 0.98) 0%, 
+                rgba(255, 255, 255, 0.6) 15%, 
+                rgba(255, 255, 255, 0.3) 30%, 
+                var(--bubble-color) 65%, 
+                var(--bubble-border) 100%
+            );
+            
+            /* Bóng đổ và ánh sáng */
+            box-shadow: 
+                inset 2px 2px 20px rgba(255, 255, 255, 0.8),
+                inset -5px -5px 20px rgba(0, 0, 0, 0.15),
+                0 8px 25px rgba(0, 0, 0, 0.2),
+                0 0 30px rgba(255, 255, 255, 0.3) inset;
+            
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            transition: transform 0.15s ease-out, filter 0.2s;
+            z-index: 20;
+            filter: brightness(1);
+            overflow: hidden;
+        }
+
+        /* Hiệu ứng phản chiếu thực tế */
+        .answer-bubble::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 50%;
+            background: radial-gradient(
+                circle at 40% 40%,
+                rgba(255, 255, 255, 0.4) 0%,
+                rgba(255, 255, 255, 0) 50%
+            );
+            pointer-events: none;
+        }
+
+        /* Đốm sáng chính (specular highlight) */
+        .answer-bubble::after {
+            content: '';
+            position: absolute;
+            top: 12%; left: 15%; width: 28%; height: 15%;
+            border-radius: 50%;
+            background: radial-gradient(
+                ellipse at center,
+                rgba(255, 255, 255, 0.95) 0%,
+                rgba(255, 255, 255, 0.1) 70%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: rotate(-35deg);
+            filter: blur(0.5px);
+            pointer-events: none;
+        }
+
+        /* Hiệu ứng hover */
+        .answer-bubble:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+
+        .pop-animation { animation: pop 0.3s forwards ease-out; }
+        @keyframes pop {
+            0% { transform: scale(1); opacity: 1; filter: brightness(1); }
+            50% { transform: scale(1.4); opacity: 0.7; filter: brightness(1.5); }
+            100% { transform: scale(0); opacity: 0; filter: brightness(0); }
+        }
+
+        /* Hiệu ứng hoa giấy */
+        .paper-flower {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f, #4d96ff);
+            border-radius: 50% 20% 50% 20%;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 30;
+            animation: flowerFloat 1.5s ease-out forwards;
+        }
+
+        @keyframes flowerFloat {
+            0% { 
+                transform: translate(0, 0) rotate(0deg) scale(0); 
+                opacity: 1; 
+            }
+            100% { 
+                transform: translate(var(--tx, 100px), var(--ty, -150px)) rotate(720deg) scale(1); 
+                opacity: 0; 
+            }
+        }
+
+        /* Hiệu ứng mặt buồn */
+        .sad-face {
+            position: absolute;
+            font-size: 3rem;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 30;
+            animation: sadFloat 1s ease-out forwards;
+        }
+
+        @keyframes sadFloat {
+            0% { 
+                transform: translate(-50%, -50%) scale(0.5); 
+                opacity: 0; 
+            }
+            30% { 
+                transform: translate(-50%, -50%) scale(1.2); 
+                opacity: 1; 
+            }
+            100% { 
+                transform: translate(-50%, -150%) scale(1); 
+                opacity: 0; 
+            }
+        }
+
+        /* CAMERA & HAND */
+        #camera-container {
+            position: fixed; bottom: 15px; right: 15px;
+            width: clamp(100px, 20vw, 150px); height: clamp(75px, 15vw, 110px);
+            border: 3px solid #333; border-radius: 12px;
+            overflow: hidden; background: #000; z-index: 100;
+        }
+        #input_video { transform: scaleX(-1); width: 100%; height: 100%; object-fit: cover; }
+        
+        #hand-cursor {
+            position: fixed; width: 50px; height: 50px;
+            border: 4px solid #ff3333; border-radius: 50%;
+            transform: translate(-50%, -50%); pointer-events: none; z-index: 999;
+            background: rgba(255, 255, 255, 0.3); display: none;
+        }
+        #hand-cursor.grabbing { background: rgba(255, 51, 51, 0.5); transform: translate(-50%, -50%) scale(0.8); }
+
+        /* RESULTS */
+        .score-final { font-size: 4rem; color: var(--primary-btn); margin-bottom: 20px; font-weight: 900; }
+    </style>
+</head>
+<body class="theme-summer">
+
+    <audio id="bg-music" loop></audio>
+    <div id="hand-cursor"></div>
+    <div id="camera-container"><video id="input_video" autoplay muted playsinline></video></div>
+
+    <div id="screen-home" class="screen active">
+        <div class="setup-container">
+            <h1>🫧 Bubble Pop 🫧</h1>
+            
+            <div class="section-title">🎨 Theme:</div>
+            <div class="theme-selector">
+                <div class="theme-btn" style="background:#a1c4fd" onclick="setTheme('spring')" title="Xuân"></div>
+                <div class="theme-btn" style="background:#f6d365" onclick="setTheme('summer')" title="Hạ"></div>
+                <div class="theme-btn" style="background:#ffcc33" onclick="setTheme('autumn')" title="Thu"></div>
+                <div class="theme-btn" style="background:#8ec5fc" onclick="setTheme('winter')" title="Đông"></div>
+            </div>
+
+            <div class="section-title">📝 Vocabulary:</div>
+            <label class="btn-upload">📂 Tải file Word (.docx)
+                <input type="file" id="docx-upload" accept=".docx" style="display: none;" onchange="handleFileUpload(this)">
+            </label>
+            <textarea id="text-input" placeholder="Ví dụ:&#10;Hello : Xin chào&#10;Apple : Quả táo&#10;Book : Quyển sách"></textarea>
+
+            <div class="section-title">🎵 Background music:</div>
+            <label class="btn-upload">🎼 Tải file nhạc (.mp3)
+                <input type="file" id="music-upload" accept="audio/*" style="display: none;" onchange="handleMusicUpload(this)">
+            </label>
+            <div id="music-name" style="font-size:0.8rem; color:#666; margin-bottom:10px; font-style:italic;"></div>
+
+            <button class="btn-start" onclick="startGame()">LET'S START ▶</button>
+        </div>
+    </div>
+
+    <div id="screen-game" class="screen">
+        <div class="game-header">
+            <button class="btn-mute" onclick="toggleMute()">🔊 Music: On</button>
+            <div class="stat-box">Score: <span id="score-val">0</span></div>
+            <div class="stat-box"><span id="round-val">1/10</span></div>
+        </div>
+        <div id="question-display">...</div>
+    </div>
+
+    <div id="screen-results" class="screen">
+        <h1>WELL DONE!</h1>
+        <div class="score-final" id="final-score">0</div>
+        <button class="btn-start" onclick="location.reload()">Play again 🔄</button>
+    </div>
+
+    <script>
+        const APP = {
+            data: [], currentIndex: 0, score: 0,
+            isRoundActive: false, bubbles: [],
+            hand: { x: 0, y: 0, isFist: false }
+        };
+
+        // --- COLORS FOR BUBBLES (Pastel/Clear colors for glossy effect) ---
+        const BUBBLE_COLORS = [
+            { main: 'rgba(255, 183, 178, 0.7)', border: '#ff9aa2' }, // Pink
+            { main: 'rgba(181, 234, 215, 0.7)', border: '#a5d6a7' }, // Green
+            { main: 'rgba(226, 240, 203, 0.7)', border: '#c5e1a5' }, // Lime
+            { main: 'rgba(199, 206, 234, 0.7)', border: '#90caf9' }, // Blue
+            { main: 'rgba(255, 255, 216, 0.7)', border: '#fff59d' }, // Yellow
+            { main: 'rgba(224, 187, 228, 0.7)', border: '#ce93d8' }  // Purple
+        ];
+
+        // --- AUDIO & THEME ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playPopSound(isCorrect) {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            
+            if (isCorrect) {
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+            } else {
+                osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+            }
+
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.2);
+        }
+
+        function setTheme(season) {
+            document.body.className = `theme-${season}`;
+            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function handleMusicUpload(input) {
+            const file = input.files[0];
+            if (file) {
+                const audio = document.getElementById('bg-music');
+                audio.src = URL.createObjectURL(file);
+                document.getElementById('music-name').innerText = "🎵 " + file.name;
+            }
+        }
+
+        function toggleMute() {
+            const audio = document.getElementById('bg-music');
+            const btn = document.querySelector('.btn-mute');
+            audio.muted = !audio.muted;
+            btn.innerText = audio.muted ? "🔇 Nhạc: TẮT" : "🔊 Nhạc: BẬT";
+        }
+
+        // --- EFFECT FUNCTIONS ---
+        function createPaperFlowerEffect(x, y) {
+            const colors = ['#ff6b6b', '#ffd93d', '#6bcf7f', '#4d96ff', '#9d4edd'];
+            for (let i = 0; i < 15; i++) {
+                const flower = document.createElement('div');
+                flower.className = 'paper-flower';
+                
+                const angle = (i * 24) * Math.PI / 180;
+                const distance = 80 + Math.random() * 100;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance - 50;
+                
+                flower.style.setProperty('--tx', tx + 'px');
+                flower.style.setProperty('--ty', ty + 'px');
+                flower.style.left = x + 'px';
+                flower.style.top = y + 'px';
+                flower.style.background = `linear-gradient(45deg, ${colors[i % colors.length]}, ${colors[(i+1) % colors.length]})`;
+                flower.style.width = `${15 + Math.random() * 15}px`;
+                flower.style.height = flower.style.width;
+                flower.style.animationDelay = `${i * 0.05}s`;
+                
+                document.getElementById('screen-game').appendChild(flower);
+                setTimeout(() => flower.remove(), 1500);
+            }
+        }
+
+        function createSadFaceEffect(x, y) {
+            const sadFace = document.createElement('div');
+            sadFace.className = 'sad-face';
+            sadFace.innerHTML = '😢';
+            sadFace.style.left = x + 'px';
+            sadFace.style.top = y + 'px';
+            
+            document.getElementById('screen-game').appendChild(sadFace);
+            setTimeout(() => sadFace.remove(), 1000);
+        }
+
+        // --- GAME LOGIC ---
+        function handleFileUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                mammoth.extractRawText({arrayBuffer: event.target.result})
+                    .then(result => document.getElementById('text-input').value = result.value)
+                    .catch(err => alert("Lỗi: " + err.message));
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function startGame() {
+            const raw = document.getElementById('text-input').value;
+            const data = raw.split('\n')
+                .map(l => l.replace(/^[\d\.\-\*\•\+\s]+/, '').trim())
+                .filter(l => l.includes(':'))
+                .map(l => { const p = l.split(':'); return { q: p[0].trim(), a: p.slice(1).join(':').trim() }})
+                .sort(() => Math.random() - 0.5);
+
+            if (data.length < 3) return alert("Cần ít nhất 3 từ vựng!");
+
+            APP.data = data;
+            APP.currentIndex = 0;
+            APP.score = 0;
+
+            document.getElementById('screen-home').classList.remove('active');
+            document.getElementById('screen-game').classList.add('active');
+            
+            const audio = document.getElementById('bg-music');
+            if(audio.src) audio.play().catch(e => console.log("Cần tương tác"));
+
+            initCamera();
+            nextRound();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function nextRound() {
+            if(APP.currentIndex >= APP.data.length) return endGame();
+
+            APP.isRoundActive = true;
+            const qData = APP.data[APP.currentIndex];
+            
+            document.getElementById('question-display').innerText = qData.q;
+            document.getElementById('round-val').innerText = `${APP.currentIndex + 1}/${APP.data.length}`;
+            
+            document.querySelectorAll('.answer-bubble').forEach(b => b.remove());
+            APP.bubbles = [];
+
+            const answers = [{ text: qData.a, correct: true }];
+            const others = APP.data.filter(d => d.a !== qData.a).sort(() => Math.random()-0.5).slice(0, 3);
+            others.forEach(o => answers.push({ text: o.a, correct: false }));
+            answers.sort(() => Math.random()-0.5);
+
+            const container = document.getElementById('screen-game');
+            
+            answers.forEach((ans) => {
+                const el = document.createElement('div');
+                const theme = BUBBLE_COLORS[Math.floor(Math.random() * BUBBLE_COLORS.length)];
+                
+                el.className = 'answer-bubble';
+                el.innerText = ans.text;
+                el.style.setProperty('--bubble-color', theme.main);
+                el.style.setProperty('--bubble-border', theme.border);
+                el.dataset.correct = ans.correct;
+
+                const bubble = {
+                    el: el,
+                    x: Math.random() * 60 + 20,
+                    y: Math.random() * 50 + 30,
+                    vx: (Math.random() - 0.5) * 0.4, // Tốc độ
+                    vy: (Math.random() - 0.5) * 0.4,
+                    popped: false
+                };
+                APP.bubbles.push(bubble);
+                container.appendChild(el);
+            });
+        }
+
+        function gameLoop() {
+            if(APP.isRoundActive) {
+                APP.bubbles.forEach(b => {
+                    if(b.popped) return;
+                    b.x += b.vx; b.y += b.vy;
+                    if(b.x < 5 || b.x > 80) b.vx *= -1;
+                    if(b.y < 15 || b.y > 80) b.vy *= -1;
+                    b.el.style.left = b.x + 'vw';
+                    b.el.style.top = b.y + 'vh';
+                    checkCollision(b);
+                });
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        function checkCollision(b) {
+            const rect = b.el.getBoundingClientRect();
+            if(APP.hand.x > rect.left && APP.hand.x < rect.right && 
+               APP.hand.y > rect.top && APP.hand.y < rect.bottom && APP.hand.isFist) {
+                popBubble(b);
+            }
+        }
+
+        function popBubble(b) {
+            if(b.popped) return;
+            b.popped = true;
+            APP.isRoundActive = false;
+            
+            const isCorrect = b.el.dataset.correct === 'true';
+            playPopSound(isCorrect);
+            b.el.classList.add('pop-animation');
+            
+            // Tạo hiệu ứng đặc biệt
+            const rect = b.el.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            if(isCorrect) {
+                // Hiệu ứng hoa giấy cho đáp án đúng
+                createPaperFlowerEffect(centerX, centerY);
+                APP.score += 100;
+                document.getElementById('score-val').innerText = APP.score;
+            } else {
+                // Hiệu ứng mặt buồn cho đáp án sai
+                createSadFaceEffect(centerX, centerY);
+            }
+
+            setTimeout(() => { APP.currentIndex++; nextRound(); }, 1200);
+        }
+
+        function endGame() {
+            document.getElementById('screen-game').classList.remove('active');
+            document.getElementById('screen-results').classList.add('active');
+            document.getElementById('final-score').innerText = APP.score;
+            document.getElementById('bg-music').pause();
+        }
+
+        // --- HAND TRACKING ---
+        function initCamera() {
+            const videoElement = document.getElementById('input_video');
+            const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
+            hands.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+            hands.onResults(results => {
+                const cursor = document.getElementById('hand-cursor');
+                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                    const lm = results.multiHandLandmarks[0];
+                    APP.hand.x = (1 - lm[8].x) * window.innerWidth;
+                    APP.hand.y = lm[8].y * window.innerHeight;
+                    APP.hand.isFist = lm[8].y > lm[6].y && lm[12].y > lm[10].y && lm[16].y > lm[14].y;
+
+                    cursor.style.display = 'block';
+                    cursor.style.left = APP.hand.x + 'px';
+                    cursor.style.top = APP.hand.y + 'px';
+                    
+                    if(APP.hand.isFist) cursor.classList.add('grabbing');
+                    else cursor.classList.remove('grabbing');
+                } else {
+                    cursor.style.display = 'none';
+                    APP.hand.isFist = false;
+                }
+            });
+            
+            const camera = new Camera(videoElement, {
+                onFrame: async () => { await hands.send({image: videoElement}); },
+                width: 320, height: 240
+            });
+            camera.start();
+        }
+    </script>
+</body>
+</html>
