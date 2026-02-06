@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Be Heard | Vocabulary in use</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #031383;
+            --primary-dark: #020c5e;
+            --accent: #FFD93D; /* Vàng Highlight */
+            --action: #FF6B6B;
+            --action-dark: #e04f4f;
+            --bg: #EEF2FF;
+            --card-bg: #ffffff;
+            --success: #27ae60;
+            --danger: #e74c3c;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+            background-image: radial-gradient(#dbeafe 15%, transparent 16%), radial-gradient(#dbeafe 15%, transparent 16%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            color: var(--primary);
+            margin: 0; padding: 10px;
+            /* Ngăn chặn các hành động mặc định gây lag trên mobile */
+            touch-action: pan-y; 
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .container {
+            max-width: 850px; margin: 10px auto;
+            background: var(--card-bg);
+            padding: 25px; 
+            border-radius: 25px;
+            box-shadow: 0 10px 0 rgba(3, 19, 131, 0.1);
+            border: 3px solid #dae1f5;
+        }
+
+        .header h1 { 
+            text-align: center; color: var(--primary); 
+            font-size: 2.5rem; margin-bottom: 20px;
+            font-weight: 900;
+        }
+
+        /* Vùng nhập liệu */
+        #input-area {
+            width: 100%; min-height: 180px; padding: 15px;
+            border-radius: 15px; border: 3px dashed #a5b4fc;
+            box-sizing: border-box; font-size: 1.1rem; 
+            background: #fff; margin-bottom: 15px; outline: none;
+        }
+
+        .btn-3d {
+            width: 100%; padding: 15px; color: white; border: none; border-radius: 15px;
+            font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1.1rem; 
+            cursor: pointer; transition: all 0.1s; text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .btn-start { background: var(--primary); box-shadow: 0 5px 0 var(--primary-dark); }
+        .btn-start:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
+
+        /* KHO TỪ VỰNG NỔI (STICKY HORIZONTAL) */
+        .word-bank-container {
+            position: -webkit-sticky; position: sticky;
+            top: 0; z-index: 1000;
+            background: #fff; margin: -25px -25px 25px -25px;
+            padding: 15px; border-bottom: 4px solid var(--primary);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .word-bank {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+            max-height: 150px; overflow-y: auto;
+        }
+
+        .draggable-word {
+            background: #fff; padding: 10px 16px; border-radius: 12px;
+            border: 2px solid var(--primary); font-weight: 800;
+            cursor: grab; transition: 0.2s; user-select: none;
+            white-space: nowrap;
+        }
+
+        /* HIỆU ỨNG KHI KÉO TỪ */
+        .draggable-word:active, .draggable-word.dragging {
+            background: var(--accent) !important;
+            transform: scale(1.1) rotate(-2deg);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .draggable-word.used { opacity: 0.15; pointer-events: none; }
+
+        /* CÂU HỎI */
+        .sentence-card {
+            background: #f8faff; padding: 22px; border-radius: 18px;
+            margin-bottom: 15px; border: 2px solid #e0e7ff;
+            display: flex; gap: 15px; align-items: flex-start;
+            font-size: 1.25rem; /* Chữ to hơn */
+            font-weight: 700; /* Chữ đậm hơn */
+            line-height: 1.8;
+        }
+
+        .q-number {
+            background: var(--accent); color: var(--primary);
+            min-width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; font-weight: 900;
+        }
+
+        /* Ô TRỐNG CĂN GIỮA TUYỆT ĐỐI */
+        .drop-zone {
+            display: inline-flex; justify-content: center; align-items: center;
+            min-width: 110px; height: 40px;
+            border-bottom: 2px solid var(--primary);
+            margin: 0 5px; padding: 0 12px;
+            background: rgba(3, 19, 131, 0.05);
+            border-radius: 8px 8px 0 0;
+            vertical-align: middle; color: var(--action);
+            transition: 0.2s; cursor: pointer;
+        }
+        .drop-zone.hovered { background: var(--accent); }
+
+        /* ĐỊNH DẠNG KẾT QUẢ */
+        .res-word-correct { color: var(--success); font-weight: 800; }
+        .res-word-wrong { color: var(--danger); text-decoration: line-through; margin-right: 5px; opacity: 0.7; }
+        .res-word-fixed { color: var(--success); font-weight: 800; border-bottom: 2px solid; }
+
+        .score-banner {
+            background: var(--primary); color: white; padding: 30px;
+            border-radius: 20px; text-align: center; margin-bottom: 20px;
+        }
+        .score-banner h2 { font-size: 3.5rem; margin: 0; color: var(--accent); }
+
+        .hidden { display: none; }
+        
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.8rem; }
+            .sentence-card { font-size: 1.1rem; padding: 15px; }
+            .word-bank-container { margin: -10px -10px 20px -10px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="setup-view">
+        <div class="header"><h1>Vocabulary In Use ✍️</h1></div>
+        <div id="input-area" contenteditable="true" placeholder="Dán văn bản vào đây. Bôi đậm (Ctrl+B) từ muốn đố..."></div>
+        <button class="btn-3d btn-start" onclick="startExercise()">🚀 Bắt đầu ngay (15 câu)</button>
+        <input type="file" id="file-upload" accept=".docx" style="display:none">
+        <button class="btn-3d" style="background:#6c757d" onclick="document.getElementById('file-upload').click()">📁 Tải file Word</button>
+    </div>
+
+    <div id="exercise-view" class="hidden">
+        <div class="word-bank-container">
+            <div class="word-bank" id="bank-content"></div>
+        </div>
+        <div id="questions-list"></div>
+        <button class="btn-3d" style="background:var(--action); box-shadow: 0 5px 0 var(--action-dark); margin-top:20px" onclick="submitExercise()">🏆 Xem kết quả</button>
+    </div>
+
+    <div id="result-view" class="hidden">
+        <div id="score-box" class="score-banner"></div>
+        <div id="detailed-results"></div>
+        <button class="btn-3d btn-start" style="margin-top:20px" onclick="location.reload()">🔄 Làm bài mới</button>
+    </div>
+</div>
+
+<script>
+    // Kho dữ liệu dự phòng (Fallback)
+    const FALLBACK = [
+        { text: "It is **vital** to maintain a healthy lifestyle.", trans: "Việc duy trì lối sống lành mạnh là rất quan trọng." },
+        { text: "He was **honored** for his **outstanding** performance.", trans: "Anh ấy được vinh danh vì màn trình diễn xuất sắc." },
+        { text: "We need to **analyze** the data carefully.", trans: "Chúng ta cần phân tích dữ liệu một cách cẩn thận." },
+        { text: "She **achieved** her goals through **persistence**.", trans: "Cô ấy đạt được mục tiêu nhờ sự kiên trì." },
+        { text: "The company is **expanding** its business globally.", trans: "Công ty đang mở rộng kinh doanh trên toàn cầu." },
+        { text: "Please confirm your **attendance** by Friday.", trans: "Vui lòng xác nhận sự tham dự của bạn trước thứ Sáu." },
+        { text: "The weather today is **perfect** for a picnic.", trans: "Thời tiết hôm nay thật hoàn hảo để đi dã ngoại." },
+        { text: "He has a **reputation** for being **reliable**.", trans: "Anh ấy nổi tiếng là người đáng tin cậy." },
+        { text: "They struggled to overcome the **obstacles**.", trans: "Họ đã đấu tranh để vượt qua những trở ngại." },
+        { text: "I highly **recommend** this book to everyone.", trans: "Tôi rất đề cử cuốn sách này cho mọi người." },
+        { text: "The **landscape** here is **breathtaking**.", trans: "Phong cảnh ở đây thật ngoạn mục." },
+        { text: "We must focus on our **priorities**.", trans: "Chúng ta phải tập trung vào các ưu tiên của mình." },
+        { text: "She is **fluent** in three different languages.", trans: "Cô ấy thông thạo ba ngôn ngữ khác nhau." },
+        { text: "The **innovation** led to a **breakthrough**.", trans: "Sự đổi mới đã dẫn đến một bước đột phá." },
+        { text: "Always **strive** for excellence in everything.", trans: "Luôn phấn đấu cho sự xuất sắc trong mọi việc." },
+        { text: "The **comprehensive** report provides a detailed **assessment** of the situation.", trans: "Bản báo cáo toàn diện cung cấp một sự đánh giá chi tiết về tình hình." },
+        { text: "We must **implement** new strategies to **enhance** our productivity.", trans: "Chúng ta phải triển khai các chiến lược mới để nâng cao năng suất." },
+        { text: "The government has **allocated** more funds to **infrastructure** development.", trans: "Chính phủ đã phân bổ thêm ngân sách cho phát triển cơ sở hạ tầng." },
+        { text: "Environmental **sustainability** is a **fundamental** concern for the future.", trans: "Sự bền vững môi trường là một mối quan tâm cơ bản cho tương lai." },
+        { text: "His **eloquent** speech made a **profound** impact on the audience.", trans: "Bài phát biểu hùng hồn của anh ấy đã tạo ra một tác động sâu sắc đến khán giả." },
+        { text: "You need to **justify** your decision with **concrete** evidence.", trans: "Bạn cần bào chữa cho quyết định của mình bằng những bằng chứng cụ thể." },
+        { text: "The project was **postponed** due to **unforeseen** circumstances.", trans: "Dự án đã bị trì hoãn do những tình huống không lường trước được." },
+        { text: "Artificial intelligence is **revolutionizing** the way we interact with technology.", trans: "Trí tuệ nhân tạo đang cách mạng hóa cách chúng ta tương tác với công nghệ." },
+        { text: "There is a noticeable **discrepancy** between the two sets of figures.", trans: "Có một sự khác biệt đáng kể giữa hai bộ số liệu." },
+        { text: "She demonstrated exceptional **resilience** in the face of adversity.", trans: "Cô ấy đã thể hiện khả năng phục hồi phi thường khi đối mặt với nghịch cảnh." },
+        { text: "The **prevalent** view among experts is that the economy will **fluctuate**.", trans: "Quan điểm phổ biến trong giới chuyên gia là nền kinh tế sẽ biến động." },
+        { text: "Effective communication is **indispensable** for successful **collaboration**.", trans: "Giao tiếp hiệu quả là không thể thiếu để hợp tác thành công." },
+        { text: "We need to evaluate the **feasibility** of the proposed plan.", trans: "Chúng ta cần đánh giá tính khả thi của kế hoạch đã đề xuất." },
+        { text: "The city's vibrant culture attracts **multitudes** of tourists.", trans: "Nền văn hóa sôi động của thành phố thu hút vô số khách du lịch." },
+        { text: "Technological **advancements** have **facilitated** global trade.", trans: "Những tiến bộ công nghệ đã tạo điều kiện thuận lợi cho thương mại toàn cầu." },
+        { text: "It is **imperative** to **adhere** to the safety regulations.", trans: "Việc tuân thủ các quy định an toàn là cấp thiết." },
+        { text: "He has the **capacity** to **comprehend** complex scientific theories.", trans: "Anh ấy có khả năng thấu hiểu các lý thuyết khoa học phức tạp." },
+        { text: "The **unprecedented** crisis required an immediate response.", trans: "Cuộc khủng hoảng chưa từng có tiền lệ đòi hỏi một phản ứng tức thì." },
+        { text: "She has an **innate** ability to motivate others.", trans: "Cô ấy có một khả năng bẩm sinh trong việc thúc đẩy người khác." }
+    ];
+
+    let currentQuestions = [];
+    let allAnswers = [];
+
+    // Xử lý File Word
+    document.getElementById('file-upload').addEventListener('change', function(e) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            mammoth.convertToHtml({arrayBuffer: event.target.result})
+                .then(result => { document.getElementById('input-area').innerHTML = result.value; });
+        };
+        reader.readAsArrayBuffer(this.files[0]);
+    });
+
+    // Hàm xóa số thứ tự và dấu đầu dòng
+    function cleanSentence(text) {
+        return text.replace(/^\s*(\d+[\.\)\-\:]|[•\-\*○●►✓■□▪▫→⇒])\s*/g, '').trim();
+    }
+
+    function startExercise() {
+        const inputDiv = document.getElementById('input-area');
+        let extracted = [];
+        
+        const tempContainer = document.createElement('div');
+        tempContainer.innerHTML = inputDiv.innerHTML;
+        const paragraphs = tempContainer.querySelectorAll('p, li, div');
+        
+        paragraphs.forEach(p => {
+            const nodes = p.querySelectorAll('b, strong, u');
+            if (nodes.length > 0) {
+                let originalText = p.innerText.trim();
+                let cleanedText = cleanSentence(originalText); 
+                
+                let gaps = [];
+                nodes.forEach(n => {
+                    let word = n.innerText.trim().replace(/[.,!?;:]+$/g, "");
+                    if(word) gaps.push(word);
+                });
+
+                if(gaps.length > 0) {
+                    extracted.push({ text: cleanedText, gaps: gaps, trans: "Keep practicing!" });
+                }
+            }
+        });
+
+        // LOGIC CHỌN 15 CÂU
+        let finalPool = extracted.sort(() => 0.5 - Math.random()).slice(0, 15);
+
+        // Bù đắp nếu thiếu câu
+        if (finalPool.length < 15) {
+            let needed = 15 - finalPool.length;
+            let extras = FALLBACK.sort(() => 0.5 - Math.random()).slice(0, needed);
+            extras.forEach(m => {
+                finalPool.push({
+                    text: m.text.replace(/\*\*/g, ''),
+                    gaps: [...m.text.matchAll(/\*\*(.*?)\*\*/g)].map(x => x[1]),
+                    trans: m.trans
+                });
+            });
+        }
+
+        currentQuestions = finalPool;
+        allAnswers = [];
+        currentQuestions.forEach(q => q.gaps.forEach(g => allAnswers.push(g)));
+        
+        renderExercise();
+    }
+
+    function renderExercise() {
+        document.getElementById('setup-view').classList.add('hidden');
+        document.getElementById('exercise-view').classList.remove('hidden');
+        
+        const bank = document.getElementById('bank-content');
+        const list = document.getElementById('questions-list');
+        bank.innerHTML = ''; list.innerHTML = '';
+
+        // Render kho từ (xáo trộn)
+        [...allAnswers].sort(() => 0.5 - Math.random()).forEach((w, i) => {
+            const div = document.createElement('div');
+            div.className = 'draggable-word';
+            div.innerText = w;
+            div.draggable = true;
+            div.id = `word-${i}`;
+            div.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData("text", e.target.innerText);
+                e.target.classList.add('dragging');
+            });
+            div.addEventListener('dragend', (e) => e.target.classList.remove('dragging'));
+            bank.appendChild(div);
+        });
+
+        // Render danh sách câu hỏi
+        currentQuestions.forEach((q, qIdx) => {
+            const card = document.createElement('div');
+            card.className = 'sentence-card';
+            let html = q.text;
+            q.gaps.forEach((gap, gIdx) => {
+                const regex = new RegExp(`\\b${gap.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+                html = html.replace(regex, `<span class="drop-zone" data-q="${qIdx}" data-g="${gIdx}" ondrop="handleDrop(event)" ondragover="event.preventDefault(); this.classList.add('hovered')" ondragleave="this.classList.remove('hovered')" onclick="clearGap(this)"></span>`);
+            });
+            card.innerHTML = `<div class="q-number">${qIdx+1}</div><div style="flex:1">${html}</div>`;
+            list.appendChild(card);
+        });
+        window.scrollTo(0,0);
+    }
+// Xử lý khi chạm vào ô trống (Kết hợp với từ đã chọn)
+    function handleZoneClick(zone) {
+        if (selectedWordElement) {
+            // Nếu đang có từ được chọn -> Điền vào
+            if (zone.innerText) toggleWordState(zone.innerText, false);
+            zone.innerText = selectedWordElement.innerText;
+            toggleWordState(selectedWordElement.innerText, true);
+            
+            selectedWordElement.classList.remove('selected');
+            selectedWordElement = null;
+        } else if (zone.innerText) {
+            // Nếu ô đang có từ mà không chọn từ mới -> Xóa từ trong ô
+            toggleWordState(zone.innerText, false);
+            zone.innerText = '';
+        }
+    }
+    function handleDrop(e) {
+        e.preventDefault();
+        e.target.classList.remove('hovered');
+        const word = e.dataTransfer.getData("text");
+        if(e.target.innerText) toggleWordInBank(e.target.innerText, false);
+        e.target.innerText = word;
+        toggleWordInBank(word, true);
+    }
+
+    function clearGap(el) {
+        if(el.innerText) {
+            toggleWordInBank(el.innerText, false);
+            el.innerText = '';
+        }
+    }
+
+    function toggleWordInBank(word, used) {
+        const items = document.querySelectorAll('.draggable-word');
+        for(let it of items) {
+            if(it.innerText === word && it.classList.contains('used') === !used) {
+                used ? it.classList.add('used') : it.classList.remove('used');
+                break;
+            }
+        }
+    }
+
+    function submitExercise() {
+        let correctCount = 0;
+        let totalCount = 0;
+        const resDiv = document.getElementById('detailed-results');
+        resDiv.innerHTML = '';
+
+        currentQuestions.forEach((q, qIdx) => {
+            let sentenceHtml = q.text;
+            let isAllCorrect = true;
+
+            q.gaps.forEach((gap) => {
+                totalCount++;
+                const zone = document.querySelector(`[data-q="${qIdx}"][data-g="${currentQuestions[qIdx].gaps.indexOf(gap)}"]`);
+                const userAns = zone ? zone.innerText : "";
+                
+                const isCorrect = userAns.toLowerCase() === gap.toLowerCase();
+                let feedback = "";
+
+                if(isCorrect) {
+                    correctCount++;
+                    feedback = `<span class="res-word-correct">${userAns}</span>`;
+                } else {
+                    isAllCorrect = false;
+                    feedback = `<span class="res-word-wrong">${userAns || '...'}</span><span class="res-word-fixed">${gap}</span>`;
+                }
+                
+                const regex = new RegExp(`\\b${gap.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+                sentenceHtml = sentenceHtml.replace(regex, feedback);
+            });
+
+            const card = document.createElement('div');
+            card.className = `sentence-card`;
+            card.style.borderLeft = isAllCorrect ? '8px solid var(--success)' : '8px solid var(--danger)';
+            card.innerHTML = `<div class="q-number">${qIdx+1}</div><div style="flex:1">${sentenceHtml}<br><small style="color:#666; font-weight:400"><i>${q.trans}</i></small></div>`;
+            resDiv.appendChild(card);
+        });
+
+        const percent = Math.round((correctCount/totalCount)*100);
+        let icon = "🔥";
+        let msg = "Cố gắng hơn ở lần sau nhé!";
+        if(percent === 100) { icon = "🏆"; msg = "TUYỆT ĐỐI! Bạn là bậc thầy!"; }
+        else if(percent >= 80) { icon = "🌟"; msg = "RẤT TỐT! Kỹ năng của bạn rất tuyệt!"; }
+        else if(percent >= 50) { icon = "👍"; msg = "KHÁ TỐT! Tiếp tục phát huy nhé!"; }
+
+        document.getElementById('score-box').innerHTML = `
+            <h2>${percent}%</h2>
+            <div style="font-size:1.3rem; margin:10px 0;">Đúng ${correctCount}/${totalCount} đáp án</div>
+            <div style="font-weight:800; font-size:1.2rem;">${icon} ${msg}</div>
+        `;
+
+        document.getElementById('exercise-view').classList.add('hidden');
+        document.getElementById('result-view').classList.remove('hidden');
+        window.scrollTo(0,0);
+    }
+</script>
+
+</body>
+</html>
