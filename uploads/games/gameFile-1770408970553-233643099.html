@@ -42,11 +42,16 @@
             border: 3px solid #dae1f5;
         }
 
+        .header { text-align: center; margin-bottom: 35px; }
         .header h1 { 
-            text-align: center; color: var(--primary); 
-            font-size: 2.5rem; margin-bottom: 20px;
-            font-weight: 900;
+            color: var(--primary); 
+            font-size: 2.8rem; 
+            margin-bottom: 5px; 
+            text-shadow: 2px 2px 0px #dae1f5;
+            font-weight: 800; /* Extra bold looks cuter in Nunito */
+            letter-spacing: -1px;
         }
+        .header p { text-align: center; color: #667eea; font-weight: 700; font-size: 1.1rem; }
 
         /* Vùng nhập liệu */
         #input-area {
@@ -147,7 +152,9 @@
 
 <div class="container">
     <div id="setup-view">
-        <div class="header"><h1>Vocabulary In Use ✍️</h1></div>
+        <div class="header"><h1>Vocabulary In Use ✍️</h1>
+        <p>Dán danh sách câu có từ in đậm cần học vào ô bên dưới hoặc tải lên file có sẵn</p>
+    </div>
         <div id="input-area" contenteditable="true" placeholder="Dán văn bản vào đây. Bôi đậm (Ctrl+B) từ muốn đố..."></div>
         <button class="btn-3d btn-start" onclick="startExercise()">🚀 Bắt đầu ngay (15 câu)</button>
         <input type="file" id="file-upload" accept=".docx" style="display:none">
