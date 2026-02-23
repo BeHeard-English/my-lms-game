@@ -93,7 +93,7 @@
             cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.2); margin-top: 15px; width: 100%;
         }
 
-        /* GAME SCREEN (Sử dụng theme từ trang đầu) */
+        /* GAME SCREEN */
         #screen-game { 
             background: var(--game-bg);
             position: relative;
@@ -116,7 +116,7 @@
             padding: 10px; background: rgba(240, 240, 240, 0.5); border-radius: 20px;
         }
 
-        /* --- BUBBLE STYLE (GLOSSY & REALISTIC) --- */
+        /* --- BUBBLE STYLE --- */
         .answer-bubble {
             position: absolute;
             width: clamp(130px, 22vw, 200px);
@@ -124,8 +124,6 @@
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             text-align: center; padding: 10px;
-            
-            /* Text Style với viền glow trắng */
             color: #000;
             font-size: clamp(1.2rem, 2.5vw, 1.8rem);
             font-weight: 800;
@@ -135,8 +133,6 @@
                 0 0 8px rgba(255, 255, 255, 0.9),
                 0 0 12px rgba(255, 255, 255, 0.7),
                 0 0 20px rgba(255, 255, 255, 0.5);
-            
-            /* Hiệu ứng thủy tinh cầu nâng cao */
             background: radial-gradient(
                 circle at 25% 25%, 
                 rgba(255, 255, 255, 0.98) 0%, 
@@ -145,14 +141,11 @@
                 var(--bubble-color) 65%, 
                 var(--bubble-border) 100%
             );
-            
-            /* Bóng đổ và ánh sáng */
             box-shadow: 
                 inset 2px 2px 20px rgba(255, 255, 255, 0.8),
                 inset -5px -5px 20px rgba(0, 0, 0, 0.15),
                 0 8px 25px rgba(0, 0, 0, 0.2),
                 0 0 30px rgba(255, 255, 255, 0.3) inset;
-            
             border: 2px solid rgba(255, 255, 255, 0.8);
             cursor: pointer;
             transition: transform 0.15s ease-out, filter 0.2s;
@@ -161,38 +154,26 @@
             overflow: hidden;
         }
 
-        /* Hiệu ứng phản chiếu thực tế */
         .answer-bubble::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             border-radius: 50%;
-            background: radial-gradient(
-                circle at 40% 40%,
-                rgba(255, 255, 255, 0.4) 0%,
-                rgba(255, 255, 255, 0) 50%
-            );
+            background: radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 50%);
             pointer-events: none;
         }
 
-        /* Đốm sáng chính (specular highlight) */
         .answer-bubble::after {
             content: '';
             position: absolute;
             top: 12%; left: 15%; width: 28%; height: 15%;
             border-radius: 50%;
-            background: radial-gradient(
-                ellipse at center,
-                rgba(255, 255, 255, 0.95) 0%,
-                rgba(255, 255, 255, 0.1) 70%,
-                rgba(255, 255, 255, 0) 100%
-            );
+            background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.1) 70%, rgba(255, 255, 255, 0) 100%);
             transform: rotate(-35deg);
             filter: blur(0.5px);
             pointer-events: none;
         }
 
-        /* Hiệu ứng hover */
         .answer-bubble:hover {
             transform: scale(1.05);
             filter: brightness(1.1);
@@ -205,56 +186,32 @@
             100% { transform: scale(0); opacity: 0; filter: brightness(0); }
         }
 
-        /* Hiệu ứng hoa giấy */
         .paper-flower {
             position: absolute;
-            width: 20px;
-            height: 20px;
+            width: 20px; height: 20px;
             background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f, #4d96ff);
             border-radius: 50% 20% 50% 20%;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 30;
+            opacity: 0; pointer-events: none; z-index: 30;
             animation: flowerFloat 1.5s ease-out forwards;
         }
 
         @keyframes flowerFloat {
-            0% { 
-                transform: translate(0, 0) rotate(0deg) scale(0); 
-                opacity: 1; 
-            }
-            100% { 
-                transform: translate(var(--tx, 100px), var(--ty, -150px)) rotate(720deg) scale(1); 
-                opacity: 0; 
-            }
+            0% { transform: translate(0, 0) rotate(0deg) scale(0); opacity: 1; }
+            100% { transform: translate(var(--tx, 100px), var(--ty, -150px)) rotate(720deg) scale(1); opacity: 0; }
         }
 
-        /* Hiệu ứng mặt buồn */
         .sad-face {
-            position: absolute;
-            font-size: 3rem;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 30;
+            position: absolute; font-size: 3rem;
+            opacity: 0; pointer-events: none; z-index: 30;
             animation: sadFloat 1s ease-out forwards;
         }
 
         @keyframes sadFloat {
-            0% { 
-                transform: translate(-50%, -50%) scale(0.5); 
-                opacity: 0; 
-            }
-            30% { 
-                transform: translate(-50%, -50%) scale(1.2); 
-                opacity: 1; 
-            }
-            100% { 
-                transform: translate(-50%, -150%) scale(1); 
-                opacity: 0; 
-            }
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            30% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -150%) scale(1); opacity: 0; }
         }
 
-        /* CAMERA & HAND */
         #camera-container {
             position: fixed; bottom: 15px; right: 15px;
             width: clamp(100px, 20vw, 150px); height: clamp(75px, 15vw, 110px);
@@ -271,7 +228,6 @@
         }
         #hand-cursor.grabbing { background: rgba(255, 51, 51, 0.5); transform: translate(-50%, -50%) scale(0.8); }
 
-        /* RESULTS */
         .score-final { font-size: 4rem; color: var(--primary-btn); margin-bottom: 20px; font-weight: 900; }
     </style>
 </head>
@@ -331,24 +287,21 @@
             hand: { x: 0, y: 0, isFist: false }
         };
 
-        // --- COLORS FOR BUBBLES (Pastel/Clear colors for glossy effect) ---
         const BUBBLE_COLORS = [
-            { main: 'rgba(255, 183, 178, 0.7)', border: '#ff9aa2' }, // Pink
-            { main: 'rgba(181, 234, 215, 0.7)', border: '#a5d6a7' }, // Green
-            { main: 'rgba(226, 240, 203, 0.7)', border: '#c5e1a5' }, // Lime
-            { main: 'rgba(199, 206, 234, 0.7)', border: '#90caf9' }, // Blue
-            { main: 'rgba(255, 255, 216, 0.7)', border: '#fff59d' }, // Yellow
-            { main: 'rgba(224, 187, 228, 0.7)', border: '#ce93d8' }  // Purple
+            { main: 'rgba(255, 183, 178, 0.7)', border: '#ff9aa2' },
+            { main: 'rgba(181, 234, 215, 0.7)', border: '#a5d6a7' },
+            { main: 'rgba(226, 240, 203, 0.7)', border: '#c5e1a5' },
+            { main: 'rgba(199, 206, 234, 0.7)', border: '#90caf9' },
+            { main: 'rgba(255, 255, 216, 0.7)', border: '#fff59d' },
+            { main: 'rgba(224, 187, 228, 0.7)', border: '#ce93d8' }
         ];
 
-        // --- AUDIO & THEME ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playPopSound(isCorrect) {
             if(audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'sine';
-            
             if (isCorrect) {
                 osc.frequency.setValueAtTime(600, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
@@ -356,7 +309,6 @@
                 osc.frequency.setValueAtTime(200, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.2);
             }
-
             gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
             osc.connect(gain);
@@ -368,7 +320,7 @@
         function setTheme(season) {
             document.body.className = `theme-${season}`;
             document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            if(event) event.target.classList.add('active');
         }
 
         function handleMusicUpload(input) {
@@ -387,18 +339,15 @@
             btn.innerText = audio.muted ? "🔇 Nhạc: TẮT" : "🔊 Nhạc: BẬT";
         }
 
-        // --- EFFECT FUNCTIONS ---
         function createPaperFlowerEffect(x, y) {
             const colors = ['#ff6b6b', '#ffd93d', '#6bcf7f', '#4d96ff', '#9d4edd'];
             for (let i = 0; i < 15; i++) {
                 const flower = document.createElement('div');
                 flower.className = 'paper-flower';
-                
                 const angle = (i * 24) * Math.PI / 180;
                 const distance = 80 + Math.random() * 100;
                 const tx = Math.cos(angle) * distance;
                 const ty = Math.sin(angle) * distance - 50;
-                
                 flower.style.setProperty('--tx', tx + 'px');
                 flower.style.setProperty('--ty', ty + 'px');
                 flower.style.left = x + 'px';
@@ -407,7 +356,6 @@
                 flower.style.width = `${15 + Math.random() * 15}px`;
                 flower.style.height = flower.style.width;
                 flower.style.animationDelay = `${i * 0.05}s`;
-                
                 document.getElementById('screen-game').appendChild(flower);
                 setTimeout(() => flower.remove(), 1500);
             }
@@ -419,12 +367,10 @@
             sadFace.innerHTML = '😢';
             sadFace.style.left = x + 'px';
             sadFace.style.top = y + 'px';
-            
             document.getElementById('screen-game').appendChild(sadFace);
             setTimeout(() => sadFace.remove(), 1000);
         }
 
-        // --- GAME LOGIC ---
         function handleFileUpload(input) {
             const file = input.files[0];
             if (!file) return;
@@ -495,10 +441,16 @@
                     el: el,
                     x: Math.random() * 60 + 20,
                     y: Math.random() * 50 + 30,
-                    vx: (Math.random() - 0.5) * 0.4, // Tốc độ
+                    vx: (Math.random() - 0.5) * 0.4,
                     vy: (Math.random() - 0.5) * 0.4,
                     popped: false
                 };
+
+                // --- TÍNH NĂNG MỚI: CLICK CHUỘT ---
+                el.onclick = () => {
+                    if (APP.isRoundActive) popBubble(bubble);
+                };
+
                 APP.bubbles.push(bubble);
                 container.appendChild(el);
             });
@@ -536,18 +488,15 @@
             playPopSound(isCorrect);
             b.el.classList.add('pop-animation');
             
-            // Tạo hiệu ứng đặc biệt
             const rect = b.el.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
             
             if(isCorrect) {
-                // Hiệu ứng hoa giấy cho đáp án đúng
                 createPaperFlowerEffect(centerX, centerY);
                 APP.score += 100;
                 document.getElementById('score-val').innerText = APP.score;
             } else {
-                // Hiệu ứng mặt buồn cho đáp án sai
                 createSadFaceEffect(centerX, centerY);
             }
 
@@ -561,7 +510,6 @@
             document.getElementById('bg-music').pause();
         }
 
-        // --- HAND TRACKING ---
         function initCamera() {
             const videoElement = document.getElementById('input_video');
             const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
@@ -573,11 +521,9 @@
                     APP.hand.x = (1 - lm[8].x) * window.innerWidth;
                     APP.hand.y = lm[8].y * window.innerHeight;
                     APP.hand.isFist = lm[8].y > lm[6].y && lm[12].y > lm[10].y && lm[16].y > lm[14].y;
-
                     cursor.style.display = 'block';
                     cursor.style.left = APP.hand.x + 'px';
                     cursor.style.top = APP.hand.y + 'px';
-                    
                     if(APP.hand.isFist) cursor.classList.add('grabbing');
                     else cursor.classList.remove('grabbing');
                 } else {
@@ -585,7 +531,6 @@
                     APP.hand.isFist = false;
                 }
             });
-            
             const camera = new Camera(videoElement, {
                 onFrame: async () => { await hands.send({image: videoElement}); },
                 width: 320, height: 240
