@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Be Heard - Tug of War</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --blue-team: #3498db;
+            --red-team: #e74c3c;
+            --font-main: 'Quicksand', sans-serif;
+            --navy-deep: #031383;
+        }
+
+        /* Themes Vivid Styles */
+        .theme-spring { background: linear-gradient(135deg, #a8e063, #56ab2f); --accent: #ff4081; }
+        .theme-summer { background: linear-gradient(135deg, #fff9c4, #ffb74d); --accent: #fbc02d; }
+        .theme-autumn { background: linear-gradient(135deg, #ffe0b2, #e64a19); --accent: #fff; }
+        .theme-winter { background: linear-gradient(135deg, #e3f2fd, #90caf9); --accent: #00d2ff; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); }
+        body { height: 100vh; overflow: hidden; transition: background 0.5s; display: flex; flex-direction: column; }
+.center-line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 4px; /* Độ dày của vạch */
+    background: rgba(255, 255, 255, 0.3); /* Màu trắng mờ để hợp với mọi theme */
+    border-left: 2px dashed #2d3436; /* Đường đứt nét để nhìn giống vạch đích */
+    transform: translateX(-50%);
+    z-index: 1; /* Nằm trên nền nhưng dưới nhân vật */
+    pointer-events: none; /* Để không cản trở việc click chuột */
+}
+        /* SETUP SCREEN (GIỮ NGUYÊN GIAO DIỆN CŨ) */
+        #setup-screen {
+            position: fixed; inset: 0; z-index: 1000;
+            display: flex; justify-content: center; align-items: center;
+            background: radial-gradient(circle at center, #0a1931, #031383);
+            backdrop-filter: blur(12px);
+        }
+        .setup-card {
+            background: white; padding: 35px; border-radius: 40px;
+            width: 90%; max-width: 950px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+        #setup-screen h1 { 
+            grid-column: span 2; text-align: center; color: var(--navy-deep); 
+            font-size: 3.2rem; font-weight: 800; text-transform: uppercase; 
+        }
+
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        textarea { height: 160px; border-radius: 20px; border: 3px solid #f0f2f5; padding: 15px; resize: none; font-size: 1rem; outline: none; }
+        
+        .btn-start {
+            grid-column: span 2; padding: 22px; border: none; border-radius: 20px;
+            background: linear-gradient(135deg, var(--navy-deep), #2575fc);
+            color: white; font-size: 2.2rem; font-weight: 800; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 3px;
+            animation: pulse 2s infinite; transition: all 0.3s ease;
+        }
+
+        /* GAME SCREEN (TỐI ƯU 1/3 CHIỀU RỘNG) */
+        #game-screen { display: none; height: 100vh; flex-direction: column; padding: 15px; position: relative; }
+        
+        .game-header {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px);
+            padding: 10px 40px; border-radius: 100px; margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .battle-area { 
+            flex: 1; display: grid; 
+            grid-template-columns: 1fr 1fr 1fr; /* Chia 3 phần bằng nhau */
+            gap: 20px; height: 75%; 
+        }
+
+        .team-panel {
+            background: rgba(255, 255, 255, 0.7); border-radius: 35px; padding: 20px;
+            display: flex; flex-direction: column; gap: 15px; position: relative;
+            border: 6px solid transparent; transition: 0.4s;
+            max-width: 100%; /* Đảm bảo nằm gọn trong 1/3 */
+        }
+        .blue-side { border-color: var(--blue-team); }
+        .red-side { border-color: var(--red-team); }
+
+        .question-card {
+            background: white; flex: 0.8; border-radius: 25px;
+            display: flex; align-items: center; justify-content: center;
+            text-align: center; font-size: clamp(1.2rem, 2.5vw, 2.2rem); font-weight: 700;
+            padding: 15px; color: #34495e; box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
+        }
+
+        .answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn-ans {
+            padding: 15px 5px; border: none; border-radius: 18px; background: white;
+            font-size: clamp(0.9rem, 1.5vw, 1.2rem); font-weight: 700; cursor: pointer;
+            box-shadow: 0 5px 0 #dfe6e9; color: #2c3e50; position: relative;
+        }
+        .btn-ans::before {
+            content: attr(data-key); position: absolute; top: 4px; left: 8px;
+            font-size: 0.7rem; color: #b2bec3;
+        }
+
+        /* ROPE VISUALS */
+        .rope-zone { position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        #rope-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    /* Giữ nguyên transition để di chuyển khi có điểm */
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 10;
+    
+    /* THÊM DÒNG NÀY: Animation rung ngang cho toàn bộ cụm dây và người */
+    animation: rope-tug 2s infinite ease-in-out;
+}
+
+/* Hiệu ứng rung ngang nhịp nhàng */
+@keyframes rope-tug {
+    0%, 100% { 
+        left: 0; 
+    }
+    50% { 
+        /* Di chuyển nhẹ sang trái hoặc phải 5-10px để tạo cảm giác giằng co */
+        left: -8px; 
+    }
+}
+        .rope-line {
+    /* Độ cao giảm xuống để dây mảnh hơn (từ 12px xuống 7px) */
+    height: 10px; 
+    
+    /* Tăng độ dài lên 800% để dây trải dài thoải mái ra hai biên màn hình */
+    width: 800%; 
+    
+    position: absolute;
+    
+    /* Căn chỉnh lại vị trí left để tâm dây luôn nằm chính giữa (Công thức: (100% - Width)/2 ) */
+    left: -350%; 
+    
+    /* Tinh chỉnh pattern mắt xích nhỏ lại (từ 10px/20px xuống 5px/10px) cho hợp với dây mảnh */
+    background: repeating-linear-gradient(
+        45deg, 
+        #a67c52, 
+        #a67c52 5px, 
+        #8b5a2b 5px, 
+        #8b5a2b 10px
+    );
+    
+    border-radius: 5px; 
+    border: 1px solid #5d2e00;
+    
+    /* Thêm một chút đổ bóng nhẹ để sợi dây có chiều sâu hơn trên nền màn hình */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+        .rope-center-mark {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 15px; 
+    height: 45px; 
+    background: #ff4757; /* Màu đỏ rực */
+    z-index: 10;
+    border-radius: 3px;
+    box-shadow: 0 0 10px rgba(255, 71, 87, 0.5); /* Thêm hiệu ứng phát sáng */
+}
+
+        .team-chars { position: absolute; display: flex; top: -80px; }
+        .chars-blue { right: 48%; }
+        .chars-red { left: 52%; }
+        .person {
+    width: clamp(100px, 15vw, 180px);
+    height: auto;
+    object-fit: contain;
+    /* Thay đổi tên animation thành 'tug-effect' cho đúng ý nghĩa */
+    animation: tug-effect 2s infinite ease-in-out; 
+    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
+}
+
+/* Định nghĩa lại hiệu ứng chuyển động ngang */
+@keyframes tug-effect {
+    0%, 100% { 
+        transform: translateX(0); 
+    }
+    50% { 
+        /* Di chuyển ngang 8px để tạo cảm giác đang gồng mình kéo */
+        transform: translateX(-8px); 
+    }
+}
+
+        /* FREEZE EFFECT */
+        .is-frozen { filter: saturate(0) blur(2px); pointer-events: none; }
+        .freeze-overlay {
+            position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+            font-size: 2.5rem; color: #fff; text-shadow: 0 0 15px #74b9ff; z-index: 100; font-weight: 700;
+        }
+        .team-panel.frozen-active .freeze-overlay { display: flex; }
+
+        #win-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000;
+            display: none; flex-direction: column; align-items: center; justify-content: center; color: white;
+        }
+
+        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(3, 19, 131, 0.7); } 70% { transform: scale(1.03); box-shadow: 0 0 0 20px rgba(3, 19, 131, 0); } 100% { transform: scale(1); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    </style>
+</head>
+<body class="theme-summer">
+
+    <div id="setup-screen">
+        <div class="setup-card">
+            <h1>🏆 Tug of War</h1>
+            <div class="input-group">
+                <label><b>Nhập từ vựng (Tiếng Anh: Tiếng Việt)</b></label>
+                <textarea id="vocab-input" placeholder="teacher: giáo viên&#10;student: học sinh"></textarea>
+                <label><b>Hoặc tải file Word (.docx)</b></label>
+                <input type="file" id="docx-upload" accept=".docx">
+            </div>
+            <div class="settings">
+                <div style="margin-bottom: 15px;">
+                    <label>Thời gian chơi</label>
+                    <select id="time-select" style="width:100%; padding:10px; border-radius:10px;">
+                        <option value="60">60 Giây</option>
+                        <option value="90" selected>90 Giây</option>
+                        <option value="120">120 Giây</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Lượt kéo để thắng</label>
+                    <select id="dist-select" style="width:100%; padding:10px; border-radius:10px;">
+                        <option value="3">3 Lượt</option>
+                        <option value="5" selected>5 Lượt</option>
+                        <option value="7">7 Lượt</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Chủ đề mùa</label>
+                    <select id="theme-select" style="width:100%; padding:10px; border-radius:10px;">
+                        <option value="spring">Mùa Xuân 🌸</option>
+                        <option value="summer" selected>Mùa Hè ☀️</option>
+                        <option value="autumn">Mùa Thu 🍂</option>
+                        <option value="winter">Mùa Đông ❄️</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Nhạc nền (.mp3)</label>
+                    <input type="file" id="music-input" accept="audio/*" style="width:100%">
+                </div>
+            </div>
+            <button class="btn-start" onclick="startGame()">LET'S PLAY</button>
+        </div>
+    </div>
+
+    <div id="game-screen">
+        <div class="game-header">
+            <div class="timer" id="timer-display" style="font-size: 2.5rem; font-weight: 700;">01:30</div>
+            <div id="season-icon" style="font-size: 2.5rem;">Let's have fun!</div>
+            <button onclick="toggleMute()" id="mute-btn" style="padding:10px 20px; border-radius: 50px; border:none; cursor:pointer; font-weight:700;">Loa: Bật</button>
+        </div>
+
+        <div class="battle-area">
+            <div class="team-panel blue-side" id="panel-blue">
+                <div class="freeze-overlay">❄️ FREEZE</div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:700; color:var(--blue-team); font-size:1.2rem;">BLUE (Q-W-A-S)</span>
+                    <span id="score-blue" style="background:#2c3e50; color:white; padding:5px 15px; border-radius:15px; font-weight:700;">0</span>
+                </div>
+                <div class="question-card" id="q-blue">...</div>
+                <div class="answer-grid" id="ans-blue"></div>
+            </div>
+
+            <div class="rope-zone">
+    <div class="center-line"></div> 
+
+    <div id="rope-wrapper">
+        <div class="rope-line"></div>
+        <div class="rope-center-mark"></div>
+        <div class="team-chars chars-blue" id="chars-blue-group"></div>
+        <div class="team-chars chars-red" id="chars-red-group"></div>
+    </div>
+</div>
+
+            <div class="team-panel red-side" id="panel-red">
+                <div class="freeze-overlay">❄️ FREEZE</div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span id="score-red" style="background:#2c3e50; color:white; padding:5px 15px; border-radius:15px; font-weight:700;">0</span>
+                    <span style="font-weight:700; color:var(--red-team); font-size:1.2rem;">(O-P-K-L) RED</span>
+                </div>
+                <div class="question-card" id="q-red">...</div>
+                <div class="answer-grid" id="ans-red"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="win-modal">
+        <h2 id="win-text" style="font-size: 4rem; margin-bottom: 20px;">WINNER!</h2>
+        <p id="win-reason" style="font-size: 1.5rem; margin-bottom: 30px;"></p>
+        <button class="btn-start" style="width: 300px;" onclick="location.reload()">PLAY AGAIN</button>
+    </div>
+
+    <audio id="bgm" loop></audio>
+    <audio id="sfx-freeze" src="https://assets.mixkit.co/active_storage/sfx/2324/2324-preview.mp3"></audio>
+    <audio id="sfx-win" src="https://assets.mixkit.co/active_storage/sfx/2020/2020-preview.mp3"></audio>
+
+    <script>
+        let vocab = [];
+        let gameState = {
+            blueScore: 0, redScore: 0, pullPos: 0,
+            active: false, blueFrozen: false, redFrozen: false
+        };
+        let gameConfig = { time: 90, winDist: 5 };
+
+        const keyMap = {
+            'q': {team: 'blue', idx: 0}, 'w': {team: 'blue', idx: 1}, 'a': {team: 'blue', idx: 2}, 's': {team: 'blue', idx: 3},
+            'o': {team: 'red', idx: 0}, 'p': {team: 'red', idx: 1}, 'k': {team: 'red', idx: 2}, 'l': {team: 'red', idx: 3}
+        };
+
+        window.addEventListener('keydown', (e) => {
+            if (!gameState.active) return;
+            const action = keyMap[e.key.toLowerCase()];
+            if (action) {
+                const btns = document.querySelectorAll(`#ans-${action.team} .btn-ans`);
+                if (btns[action.idx]) btns[action.idx].click();
+            }
+        });
+
+        document.getElementById('docx-upload').addEventListener('change', function(e) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                mammoth.extractRawText({arrayBuffer: event.target.result})
+                    .then(r => document.getElementById('vocab-input').value = r.value);
+            };
+            reader.readAsArrayBuffer(this.files[0]);
+        });
+
+        function startGame() {
+            const text = document.getElementById('vocab-input').value;
+            const lines = text.split('\n').filter(l => l.includes(':'));
+            if (lines.length < 5) return alert("Vui lòng nhập ít nhất 10 từ!");
+
+            vocab = lines.map(l => {
+                const p = l.split(':');
+                return { en: p[0].trim(), vi: p[1].trim() };
+            });
+
+            gameConfig.time = parseInt(document.getElementById('time-select').value);
+            gameConfig.winDist = parseInt(document.getElementById('dist-select').value);
+            
+            document.body.className = 'theme-' + document.getElementById('theme-select').value;
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'flex';
+            
+            renderTeams();
+            gameState.active = true;
+            
+            if(document.getElementById('music-input').files[0]) {
+                document.getElementById('bgm').src = URL.createObjectURL(document.getElementById('music-input').files[0]);
+                document.getElementById('bgm').play();
+            }
+
+            runTimer();
+            ask('blue');
+            ask('red');
+        }
+
+        function renderTeams() {
+            ['blue', 'red'].forEach(team => {
+                const group = document.getElementById(`chars-${team}-group`);
+                group.innerHTML = '';
+                for(let i=0; i<3; i++) {
+                    const img = document.createElement('img');
+                    img.src = `${team}-team.png`;
+                    img.className = 'person';
+                    img.onerror = () => { img.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${team}${i}`; };
+                    group.appendChild(img);
+                }
+            });
+        }
+
+        function runTimer() {
+            let s = gameConfig.time;
+            const el = document.getElementById('timer-display');
+            const timer = setInterval(() => {
+                if(!gameState.active) return clearInterval(timer);
+                s--;
+                let m = Math.floor(s/60), sec = s%60;
+                el.innerText = `${m}:${sec < 10 ? '0'+sec : sec}`;
+                
+                if(s <= 0) {
+                    clearInterval(timer);
+                    // LOGIC THẮNG THEO ĐIỂM KHI HẾT GIỜ
+                    if(gameState.blueScore > gameState.redScore) finishGame("TEAM BLUE - WINNER!", "Thắng nhờ số điểm cao hơn!");
+                    else if(gameState.redScore > gameState.blueScore) finishGame("TEAM RED - WINNER!", "Thắng nhờ số điểm cao hơn!");
+                    else finishGame("IT'S A TIE!", "Hoà nhé!");
+                }
+            }, 1000);
+        }
+
+        function ask(team) {
+            if(!gameState.active || (team === 'blue' ? gameState.blueFrozen : gameState.redFrozen)) return;
+
+            const item = vocab[Math.floor(Math.random() * vocab.length)];
+            const isEn = Math.random() > 0.5;
+            const qText = isEn ? item.en : item.vi;
+            const correct = isEn ? item.vi : item.en;
+
+            document.getElementById(`q-${team}`).innerText = qText;
+            let options = [correct];
+            while(options.length < 4) {
+                const r = vocab[Math.floor(Math.random() * vocab.length)];
+                const val = isEn ? r.vi : r.en;
+                if(!options.includes(val)) options.push(val);
+            }
+            options.sort(() => Math.random() - 0.5);
+
+            const grid = document.getElementById(`ans-${team}`);
+            grid.innerHTML = '';
+            const keys = team === 'blue' ? ['Q','W','A','S'] : ['O','P','K','L'];
+            
+            options.forEach((opt, i) => {
+                const b = document.createElement('button');
+                b.className = 'btn-ans';
+                b.innerText = opt;
+                b.setAttribute('data-key', keys[i]);
+                b.onclick = () => check(team, opt, correct);
+                grid.appendChild(b);
+            });
+        }
+
+        function check(team, selected, correct) {
+            if(selected === correct) {
+                if(team === 'blue') { gameState.blueScore++; gameState.pullPos--; }
+                else { gameState.redScore++; gameState.pullPos++; }
+                
+                document.getElementById(`score-${team}`).innerText = (team === 'blue' ? gameState.blueScore : gameState.redScore);
+                updateRope();
+                
+                if(Math.abs(gameState.pullPos) >= gameConfig.winDist) {
+                    finishGame(gameState.pullPos < 0 ? "TEAM BLUE - WINNER!" : "TEAM RED - WINNER!", "Thắng tuyệt đối bằng cách kéo dây!");
+                } else {
+                    ask(team);
+                }
+            } else {
+                freeze(team);
+            }
+        }
+
+        function freeze(team) {
+            const panel = document.getElementById(`panel-${team}`);
+            document.getElementById('sfx-freeze').play();
+            if(team === 'blue') gameState.blueFrozen = true; else gameState.redFrozen = true;
+            panel.classList.add('is-frozen', 'frozen-active');
+            setTimeout(() => {
+                if(team === 'blue') gameState.blueFrozen = false; else gameState.redFrozen = false;
+                panel.classList.remove('is-frozen', 'frozen-active');
+                ask(team);
+            }, 3000);
+        }
+
+        function updateRope() {
+    // Thay đổi con số này. Số càng nhỏ, độ dịch chuyển mỗi lần trả lời đúng càng ít.
+    // Ví dụ: Đổi từ 60 hoặc 70 xuống 30.
+    const stepSize = 30; 
+    
+    const moveX = gameState.pullPos * stepSize;
+    document.getElementById('rope-wrapper').style.transform = `translateX(${moveX}px)`;
+}
+
+        function finishGame(msg, reason) {
+            gameState.active = false;
+            document.getElementById('sfx-win').play();
+            document.getElementById('win-modal').style.display = 'flex';
+            document.getElementById('win-text').innerText = msg;
+            document.getElementById('win-reason').innerText = reason;
+            document.getElementById('win-text').style.color = (gameState.blueScore > gameState.redScore || gameState.pullPos < 0) ? 'var(--blue-team)' : 'var(--red-team)';
+            
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        }
+
+        function toggleMute() {
+            const bgm = document.getElementById('bgm');
+            bgm.muted = !bgm.muted;
+            document.getElementById('mute-btn').innerText = bgm.muted ? "Loa: Tắt" : "Loa: Bật";
+        }
+    </script>
+</body>
+</html>
