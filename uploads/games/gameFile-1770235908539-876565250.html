@@ -184,49 +184,58 @@
             background-color: #f4f7ff;
         }
 
-        /* Reordering Area */
-        .reorder-area {
-            background-color: #fcfdfe;
-            border: 3px dashed var(--primary);
-            border-radius: 20px;
-            min-height: 80px;
-            padding: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 15px;
-            align-items: center;
-        }
+        /* Reordering Area - Khung chứa các từ đã chọn */
+.reorder-area {
+    background-color: #fcfdfe;
+    border: 3px dashed var(--primary);
+    border-radius: 15px;      /* Giảm bo góc một chút cho gọn */
+    min-height: 50px;         /* Giảm từ 60px xuống 50px */
+    padding: 8px;             /* Giảm padding để khung ôm sát nút hơn */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;                 /* Khoảng cách giữa các nút khi kéo vào */
+    margin-bottom: 12px;
+    align-items: center;
+}
 
-        .word-bank {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            padding: 10px 0;
-        }
+/* Word Bank - Khu vực chứa các từ gợi ý */
+.word-bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;                 /* Đồng bộ gap với reorder-area cho đều */
+    padding: 5px 0;           /* Giảm padding trên dưới */
+}
 
-        .word-chip {
-            background-color: white;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            padding: 12px 22px;
-            border-radius: 50px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 5px 0 var(--primary);
-        }
+/* Word Chip - Nút chứa từng từ lẻ */
+.word-chip {
+    background-color: white;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    
+    /* ĐIỀU CHỈNH CHÍNH: Giảm padding trên-dưới (6px) và trái-phải (14px) */
+    padding: 6px 14px; 
+    
+    border-radius: 12px;      /* Bo góc ít hơn để trông bớt giống hình bầu dục cồng kềnh */
+    font-weight: 700;
+    font-size: 0.95rem;       /* Giảm nhẹ cỡ chữ để tổng thể thanh mảnh hơn */
+    cursor: pointer;
+    transition: all 0.2s;
+    
+    /* Giảm độ dày của bóng đổ (shadow) xuống 2px */
+    box-shadow: 0 2px 0 var(--primary);  
+    line-height: 1;           /* Ép dòng sát vào chữ để giảm chiều cao tối đa */
+}
 
-        .word-chip:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 0 var(--primary);
-        }
+.word-chip:hover {
+    transform: translateY(-1px); /* Giảm độ nảy khi hover để khớp với shadow mỏng */
+    box-shadow: 0 3px 0 var(--primary);
+}
 
-        .word-chip.in-answer {
-            background-color: var(--primary);
-            color: white;
-            box-shadow: none;
-        }
+.word-chip.in-answer {
+    background-color: var(--primary);
+    color: white;
+    box-shadow: none;
+}
 
         /* Feedback & Score */
         .score-panel {
@@ -301,6 +310,8 @@
                 <label class="checkbox-wrapper"><input type="checkbox" name="grammar" value="comp_adj"> Comparative</label>
                 <label class="checkbox-wrapper"><input type="checkbox" name="grammar" value="sup_adj"> Superlative</label>
                 <label class="checkbox-wrapper"><input type="checkbox" name="grammar" value="possessive"> Possessive Case</label>
+                <label class="checkbox-wrapper"><input type="checkbox" name="grammar" value="modal_verbs"> Modal verbs</label>
+                <label class="checkbox-wrapper"><input type="checkbox" name="grammar" value="word_type"> Word Type</label>
             </div>
             
             <button class="btn" onclick="startTest()">Start Adventure! 🎮</button>
@@ -575,6 +586,29 @@
     { type: 'order', tag: 'sup_adj', q: "the / smallest / planet / is / Mercury", a: "Mercury is the smallest planet.", exp: "Small là tính từ ngắn -> the smallest.", trans: "Sao Thủy là hành tinh nhỏ nhất." },
     { type: 'order', tag: 'sup_adj', q: "the / richest / man / world / in / is / who / the / ?", a: "Who is the richest man in the world?", exp: "Câu hỏi tìm kiếm đối tượng đứng nhất (the richest).", trans: "Ai là người giàu nhất thế giới?" },
     { type: 'order', tag: 'sup_adj', q: "worst / my / is / day / this / ever", a: "This is my worst day ever.", exp: "Lưu ý: Khi có tính từ sở hữu 'my', chúng ta không dùng 'the' trước 'worst'.", trans: "Đây là ngày tệ nhất của tôi từ trước tới giờ." },
+
+    // MODAL VERBS (can, will, should, must, may) - 10 MC, 10 Order
+    { type: 'mc', tag: 'modal_verbs', q: "She ____ speak three languages fluently.", opts: ["can", "cans", "is can", "could"], a: "A", exp: "Diễn tả khả năng ở hiện tại (Ability) -> dùng 'can'.", trans: "Cô ấy có thể nói trôi chảy ba ngôn ngữ." },
+    { type: 'mc', tag: 'modal_verbs', q: "You ____ eat more vegetables for your health.", opts: ["must", "should", "will", "may"], a: "B", exp: "Lời khuyên (Advice) -> dùng 'should'.", trans: "Bạn nên ăn nhiều rau hơn vì sức khỏe của mình." },
+    { type: 'mc', tag: 'modal_verbs', q: "Drivers ____ stop when the traffic lights are red.", opts: ["may", "should", "can", "must"], a: "D", exp: "Nghĩa vụ, bắt buộc theo luật (Obligation) -> dùng 'must'.", trans: "Người lái xe phải dừng lại khi đèn giao thông màu đỏ." },
+    { type: 'mc', tag: 'modal_verbs', q: "____ I come in, teacher?", opts: ["Must", "Will", "May", "Should"], a: "C", exp: "Xin phép một cách lịch sự (Permission) -> dùng 'may'.", trans: "Thưa thầy/cô, em có thể vào lớp được không ạ?" },
+    { type: 'mc', tag: 'modal_verbs', q: "Don't worry, I ____ help you with your homework.", opts: ["will", "must", "should", "may"], a: "A", exp: "Lời hứa hoặc quyết định ngay lúc nói (Promise) -> dùng 'will'.", trans: "Đừng lo, tôi sẽ giúp bạn làm bài tập về nhà." },
+    { type: 'mc', tag: 'modal_verbs', q: "It ____ rain this afternoon, so take an umbrella.", opts: ["must", "may", "should", "will"], a: "B", exp: "Diễn tả khả năng có thể xảy ra (Possibility) -> dùng 'may'.", trans: "Trời có thể mưa chiều nay đấy, nên hãy mang theo ô." },
+    { type: 'mc', tag: 'modal_verbs', q: "You ____ touch that wire. It's very dangerous!", opts: ["shouldn't", "mustn't", "can't", "won't"], a: "B", exp: "Sự cấm đoán (Prohibition) -> dùng 'mustn't'.", trans: "Bạn không được chạm vào sợi dây đó. Nó rất nguy hiểm!" },
+    { type: 'mc', tag: 'modal_verbs', q: "____ you open the door for me, please?", opts: ["Can", "Should", "Must", "May"], a: "A", exp: "Câu yêu cầu lịch sự (Request) -> dùng 'Can' (hoặc Could).", trans: "Bạn vui lòng mở cửa giúp tôi được không?" },
+    { type: 'mc', tag: 'modal_verbs', q: "I'm sorry, I ____ come to the meeting tomorrow.", opts: ["can't", "mustn't", "shouldn't", "may not"], a: "A", exp: "Diễn tả việc không thể thực hiện (Inability) -> dùng 'can't'.", trans: "Tôi xin lỗi, tôi không thể đến buổi họp ngày mai." },
+    { type: 'mc', tag: 'modal_verbs', q: "You ____ be late for the exam.", opts: ["will", "can", "shouldn't", "may"], a: "C", exp: "Lời khuyên không nên làm gì -> dùng 'shouldn't'.", trans: "Bạn không nên đi thi muộn." },
+
+    { type: 'order', tag: 'modal_verbs', q: "play / brother / the / can / my / guitar", a: "My brother can play the guitar.", exp: "Cấu trúc: S + modal verb + V-inf.", trans: "Anh trai tôi có thể chơi đàn guitar." },
+    { type: 'order', tag: 'modal_verbs', q: "see / you / should / doctor / a", a: "You should see a doctor.", exp: "Lời khuyên với 'should'.", trans: "Bạn nên đi gặp bác sĩ đi." },
+    { type: 'order', tag: 'modal_verbs', q: "wear / we / uniform / must / school / at", a: "We must wear uniform at school.", exp: "Quy định bắt buộc với 'must'.", trans: "Chúng tôi phải mặc đồng phục ở trường." },
+    { type: 'order', tag: 'modal_verbs', q: "I / borrow / may / pen / your / ?", a: "May I borrow your pen?", exp: "Câu hỏi xin phép lịch sự: May + S + V-inf?", trans: "Tôi có thể mượn bút của bạn được không?" },
+    { type: 'order', tag: 'modal_verbs', q: "be / late / will / he / not", a: "He will not be late.", exp: "Phủ định của 'will' là 'will not' (won't).", trans: "Anh ấy sẽ không đến muộn đâu." },
+    { type: 'order', tag: 'modal_verbs', q: "you / speak / can / French / ?", a: "Can you speak French?", exp: "Câu hỏi về khả năng: Can + S + V-inf?", trans: "Bạn có biết nói tiếng Pháp không?" },
+    { type: 'order', tag: 'modal_verbs', q: "we / what / do / should / ?", a: "What should we do?", exp: "Câu hỏi xin lời khuyên: Wh-word + should + S + V-inf?", trans: "Chúng ta nên làm gì bây giờ?" },
+    { type: 'order', tag: 'modal_verbs', q: "park / not / you / must / here", a: "You must not park here.", exp: "Cấm đỗ xe (Must not).", trans: "Bạn không được đỗ xe ở đây." },
+    { type: 'order', tag: 'modal_verbs', q: "be / true / it / may", a: "It may be true.", exp: "Diễn tả sự không chắc chắn.", trans: "Điều đó có thể là sự thật." },
+    { type: 'order', tag: 'modal_verbs', q: "forget / never / I / will / you", a: "I will never forget you.", exp: "Trạng từ 'never' đứng sau modal verb.", trans: "Tôi sẽ không bao giờ quên bạn." },
     
     // POSSESSIVE CASE - 10 MC, 10 Order (ĐÃ KIỂM TRA - OK)
     { type: 'mc', tag: 'possessive', q: "This is ____ car.", opts: ["Tom", "Tom's", "Toms", "Toms'"], a: "B", exp: "Sở hữu cách với tên riêng số ít: thêm 's vào sau tên.", trans: "Đây là xe của Tom." },
@@ -596,7 +630,269 @@
     { type: 'order', tag: 'possessive', q: "car / color / what / is / your / ?", a: "What color is your car?", exp: "Tính từ sở hữu 'your' bổ nghĩa cho 'car'.", trans: "Xe bạn màu gì?" },
     { type: 'order', tag: 'possessive', q: "boss's / office / My / is / big", a: "My boss's office is big.", exp: "Văn phòng của ông chủ (số ít).", trans: "Văn phòng của ông chủ tôi rất lớn." },
     { type: 'order', tag: 'possessive', q: "hers / not / is / bag / this", a: "This bag is not hers.", exp: "Sử dụng đại từ sở hữu 'hers' đứng một mình.", trans: "Cái túi này không phải của cô ấy." },
-    { type: 'order', tag: 'possessive', q: "teachers' / lounge / the / is / where / ?", a: "Where is the teachers' lounge?", exp: "Phòng của (nhiều) giáo viên: Teachers + dấu nháy đơn.", trans: "Phòng giáo viên ở đâu?" }
+    { type: 'order', tag: 'possessive', q: "teachers' / lounge / the / is / where / ?", a: "Where is the teachers' lounge?", exp: "Phòng của (nhiều) giáo viên: Teachers + dấu nháy đơn.", trans: "Phòng giáo viên ở đâu?" },
+
+    // ===== 10 CÂU TRẮC NGHIỆM =====
+    {
+        id: 1,
+        type: 'mc',
+        tag: 'word_type',
+        q: "The ____ of the mountain was breathtaking.",
+        opts: [
+            "beauty (noun)", 
+            "beautiful (adjective)", 
+            "beautifully (adverb)", 
+            "beautify (verb)"
+        ],
+        a: "A",
+        exp: "'Beauty' là danh từ đóng vai trò chủ ngữ của câu. Các từ còn lại: beautiful (adj), beautifully (adv), beautify (v).",
+        trans: "Vẻ đẹp của ngọn núi thật ngoạn mục.",
+        difficulty: "easy"
+    },
+    {
+        id: 2,
+        type: 'mc',
+        tag: 'word_type',
+        q: "She sings ____ in the choir every Sunday.",
+        opts: [
+            "beauty (noun)", 
+            "beautiful (adjective)", 
+            "beautifully (adverb)", 
+            "beautify (verb)"
+        ],
+        a: "C",
+        exp: "'Beautifully' là trạng từ bổ nghĩa cho động từ 'sings'. Các từ còn lại: beauty (n), beautiful (adj), beautify (v).",
+        trans: "Cô ấy hát hay trong dàn hợp xướng mỗi Chủ nhật.",
+        difficulty: "easy"
+    },
+    {
+        id: 3,
+        type: 'mc',
+        tag: 'word_type',
+        q: "We need to ____ the garden before the party.",
+        opts: [
+            "beauty (noun)", 
+            "beautiful (adjective)", 
+            "beautifully (adverb)", 
+            "beautify (verb)"
+        ],
+        a: "D",
+        exp: "'Beautify' là động từ (cần động từ nguyên thể sau 'need to'). Các từ còn lại: beauty (n), beautiful (adj), beautifully (adv).",
+        trans: "Chúng ta cần làm đẹp khu vườn trước bữa tiệc.",
+        difficulty: "medium"
+    },
+    {
+        id: 4,
+        type: 'mc',
+        tag: 'word_type',
+        q: "His ____ explanation made the concept easy to understand.",
+        opts: [
+            "clear (adjective)", 
+            "clearly (adverb)", 
+            "clarity (noun)", 
+            "clarify (verb)"
+        ],
+        a: "A",
+        exp: "'Clear' là tính từ bổ nghĩa cho danh từ 'explanation'. Các từ còn lại: clearly (adv), clarity (n), clarify (v).",
+        trans: "Lời giải thích rõ ràng của anh ấy làm khái niệm dễ hiểu.",
+        difficulty: "medium"
+    },
+    {
+        id: 5,
+        type: 'mc',
+        tag: 'word_type',
+        q: "Please speak ____ so everyone can hear you.",
+        opts: [
+            "clear (adjective)", 
+            "clearly (adverb)", 
+            "clarity (noun)", 
+            "clarify (verb)"
+        ],
+        a: "B",
+        exp: "'Clearly' là trạng từ bổ nghĩa cho động từ 'speak'. Các từ còn lại: clear (adj), clarity (n), clarify (v).",
+        trans: "Xin hãy nói rõ ràng để mọi người có thể nghe bạn.",
+        difficulty: "easy"
+    },
+    {
+        id: 6,
+        type: 'mc',
+        tag: 'word_type',
+        q: "The ____ of his argument was impressive.",
+        opts: [
+            "logic (noun)", 
+            "logical (adjective)", 
+            "logically (adverb)", 
+            "logician (noun-person)"
+        ],
+        a: "A",
+        exp: "'Logic' là danh từ trừu tượng làm chủ ngữ. 'Logician' là danh từ chỉ người nhưng không phù hợp ngữ cảnh.",
+        trans: "Tính logic trong lập luận của anh ấy rất ấn tượng.",
+        difficulty: "medium"
+    },
+    {
+        id: 7,
+        type: 'mc',
+        tag: 'word_type',
+        q: "She thought ____ about the difficult problem.",
+        opts: [
+            "logic (noun)", 
+            "logical (adjective)", 
+            "logically (adverb)", 
+            "logician (noun-person)"
+        ],
+        a: "C",
+        exp: "'Logically' là trạng từ bổ nghĩa cho động từ 'thought'. Các từ còn lại: logic (n), logical (adj), logician (n).",
+        trans: "Cô ấy suy nghĩ một cách logic về vấn đề khó khăn.",
+        difficulty: "medium"
+    },
+    {
+        id: 8,
+        type: 'mc',
+        tag: 'word_type',
+        q: "The ____ child shared his toys willingly.",
+        opts: [
+            "kindness (noun)", 
+            "kind (adjective)", 
+            "kindly (adverb)", 
+            "kind-hearted (adjective)"
+        ],
+        a: "B",
+        exp: "'Kind' là tính từ bổ nghĩa cho danh từ 'child'. 'Kind-hearted' cũng là tính từ nhưng không có trong lựa chọn.",
+        trans: "Đứa trẻ tử tế sẵn sàng chia sẻ đồ chơi của mình.",
+        difficulty: "easy"
+    },
+    {
+        id: 9,
+        type: 'mc',
+        tag: 'word_type',
+        q: "He treated everyone with great ____.",
+        opts: [
+            "kindness (noun)", 
+            "kind (adjective)", 
+            "kindly (adverb)", 
+            "kind-hearted (adjective)"
+        ],
+        a: "A",
+        exp: "'Kindness' là danh từ, đứng sau giới từ 'with'. Các từ còn lại: kind (adj), kindly (adv), kind-hearted (adj).",
+        trans: "Anh ấy đối xử với mọi người bằng sự tử tế lớn.",
+        difficulty: "medium"
+    },
+    {
+        id: 10,
+        type: 'mc',
+        tag: 'word_type',
+        q: "The teacher ____ explained the complex topic.",
+        opts: [
+            "patience (noun)", 
+            "patient (adjective)", 
+            "patiently (adverb)", 
+            "patients (noun-plural)"
+        ],
+        a: "C",
+        exp: "'Patiently' là trạng từ bổ nghĩa cho động từ 'explained'. Các từ còn lại: patience (n), patient (adj), patients (n).",
+        trans: "Giáo viên kiên nhẫn giải thích chủ đề phức tạp.",
+        difficulty: "medium"
+    },
+    {
+        id: 11,
+        type: 'order',
+        tag: 'word_type',
+        q: "reads / book / interesting / an / she / every / night",
+        a: "She reads an interesting book every night.",
+        exp: "Cấu trúc: Chủ ngữ (She) + Động từ (reads) + Mạo từ (an) + Tính từ (interesting) + Danh từ (book) + Trạng từ chỉ thời gian (every night).",
+        trans: "Cô ấy đọc một cuốn sách thú vị mỗi tối.",
+        difficulty: "easy"
+    },
+    {
+        id: 12,
+        type: 'order',
+        tag: 'word_type',
+        q: "quickly / the / finished / assignment / he",
+        a: "He finished the assignment quickly.",
+        exp: "Cấu trúc: Chủ ngữ (He) + Động từ (finished) + Danh từ (assignment) + Trạng từ (quickly). Trạng từ có thể đứng cuối câu để bổ nghĩa cho động từ.",
+        trans: "Anh ấy hoàn thành bài tập nhanh chóng.",
+        difficulty: "easy"
+    },
+    {
+        id: 13,
+        type: 'order',
+        tag: 'word_type',
+        q: "beautiful / sings / song / she / a / beautifully",
+        a: "She sings a beautiful song beautifully.",
+        exp: "Cấu trúc: Chủ ngữ (She) + Động từ (sings) + Mạo từ (a) + Tính từ (beautiful) + Danh từ (song) + Trạng từ (beautifully). Tính từ bổ nghĩa cho danh từ, trạng từ bổ nghĩa cho động từ.",
+        trans: "Cô ấy hát một bài hát hay một cách tuyệt vời.",
+        difficulty: "medium"
+    },
+    {
+        id: 14,
+        type: 'order',
+        tag: 'word_type',
+        q: "carefully / driver / the / drove / car / the / experienced",
+        a: "The experienced driver drove the car carefully.",
+        exp: "Cấu trúc: Mạo từ (The) + Tính từ (experienced) + Danh từ (driver) + Động từ (drove) + Danh từ (car) + Trạng từ (carefully). Tính từ đứng trước danh từ nó bổ nghĩa.",
+        trans: "Người lái xe có kinh nghiệm lái xe cẩn thận.",
+        difficulty: "medium"
+    },
+    {
+        id: 15,
+        type: 'order',
+        tag: 'word_type',
+        q: "happily / children / playground / the / in / played",
+        a: "The children played happily in the playground.",
+        exp: "Cấu trúc: Mạo từ (The) + Danh từ (children) + Động từ (played) + Trạng từ (happily) + Giới từ (in) + Danh từ (playground).",
+        trans: "Những đứa trẻ chơi vui vẻ trong sân chơi.",
+        difficulty: "easy"
+    },
+    {
+        id: 16,
+        type: 'order',
+        tag: 'word_type',
+        q: "difficult / exam / very / was / the / yesterday",
+        a: "The exam yesterday was very difficult.",
+        exp: "Cấu trúc: Mạo từ (The) + Danh từ (exam) + Trạng từ chỉ thời gian (yesterday) + Động từ (was) + Trạng từ (very) + Tính từ (difficult).",
+        trans: "Bài kiểm tra ngày hôm qua rất khó.",
+        difficulty: "medium"
+    },
+    {
+        id: 17,
+        type: 'order',
+        tag: 'word_type',
+        q: "speaks / French / fluently / she / and / English",
+        a: "She speaks English and French fluently.",
+        exp: "Cấu trúc: Chủ ngữ (She) + Động từ (speaks) + Danh từ (English and French) + Trạng từ (fluently).",
+        trans: "Cô ấy nói tiếng Anh và tiếng Pháp trôi chảy.",
+        difficulty: "medium"
+    },
+    {
+        id: 18,
+        type: 'order',
+        tag: 'word_type',
+        q: "old / man / the / walked / slowly / street / down / the",
+        a: "The old man walked slowly down the street.",
+        exp: "Cấu trúc: Mạo từ (The) + Tính từ (old) + Danh từ (man) + Động từ (walked) + Trạng từ (slowly) + Giới từ (down) + Danh từ (street).",
+        trans: "Ông già đi chậm rãi xuống phố.",
+        difficulty: "easy"
+    },
+    {
+        id: 19,
+        type: 'order',
+        tag: 'word_type',
+        q: "student / hard / studies / the / intelligent / very",
+        a: "The intelligent student studies very hard.",
+        exp: "Cấu trúc: Mạo từ (The) + Tính từ (intelligent) + Danh từ (student) + Động từ (studies) + Trạng từ (very hard).",
+        trans: "Học sinh thông minh học tập rất chăm chỉ.",
+        difficulty: "medium"
+    },
+    {
+        id: 20,
+        type: 'order',
+        tag: 'word_type',
+        q: "weather / today / is / sunny / the / extremely",
+        a: "The weather today is extremely sunny.",
+        exp: "Cấu trúc: Mạo từ (The) + Danh từ (weather) + Trạng từ chỉ thời gian (today) + Động từ (is) + Trạng từ (extremely) + Tính từ (sunny).",
+        trans: "Thời tiết hôm nay cực kỳ nắng.",
+        difficulty: "medium"
+    }
 ];
 
     // Để đảm bảo có đủ 10 câu mỗi loại, code này sẽ nhân bản DB nếu DB của bạn còn ít.
