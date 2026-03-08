@@ -83,14 +83,35 @@
         .grid-checkboxes {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 15px;
-            margin: 25px 0;
+            gap: 10px;
+            margin: 20px 0;
         }
+
+/* Tối ưu hóa cho điện thoại */
+@media screen and (max-width: 768px) {
+    /* Khi điện thoại để dọc */
+    @media (orientation: portrait) {
+        .grid-checkboxes {
+            grid-template-columns: repeat(2, 1fr); /* Chia 2 cột */
+        }
+        .checkbox-wrapper {
+            padding: 10px 5px; /* Giảm padding một chút để vừa màn hình nhỏ */
+            font-size: 0.9rem;  /* Giảm cỡ chữ nếu cần */
+        }
+    }
+
+    /* Khi điện thoại để ngang */
+    @media (orientation: landscape) {
+        .grid-checkboxes {
+            grid-template-columns: repeat(3, 1fr); /* Chia 3 cột */
+        }
+    }
+}
 
         .checkbox-wrapper {
             display: flex;
             align-items: center;
-            padding: 15px;
+            padding: 6px;
             background: white;
             border: 2px solid var(--border);
             border-radius: 18px;
