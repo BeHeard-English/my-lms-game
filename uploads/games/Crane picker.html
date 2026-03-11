@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>🎮 UFO Crane Picker - Be Heard</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ny: #ffe94d; --np: #ff5fa0; --nb: #4dd8ff; --ng: #4dffb4; --npu: #c77dff;
+  --bg: #0d0b1e; --panel: rgba(19,16,43,0.93);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:'Baloo 2',sans-serif;background:var(--bg);overflow:hidden;}
+body{
+  background-image:
+    radial-gradient(ellipse at 20% 0%,rgba(199,125,255,.15),transparent 50%),
+    radial-gradient(ellipse at 80% 0%,rgba(77,216,255,.12),transparent 50%),
+    radial-gradient(ellipse at 50% 100%,rgba(255,94,160,.1),transparent 60%);
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    radial-gradient(1px 1px at 10% 15%,rgba(255,255,255,.6),transparent),
+    radial-gradient(1px 1px at 30% 40%,rgba(255,255,255,.4),transparent),
+    radial-gradient(1px 1px at 55% 20%,rgba(255,255,255,.5),transparent),
+    radial-gradient(1px 1px at 70% 60%,rgba(255,255,255,.3),transparent),
+    radial-gradient(1px 1px at 85% 10%,rgba(255,255,255,.6),transparent),
+    radial-gradient(1px 1px at 15% 80%,rgba(255,255,255,.5),transparent);
+}
+
+/* ══════════════════════════════════
+   DESKTOP LAYOUT (≥1024px)
+══════════════════════════════════ */
+.app{
+  position:relative;z-index:1;height:100vh;
+  display:grid;
+  grid-template-rows:auto 1fr;
+  grid-template-columns:230px 1fr 230px;
+  grid-template-areas:"hdr hdr hdr""lft main rgt";
+  gap:8px;padding:8px;
+}
+.header{grid-area:hdr;text-align:center;padding:4px 0 2px;}
+.header h1{
+  font-size:clamp(1.3rem,2.5vw,1.9rem);font-weight:900;letter-spacing:3px;
+  background:linear-gradient(90deg,#ffe94d,#ff5fa0,#4dd8ff,#ffe94d);
+  background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;animation:titleShift 4s linear infinite;
+  filter:drop-shadow(0 0 14px rgba(255,233,77,.5));line-height:1;
+}
+@keyframes titleShift{0%{background-position:0%}100%{background-position:200%}}
+.header .badge{display:inline-block;background:linear-gradient(135deg,#ff5fa0,#c77dff);color:#fff;font-size:.58rem;font-weight:800;padding:1px 10px;border-radius:20px;letter-spacing:2px;margin-top:2px;}
+
+.panel{
+  background:var(--panel);border:1px solid rgba(255,255,255,.07);
+  border-radius:16px;padding:12px;backdrop-filter:blur(12px);
+  box-shadow:0 6px 24px rgba(0,0,0,.5);
+  display:flex;flex-direction:column;gap:8px;overflow:hidden;
+}
+.panel-left{grid-area:lft;}
+.panel-right{grid-area:rgt;}
+.panel h3{font-size:.76rem;font-weight:800;letter-spacing:1px;display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.h-yellow{color:var(--ny);} .h-pink{color:var(--np);} .h-green{color:var(--ng);}
+
+/* Input + DOCX row */
+.input-actions{display:flex;gap:5px;flex-shrink:0;}
+.btn-docx{
+  flex-shrink:0;
+  background:rgba(77,216,255,.12);border:1.5px solid rgba(77,216,255,.35);
+  border-radius:8px;color:var(--nb);font-family:'Baloo 2',sans-serif;
+  font-size:.72rem;font-weight:700;padding:0 8px;cursor:pointer;
+  transition:all .25s;white-space:nowrap;display:flex;align-items:center;gap:4px;
+}
+.btn-docx:hover{background:rgba(77,216,255,.22);border-color:var(--nb);}
+#docx-file{display:none;}
+
+.panel textarea{
+  flex:1;min-height:0;background:rgba(0,0,0,.35);
+  border:1.5px solid rgba(255,255,255,.1);border-radius:10px;
+  color:#e2e8f0;padding:8px 10px;font-family:'Baloo 2',sans-serif;
+  font-size:.82rem;resize:none;outline:none;line-height:1.5;
+  transition:border-color .3s;
+}
+.panel textarea:focus{border-color:var(--ny);}
+.panel textarea::placeholder{color:rgba(255,255,255,.2);}
+
+.btn-primary{
+  flex-shrink:0;background:linear-gradient(135deg,#ffe94d,#ff9f43);
+  border:none;border-radius:10px;color:#1a1640;
+  font-family:'Baloo 2',sans-serif;font-size:.85rem;font-weight:800;
+  padding:8px;cursor:pointer;transition:transform .2s,box-shadow .2s;letter-spacing:1px;
+}
+.btn-primary:hover{transform:scale(1.04);box-shadow:0 4px 16px rgba(255,233,77,.5);}
+
+.item-chips{display:flex;flex-wrap:wrap;gap:4px;overflow-y:auto;flex-shrink:0;max-height:56px;}
+.item-chip{background:rgba(77,216,255,.1);border:1px solid rgba(77,216,255,.3);border-radius:20px;color:var(--nb);font-size:.62rem;padding:1px 7px;font-weight:600;}
+
+.divider{width:100%;height:1px;background:rgba(255,255,255,.06);flex-shrink:0;}
+
+/* BGM */
+.bgm-upload-btn{
+  flex-shrink:0;background:rgba(255,95,160,.1);
+  border:1.5px dashed rgba(255,95,160,.4);border-radius:10px;
+  color:var(--np);font-family:'Baloo 2',sans-serif;font-size:.76rem;
+  font-weight:700;padding:7px;cursor:pointer;transition:all .3s;text-align:center;
+}
+.bgm-upload-btn:hover{background:rgba(255,95,160,.2);border-style:solid;}
+#bgm-file{display:none;}
+#bgm-name{color:rgba(255,255,255,.35);font-size:.63rem;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;}
+.bgm-controls{display:flex;gap:5px;flex-shrink:0;}
+.bgm-ctrl-btn{
+  flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:7px;color:#fff;font-family:'Baloo 2',sans-serif;
+  font-size:.7rem;font-weight:700;padding:5px 2px;cursor:pointer;transition:all .2s;
+}
+.bgm-ctrl-btn:hover{background:rgba(255,255,255,.12);}
+.bgm-ctrl-btn.active{background:rgba(77,216,255,.2);border-color:var(--nb);color:var(--nb);}
+.volume-row{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.volume-row span{color:rgba(255,255,255,.4);font-size:.68rem;}
+input[type=range]{flex:1;-webkit-appearance:none;height:3px;border-radius:2px;background:rgba(255,255,255,.1);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--nb);cursor:pointer;}
+
+/* Stats */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;flex-shrink:0;}
+.stat-box{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:6px;text-align:center;}
+.stat-box .val{font-size:1.35rem;font-weight:900;color:var(--ng);line-height:1;}
+.stat-box .lbl{font-size:.56rem;color:rgba(255,255,255,.3);margin-top:1px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+
+/* Status + Play */
+.status-bar{
+  flex-shrink:0;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);
+  border-radius:8px;padding:5px 10px;color:rgba(255,255,255,.45);
+  font-size:.73rem;font-weight:600;text-align:center;min-height:28px;
+  display:flex;align-items:center;justify-content:center;
+}
+#btn-play{
+  flex-shrink:0;background:linear-gradient(135deg,#ff5fa0,#c77dff);
+  border:none;border-radius:50px;color:#fff;font-family:'Baloo 2',sans-serif;
+  font-size:1.05rem;font-weight:900;padding:10px 0;width:100%;
+  cursor:pointer;letter-spacing:3px;text-transform:uppercase;
+  box-shadow:0 4px 22px rgba(255,95,160,.5),0 0 0 2px rgba(255,95,160,.2);
+  transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden;
+}
+#btn-play::before{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);animation:btnShine 2.5s linear infinite;}
+@keyframes btnShine{0%{left:-100%}100%{left:200%}}
+#btn-play:hover:not(:disabled){transform:scale(1.04) translateY(-1px);box-shadow:0 8px 30px rgba(255,95,160,.7),0 0 0 3px rgba(255,95,160,.3);}
+#btn-play:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+#btn-play:active:not(:disabled){transform:scale(.97);}
+
+/* ══════════════════════════════════
+   MACHINE
+══════════════════════════════════ */
+.main{grid-area:main;display:flex;flex-direction:column;align-items:center;min-height:0;}
+.machine{
+  width:100%;flex:1;min-height:0;border-radius:20px 20px 10px 10px;
+  overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 0 0 2px rgba(255,255,255,.06),0 0 34px rgba(77,216,255,.2),0 0 64px rgba(199,125,255,.12),0 14px 44px rgba(0,0,0,.7);
+}
+.marquee-bar{
+  flex-shrink:0;background:linear-gradient(90deg,#ff5fa0,#ffe94d,#4dffb4,#4dd8ff,#c77dff,#ff5fa0);
+  background-size:300%;animation:marqueeBG 3s linear infinite;
+  padding:4px 0;display:flex;align-items:center;justify-content:center;gap:14px;
+}
+@keyframes marqueeBG{0%{background-position:0%}100%{background-position:300%}}
+.marquee-text{color:rgba(0,0,0,.65);font-size:.58rem;font-weight:900;letter-spacing:4px;text-transform:uppercase;white-space:nowrap;}
+.light-row{display:flex;gap:7px;}
+.lbulb{width:7px;height:7px;border-radius:50%;background:#fff;box-shadow:0 0 6px 2px #fff;animation:bulbBlink .8s ease-in-out infinite alternate;}
+.lbulb:nth-child(2n){animation-delay:.4s;background:#ffe94d;box-shadow:0 0 6px 2px #ffe94d;}
+.lbulb:nth-child(3n){animation-delay:.2s;background:#ff5fa0;box-shadow:0 0 6px 2px #ff5fa0;}
+@keyframes bulbBlink{0%{opacity:.4;transform:scale(.8)}100%{opacity:1;transform:scale(1.1)}}
+.machine-header{flex-shrink:0;background:linear-gradient(180deg,#221e4a,#1a1640);padding:5px 14px;border-bottom:2px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between;}
+.machine-logo{font-size:.9rem;font-weight:900;color:var(--ny);letter-spacing:3px;text-shadow:0 0 10px rgba(255,233,77,.7);}
+.machine-logo span{color:var(--np);}
+.coin-slots{display:flex;gap:5px;}
+.coin-slot{width:17px;height:6px;background:rgba(0,0,0,.6);border-radius:4px;border:1px solid rgba(255,255,255,.15);}
+.crane-track{flex-shrink:0;position:relative;height:26px;background:linear-gradient(180deg,#0d0b1e,#13102b);overflow:visible;z-index:20;}
+.track-rail{position:absolute;top:50%;left:10px;right:10px;height:4px;background:linear-gradient(90deg,#2d3561,#7a8fff,#c77dff,#4dd8ff,#7a8fff,#2d3561);background-size:200%;border-radius:3px;transform:translateY(-50%);animation:railGlow 2s linear infinite;box-shadow:0 0 8px rgba(120,150,255,.5);}
+@keyframes railGlow{0%{background-position:0%}100%{background-position:200%}}
+.track-wheels{position:absolute;top:50%;left:8px;right:8px;display:flex;justify-content:space-between;transform:translateY(-50%);}
+.wheel{width:9px;height:9px;border-radius:50%;background:linear-gradient(135deg,#718096,#2d3748);border:1.5px solid rgba(255,255,255,.2);}
+#crane{position:absolute;top:0;left:10%;width:52px;display:flex;flex-direction:column;align-items:center;z-index:30;transform:translateX(-50%);transition:left .7s cubic-bezier(.25,.46,.45,.94);filter:drop-shadow(0 0 7px rgba(255,233,77,.6));}
+.crane-body{width:40px;height:22px;background:linear-gradient(180deg,#ffe94d,#ff9f43);border-radius:6px 6px 0 0;border:2px solid rgba(255,255,255,.3);position:relative;display:flex;align-items:center;justify-content:center;font-size:12px;}
+.crane-body::before{content:'';position:absolute;top:2px;left:4px;right:4px;height:4px;background:rgba(255,255,255,.25);border-radius:3px;}
+.crane-body::after{content:'';position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);width:6px;height:6px;background:#ff9f43;border-radius:0 0 4px 4px;}
+.crane-wire{width:3px;height:0;background:linear-gradient(180deg,#e2e8f0,rgba(160,174,192,.6));transition:height .55s ease-in-out;box-shadow:0 0 4px rgba(200,220,255,.5);}
+.crane-claw{width:30px;height:20px;position:relative;opacity:0;transition:opacity .3s;}
+.claw-arm{position:absolute;bottom:0;width:4px;height:15px;background:linear-gradient(180deg,#cbd5e0,#718096);border-radius:0 0 4px 4px;transform-origin:top center;}
+.claw-arm.l{left:2px;transform:rotate(-38deg);}
+.claw-arm.m{left:50%;transform:translateX(-50%);}
+.claw-arm.r{right:2px;transform:rotate(38deg);}
+.claw-grip .claw-arm.l{transform:rotate(-15deg);}
+.claw-grip .claw-arm.r{transform:rotate(15deg);}
+.claw-grip .claw-arm.m{transform:translateX(-50%) scaleY(.9);}
+.glass-area{flex:1;min-height:0;position:relative;background:linear-gradient(180deg,#0d1a35,#0d1f42 40%,#0a1830);overflow:hidden;}
+.glass-area::after{content:'';position:absolute;bottom:0;left:0;right:0;height:45px;background:linear-gradient(0deg,rgba(77,100,255,.15),transparent);pointer-events:none;}
+.glass-area::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.025) 3px,rgba(0,0,0,.025) 4px);pointer-events:none;z-index:10;}
+.glass-shine{position:absolute;top:0;left:0;bottom:0;width:15%;background:linear-gradient(90deg,rgba(255,255,255,.04),rgba(255,255,255,.01) 50%,transparent);pointer-events:none;z-index:11;border-radius:0 40% 40% 0;}
+.glass-floor{position:absolute;bottom:0;left:0;right:0;height:9px;background:linear-gradient(180deg,transparent,rgba(100,120,255,.2));border-top:1px solid rgba(100,150,255,.15);pointer-events:none;z-index:12;}
+#balls-container{position:absolute;inset:0;}
+.ball{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:default;box-shadow:inset -5px -5px 10px rgba(0,0,0,.35),inset 4px 4px 8px rgba(255,255,255,.35),0 5px 10px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.1);user-select:none;overflow:hidden;}
+.ball::before{content:'';position:absolute;inset:0;border-radius:50%;background:inherit;}
+.ball::after{content:'';position:absolute;top:12%;left:20%;width:35%;height:22%;background:rgba(255,255,255,.45);border-radius:50%;transform:rotate(-35deg);pointer-events:none;}
+.ball .ball-emoji{font-size:1.3em;position:relative;z-index:2;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));pointer-events:none;}
+.ball.idle-float{animation:idleFloat var(--dur,3s) ease-in-out infinite var(--delay,0s);}
+@keyframes idleFloat{0%,100%{transform:translateY(0) rotate(var(--rot1,-2deg))}50%{transform:translateY(-5px) rotate(var(--rot2,2deg))}}
+.ball.grabbed{animation:none !important;z-index:50;}
+.empty-state{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;pointer-events:none;color:rgba(255,255,255,.12);}
+.empty-state .big-icon{font-size:2.8rem;filter:grayscale(1);}
+.empty-state p{font-size:.78rem;font-weight:600;}
+.machine-bottom{flex-shrink:0;background:linear-gradient(180deg,#1a1640,#13102b);padding:6px 14px;border-top:2px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between;}
+.lcd-box{background:#0a0f0a;border:1.5px solid rgba(77,255,180,.3);border-radius:5px;padding:3px 9px;font-family:'Courier New',monospace;font-size:.7rem;color:#4dffb4;text-shadow:0 0 6px rgba(77,255,180,.7);letter-spacing:2px;}
+.machine-tag{color:rgba(255,255,255,.18);font-size:.56rem;letter-spacing:4px;font-weight:800;}
+.chute-row{flex-shrink:0;display:flex;justify-content:center;}
+.chute-side{width:11px;height:40px;background:linear-gradient(180deg,#221e4a,#13102b);border:2px solid rgba(255,255,255,.05);}
+.chute-side.left{border-radius:0 0 0 8px;border-right:none;}
+.chute-side.right{border-radius:0 0 8px 0;border-left:none;}
+.prize-chute{width:84px;height:40px;background:linear-gradient(180deg,#0d0b1e,#13102b);border:2px solid rgba(255,255,255,.05);border-top:none;border-radius:0 0 12px 12px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
+.chute-slot{position:absolute;top:0;left:20%;right:20%;height:4px;background:rgba(0,0,0,.9);border-radius:0 0 3px 3px;}
+#chute-ball{display:none;width:32px;height:32px;border-radius:50%;animation:chuteIn .5s cubic-bezier(.34,1.56,.64,1);align-items:center;justify-content:center;font-size:1rem;position:relative;box-shadow:inset -2px -2px 5px rgba(0,0,0,.3),inset 2px 2px 4px rgba(255,255,255,.3);}
+#chute-ball::after{content:'';position:absolute;top:15%;left:20%;width:32%;height:20%;background:rgba(255,255,255,.4);border-radius:50%;transform:rotate(-35deg);}
+@keyframes chuteIn{0%{transform:translateY(-35px) scale(.3);opacity:0}100%{transform:translateY(0) scale(1);opacity:1}}
+
+/* ══════════════════════════════════
+   RESULT OVERLAY
+══════════════════════════════════ */
+#result-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:2000;align-items:center;justify-content:center;backdrop-filter:blur(8px);cursor:pointer;}
+#result-overlay.show{display:flex;}
+.result-bg-blur{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(199,125,255,.1),transparent 70%);pointer-events:none;}
+.result-card{position:relative;background:linear-gradient(135deg,#1e1a45,#13102b);border:2px solid rgba(255,233,77,.3);border-radius:24px;padding:32px 44px;text-align:center;box-shadow:0 20px 80px rgba(0,0,0,.6),0 0 50px rgba(255,233,77,.12);animation:cardPop .5s cubic-bezier(.175,.885,.32,1.275);max-width:360px;width:90%;overflow:hidden;pointer-events:none;}
+.result-card::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at center,rgba(255,233,77,.05),transparent 60%);animation:resultGlow 3s ease-in-out infinite;pointer-events:none;}
+@keyframes resultGlow{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+@keyframes cardPop{0%{transform:scale(.2) rotate(-15deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+.result-stars{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.result-star{position:absolute;color:var(--ny);font-size:.9rem;animation:starFloat 2s ease-in-out infinite;}
+@keyframes starFloat{0%,100%{transform:translateY(0) rotate(0) scale(1);opacity:.6}50%{transform:translateY(-10px) rotate(180deg) scale(1.2);opacity:1}}
+.result-emoji-big{font-size:3.5rem;animation:emojiSpin .8s cubic-bezier(.34,1.56,.64,1);display:block;}
+@keyframes emojiSpin{0%{transform:scale(0) rotate(-180deg)}100%{transform:scale(1) rotate(0)}}
+.result-ball-circle{width:56px;height:56px;border-radius:50%;margin:10px auto;box-shadow:inset -4px -4px 8px rgba(0,0,0,.3),inset 3px 3px 7px rgba(255,255,255,.3),0 5px 16px rgba(0,0,0,.4);position:relative;animation:ballReveal .6s cubic-bezier(.34,1.56,.64,1) .2s both;}
+.result-ball-circle::after{content:'';position:absolute;top:15%;left:20%;width:32%;height:20%;background:rgba(255,255,255,.4);border-radius:50%;transform:rotate(-35deg);}
+@keyframes ballReveal{0%{transform:scale(0)}100%{transform:scale(1)}}
+.result-label{color:rgba(255,255,255,.35);font-size:.7rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-top:6px;}
+.result-name{color:var(--ny);font-size:clamp(1.4rem,4vw,2.1rem);font-weight:900;text-shadow:0 0 20px rgba(255,233,77,.6);margin:6px 0 10px;word-break:break-word;line-height:1.2;}
+.result-hint{color:rgba(255,255,255,.28);font-size:.72rem;font-weight:600;letter-spacing:1px;}
+
+/* Confetti */
+.cfti{position:fixed;top:-12px;border-radius:3px;animation:cfFall linear forwards;z-index:1500;pointer-events:none;}
+@keyframes cfFall{0%{transform:translateY(0) rotate(0) scaleX(1);opacity:1}80%{opacity:1}100%{transform:translateY(105vh) rotate(900deg) scaleX(-1);opacity:0}}
+
+/* ══════════════════════════════════
+   TABLET (768–1023px)
+══════════════════════════════════ */
+@media(max-width:1023px) and (min-width:600px){
+  html,body{overflow:auto;}
+  .app{
+    height:auto;min-height:100vh;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:auto auto 1fr auto;
+    grid-template-areas:
+      "hdr  hdr"
+      "lft  rgt"
+      "main main"
+      "main main";
+    gap:8px;padding:10px;
+  }
+  .panel-left,.panel-right{height:auto;}
+  .panel-left .panel-textarea-wrap{display:flex;gap:6px;}
+  .main{width:100%;max-width:600px;margin:0 auto;height:520px;}
+  .machine{border-radius:18px 18px 8px 8px;}
+  .glass-area{height:280px;flex:none;}
+}
+
+/* ══════════════════════════════════
+   MOBILE (< 600px)
+══════════════════════════════════ */
+@media(max-width:599px){
+  html,body{overflow:auto;}
+  .app{
+    height:auto;
+    display:flex;flex-direction:column;
+    padding:8px;gap:8px;
+  }
+  .header h1{font-size:1.3rem;letter-spacing:2px;}
+  .header .badge{font-size:.55rem;}
+
+  /* Machine block */
+  .main{width:100%;order:1;}
+  .machine{border-radius:16px 16px 8px 8px;}
+  .glass-area{height:220px;flex:none;}
+  .marquee-text{font-size:.52rem;letter-spacing:2px;}
+  .machine-logo{font-size:.78rem;letter-spacing:2px;}
+  .lcd-box{font-size:.62rem;padding:2px 7px;}
+
+  /* Tabs for bottom panels */
+  .panels-bottom{order:2;display:flex;flex-direction:column;gap:8px;}
+  .panel-left,.panel-right{border-radius:14px;}
+
+  /* Collapse panels */
+  .panel{padding:10px;}
+  .panel h3{cursor:pointer;justify-content:space-between;}
+  .panel h3::after{content:'▾';font-size:.8rem;color:rgba(255,255,255,.3);transition:transform .3s;}
+  .panel.collapsed h3::after{transform:rotate(-90deg);}
+  .panel.collapsed .panel-body{display:none;}
+  .panel-body{display:flex;flex-direction:column;gap:7px;margin-top:6px;}
+
+  /* Play button always visible outside panels */
+  .mobile-play-area{order:2;display:flex;flex-direction:column;gap:7px;padding:0 2px;}
+  .panel-left,.panel-right{order:3;}
+}
+
+/* Always hide mobile-play-area on non-mobile */
+.mobile-play-area{display:none;}
+.panel-right .spacer{flex:1;}
+
+/* Scrollbars */
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px;}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>🎮 UFO CRANE PICKER</h1>
+    <div class="badge">✨ ARCADE EDITION ✨</div>
+  </div>
+
+  <!-- LEFT PANEL -->
+  <div class="panel panel-left" id="panel-left">
+    <h3 class="h-yellow" onclick="togglePanel('panel-left')">🎯 Danh sách lựa chọn</h3>
+    <div class="panel-body">
+      <div class="input-actions">
+        <button class="btn-docx" onclick="document.getElementById('docx-file').click()" title="Tải file Word .docx">📄 DOCX</button>
+        <input type="file" id="docx-file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onchange="loadDocx(this)">
+      </div>
+      <textarea id="items-input" placeholder="Nhập mỗi mục 1 dòng:&#10;&#10;Nguyễn Văn An&#10;Trần Thị Bình&#10;Lê Minh Châu&#10;..."></textarea>
+      <button class="btn-primary" onclick="loadItems()">🎳 NẠP BÓNG VÀO MÁY</button>
+      <div class="item-chips" id="item-chips"></div>
+      <div class="divider"></div>
+      <h3 class="h-green" style="cursor:default;">📊 Thống kê</h3>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="val" id="stat-plays">0</div><div class="lbl">Lượt chơi</div></div>
+        <div class="stat-box"><div class="val" id="stat-left">0</div><div class="lbl">Còn lại</div></div>
+        <div class="stat-box"><div class="val" id="stat-total">0</div><div class="lbl">Tổng số</div></div>
+        <div class="stat-box"><div class="val" id="stat-pct">0%</div><div class="lbl">Đã gắp</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN MACHINE -->
+  <div class="main">
+    <div class="machine" id="machine">
+      <div class="marquee-bar">
+        <div class="light-row"><div class="lbulb"></div><div class="lbulb"></div><div class="lbulb"></div></div>
+        <div class="marquee-text">⭐ UFO CATCHER ⭐ CRANE GAME ⭐ PICK YOUR PRIZE ⭐</div>
+        <div class="light-row"><div class="lbulb"></div><div class="lbulb"></div><div class="lbulb"></div></div>
+      </div>
+      <div class="machine-header">
+        <div class="machine-logo">UFO <span>CATCHER</span></div>
+        <div class="coin-slots"><div class="coin-slot"></div><div class="coin-slot"></div></div>
+      </div>
+      <div class="crane-track">
+        <div class="track-rail"></div>
+        <div class="track-wheels">
+          <div class="wheel"></div><div class="wheel"></div><div class="wheel"></div><div class="wheel"></div><div class="wheel"></div>
+        </div>
+        <div id="crane">
+          <div class="crane-body">🕹️</div>
+          <div class="crane-wire" id="crane-wire"></div>
+          <div class="crane-claw" id="crane-claw">
+            <div class="claw-arm l"></div><div class="claw-arm m"></div><div class="claw-arm r"></div>
+          </div>
+        </div>
+      </div>
+      <div class="glass-area">
+        <div class="glass-shine"></div>
+        <div class="glass-floor"></div>
+        <div id="balls-container">
+          <div class="empty-state"><div class="big-icon">🎳</div><p>Hãy nạp bóng để bắt đầu!</p></div>
+        </div>
+      </div>
+      <div class="machine-bottom">
+        <div class="lcd-box" id="lcd-plays">PLY:000</div>
+        <div class="machine-tag">◆ SEGA UFO ◆</div>
+        <div class="lcd-box" id="lcd-items">ITM:000</div>
+      </div>
+    </div>
+    <div class="chute-row">
+      <div class="chute-side left"></div>
+      <div class="prize-chute"><div class="chute-slot"></div><div id="chute-ball"></div></div>
+      <div class="chute-side right"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="panel panel-right" id="panel-right">
+    <h3 class="h-pink" onclick="togglePanel('panel-right')">🎵 Nhạc nền (BGM)</h3>
+    <div class="panel-body">
+      <button class="bgm-upload-btn" onclick="document.getElementById('bgm-file').click()">📂 Tải file MP3 từ thiết bị</button>
+      <input type="file" id="bgm-file" accept="audio/mp3,audio/*" onchange="loadBGM(this)">
+      <div id="bgm-name">Chưa có file nhạc</div>
+      <div class="bgm-controls">
+        <button class="bgm-ctrl-btn" id="btn-bgm-play" onclick="toggleBGM()">▶ Phát</button>
+        <button class="bgm-ctrl-btn" onclick="stopBGM()">⏹ Dừng</button>
+        <button class="bgm-ctrl-btn" id="btn-bgm-loop" onclick="toggleLoop()">🔁 Lặp</button>
+      </div>
+      <div class="volume-row">
+        <span>🔈</span>
+        <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.5" oninput="setVolume(this.value)">
+        <span>🔊</span>
+      </div>
+      <div class="divider"></div>
+      <div class="spacer"></div>
+      <div class="status-bar" id="status-msg">Nhập danh sách và nhấn <strong>NẠP BÓNG</strong> để bắt đầu!</div>
+      <button id="btn-play" onclick="play()" disabled>🕹️ PLAY</button>
+    </div>
+  </div>
+
+  <!-- MOBILE PLAY AREA (only visible on mobile, injected by JS) -->
+  <div class="mobile-play-area" id="mobile-play-area"></div>
+
+</div>
+
+<!-- RESULT OVERLAY -->
+<div id="result-overlay" onclick="closeResult()">
+  <div class="result-bg-blur"></div>
+  <div class="result-card">
+    <div class="result-stars" id="result-stars"></div>
+    <span class="result-emoji-big" id="result-emoji">🎉</span>
+    <div class="result-ball-circle" id="result-ball-circle"></div>
+    <div class="result-label">✨ Kết quả được chọn ✨</div>
+    <div class="result-name" id="result-name"></div>
+    <div class="result-hint">👆 Chạm / click bất kỳ đâu để tiếp tục</div>
+  </div>
+</div>
+
+<audio id="bgm-audio" loop></audio>
+
+<!-- Mammoth for DOCX parsing -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script>
+/* ── RESPONSIVE SETUP ── */
+function isMobile(){return window.innerWidth<600;}
+
+function setupMobileLayout(){
+  if(!isMobile()) return;
+  // Move status + play button to mobile-play-area
+  const mpa = document.getElementById('mobile-play-area');
+  if(mpa && mpa.children.length===0){
+    const sb = document.getElementById('status-msg');
+    const bp = document.getElementById('btn-play');
+    mpa.appendChild(sb);
+    mpa.appendChild(bp);
+    mpa.style.display='flex';
+    mpa.style.flexDirection='column';
+    mpa.style.gap='7px';
+    mpa.style.padding='0 2px';
+  }
+  // Collapse panels by default on mobile
+  ['panel-left','panel-right'].forEach(id=>{
+    const p=document.getElementById(id);
+    if(p && !p.classList.contains('_init')){
+      p.classList.add('collapsed','_init');
+    }
+  });
+}
+
+function togglePanel(id){
+  if(!isMobile()) return;
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+window.addEventListener('resize', ()=>{
+  renderBalls();
+});
+
+/* ── DATA ── */
+const BALL_COLORS=[
+  ['#ff6b6b','#ff4757'],['#ffd93d','#ffa502'],['#6bcb77','#2ed573'],
+  ['#4dd8ff','#1e90ff'],['#c77dff','#a855f7'],['#ff9f43','#ff6348'],
+  ['#ff6eb4','#ff4daa'],['#00cec9','#00b5a0'],['#fd79a8','#e84393'],
+  ['#a29bfe','#6c5ce7'],['#55efc4','#00cca3'],['#fdcb6e','#f0a500'],
+];
+const BALL_EMOJIS=['⭐','🌟','💎','🔮','🎀','🌈','🍀','🦋','🌸','🎵','🎯','🏆','💫','🎁','🌺'];
+const RESULT_EMOJIS=['🎉','🏆','🌟','🎊','🥳','✨','💫','🎁','🎯','🌈'];
+
+let items=[],ballEls=[],playCount=0,totalLoaded=0,busy=false;
+let craneX=15,craneDir=1,craneAnim=null;
+const CRANE_SPEED=0.22;
+
+/* ── AUDIO ── */
+let audioCtx=null;
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,type,dur,vol=0.3,d=0){
+  const ctx=getCtx(),o=ctx.createOscillator(),g=ctx.createGain();
+  o.connect(g);g.connect(ctx.destination);o.type=type;o.frequency.value=freq;
+  g.gain.setValueAtTime(0,ctx.currentTime+d);
+  g.gain.linearRampToValueAtTime(vol,ctx.currentTime+d+0.01);
+  g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+d+dur);
+  o.start(ctx.currentTime+d);o.stop(ctx.currentTime+d+dur+0.05);
+}
+function playNoise(dur,vol=0.1){
+  const ctx=getCtx(),buf=ctx.createBuffer(1,ctx.sampleRate*dur,ctx.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  const src=ctx.createBufferSource(),g=ctx.createGain();
+  src.buffer=buf;src.connect(g);g.connect(ctx.destination);
+  g.gain.setValueAtTime(vol,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);src.start();
+}
+function sfxMove(){playTone(800,'square',.06,.05);playTone(400,'square',.06,.04,.06);}
+function sfxLower(){[0,1,2,3].forEach(i=>playTone(300-i*20,'sawtooth',.08,.08,i*.1));}
+function sfxGrab(){playTone(600,'square',.08,.15);playTone(500,'square',.08,.15,.1);playNoise(.08,.08);}
+function sfxLift(){[0,1,2,3,4].forEach(i=>playTone(200+i*40,'sawtooth',.07,.07,i*.08));}
+function sfxDrop(){playTone(180,'sine',.2,.25);playNoise(.1,.12);}
+function sfxReveal(){
+  [523,659,784,1047,1319].forEach((n,i)=>playTone(n,'triangle',.25,.2,i*.1));
+  setTimeout(()=>{playTone(1047,'sine',.4,.25);playTone(1319,'sine',.4,.2,.05);playTone(1568,'sine',.4,.3,.1);},600);
+}
+function sfxLoad(){[0,1,2].forEach(i=>playTone(400+i*200,'triangle',.1,.15,i*.07));}
+
+/* ── CRANE ── */
+function startSway(){
+  if(craneAnim)return;
+  const step=()=>{
+    craneX+=craneDir*CRANE_SPEED;
+    if(craneX>85){craneX=85;craneDir=-1;}
+    if(craneX<12){craneX=12;craneDir=1;}
+    document.getElementById('crane').style.left=craneX+'%';
+    craneAnim=requestAnimationFrame(step);
+  };
+  craneAnim=requestAnimationFrame(step);
+}
+function stopSway(){if(craneAnim){cancelAnimationFrame(craneAnim);craneAnim=null;}}
+
+/* ── DOCX LOADER ── */
+async function loadDocx(input){
+  const file=input.files[0]; if(!file)return;
+  if(typeof mammoth==='undefined'){setStatus('⚠️ Thư viện đọc DOCX chưa tải xong, thử lại!');return;}
+  setStatus('📄 Đang đọc file DOCX...');
+  try{
+    const ab=await file.arrayBuffer();
+    const result=await mammoth.extractRawText({arrayBuffer:ab});
+    const lines=result.value.split('\n').map(s=>s.trim()).filter(s=>s.length>0);
+    if(!lines.length){setStatus('⚠️ Không tìm thấy nội dung trong file!');return;}
+    document.getElementById('items-input').value=lines.join('\n');
+    setStatus(`✅ Đã đọc <strong>${lines.length}</strong> dòng từ DOCX — Nhấn NẠP BÓNG!`);
+  }catch(e){setStatus('❌ Lỗi đọc file DOCX. Hãy thử file khác.');}
+  input.value='';
+}
+
+/* ── LOAD ITEMS ── */
+function loadItems(){
+  const raw=document.getElementById('items-input').value.trim();
+  if(!raw){setStatus('⚠️ Vui lòng nhập ít nhất 1 mục!');return;}
+  const parsed=raw.split('\n').map(s=>s.trim()).filter(s=>s);
+  if(!parsed.length){setStatus('⚠️ Không có mục hợp lệ!');return;}
+  items=parsed;totalLoaded=items.length;
+  renderBalls();renderChips();updateStats();
+  document.getElementById('btn-play').disabled=false;
+  sfxLoad();startSway();
+  setStatus(`✅ Đã nạp <strong>${items.length}</strong> quả bóng — Nhấn PLAY!`);
+  if(isMobile()){
+    ['panel-left','panel-right'].forEach(id=>document.getElementById(id).classList.add('collapsed'));
+  }
+}
+
+/* ── RENDER BALLS ── */
+function renderBalls(){
+  const c=document.getElementById('balls-container');
+  c.innerHTML='';ballEls=[];
+  if(!items.length){
+    c.innerHTML='<div class="empty-state"><div class="big-icon">🎳</div><p>Hãy nạp bóng để bắt đầu!</p></div>';
+    return;
+  }
+  const n=items.length;
+  const glassEl=document.querySelector('.glass-area');
+  const W=glassEl.clientWidth||400,H=glassEl.clientHeight||220;
+  const sz=Math.max(40,Math.min(76,Math.floor(W/Math.ceil(Math.sqrt(n*2.2)))));
+  const cols=Math.max(3,Math.ceil(W/(sz+10)));
+  const pad=8;
+  items.forEach((item,i)=>{
+    const col=i%cols,row=Math.floor(i/cols);
+    const totalCols=Math.min(cols,n);
+    const rowH=Math.min(sz+10,(H-sz-pad)/Math.max(1,Math.ceil(n/cols)));
+    const xSpan=(W-pad*2-sz)/Math.max(1,totalCols-1);
+    const x=Math.min(Math.max(pad+col*xSpan+(Math.random()-.5)*14,pad),W-sz-pad);
+    const y=Math.min(Math.max(pad+row*rowH+(Math.random()-.5)*8,pad),H-sz-pad);
+    const[c1,c2]=BALL_COLORS[i%BALL_COLORS.length];
+    const emoji=BALL_EMOJIS[i%BALL_EMOJIS.length];
+    const rot1=((Math.random()-.5)*6).toFixed(1)+'deg';
+    const rot2=((Math.random()-.5)*6).toFixed(1)+'deg';
+    const b=document.createElement('div');
+    b.className='ball idle-float';
+    b.style.cssText=`width:${sz}px;height:${sz}px;left:${x}px;top:${y}px;background:radial-gradient(circle at 35% 30%,${lighten(c1)},${c1} 55%,${c2});--dur:${2.5+Math.random()*2}s;--delay:${(Math.random()*2).toFixed(2)}s;--rot1:${rot1};--rot2:${rot2};font-size:${Math.round(sz*.36)}px;`;
+    b.dataset.item=item;b.dataset.color=c1;b.dataset.emoji=emoji;b.dataset.index=i;
+    const sp=document.createElement('span');sp.className='ball-emoji';sp.textContent=emoji;
+    b.appendChild(sp);c.appendChild(b);ballEls.push(b);
+  });
+}
+function lighten(hex){const n=parseInt(hex.slice(1),16);return`rgb(${Math.min(255,((n>>16)&0xff)+70)},${Math.min(255,((n>>8)&0xff)+70)},${Math.min(255,(n&0xff)+70)})`;}
+function darken(hex){const n=parseInt(hex.slice(1),16);return`rgb(${Math.max(0,((n>>16)&0xff)-50)},${Math.max(0,((n>>8)&0xff)-50)},${Math.max(0,(n&0xff)-50)})`;}
+function delay(ms){return new Promise(r=>setTimeout(r,ms));}
+
+/* ── PLAY ── */
+async function play(){
+  if(busy)return;
+  const alive=ballEls.filter(b=>b.parentNode&&b.parentNode.id==='balls-container');
+  if(!alive.length){setStatus('🎉 Đã gắp hết! Hãy nạp bóng mới.');return;}
+  busy=true;document.getElementById('btn-play').disabled=true;getCtx();
+  try{
+    const target=alive[Math.floor(Math.random()*alive.length)];
+    const itemName=target.dataset.item,color=target.dataset.color,emoji=target.dataset.emoji;
+    stopSway();
+    const mRect=document.getElementById('machine').getBoundingClientRect();
+    const bRect=target.getBoundingClientRect();
+    const pct=((bRect.left+bRect.width/2-mRect.left)/mRect.width)*100;
+    setStatus('🚀 Cần gắp đang di chuyển...');sfxMove();
+    const crane=document.getElementById('crane');
+    crane.style.transition='left 0.8s cubic-bezier(.25,.46,.45,.94)';
+    crane.style.left=pct+'%';
+    await delay(900);
+    setStatus('⬇️ Hạ cần xuống...');sfxLower();
+    const wire=document.getElementById('crane-wire'),claw=document.getElementById('crane-claw');
+    claw.style.opacity='1';
+    const wireH=(parseFloat(target.style.top)||0)+parseInt(target.style.height||55)-4;
+    wire.style.height=wireH+'px';
+    await delay(700);
+    sfxGrab();claw.classList.add('claw-grip');
+    await delay(300);
+    setStatus('⬆️ Kéo lên...');sfxLift();
+    wire.style.height='0px';target.classList.add('grabbed');
+    target.style.transition='top .55s ease-in-out,opacity .2s';
+    target.style.top='-80px';target.style.opacity='0';
+    await delay(650);
+    target.remove();wire.style.height='0px';claw.style.opacity='0';claw.classList.remove('claw-grip');
+    setStatus('🎳 Bóng rơi vào khay...');sfxDrop();
+    const cb=document.getElementById('chute-ball');
+    cb.style.background=`radial-gradient(circle at 35% 30%,${lighten(color)},${color} 55%,${darken(color)})`;
+    cb.style.display='flex';cb.textContent=emoji;
+    await delay(500);
+    playCount++;updateStats();
+    await delay(300);sfxReveal();showResult(itemName,color);
+  }catch(e){console.error(e);}
+  finally{
+    startSway();busy=false;
+    const rem=ballEls.filter(b=>b.parentNode&&b.parentNode.id==='balls-container').length;
+    document.getElementById('btn-play').disabled=rem===0;
+    setStatus(rem>0?`🕹️ Còn <strong>${rem}</strong> quả bóng — Nhấn PLAY!`:'🎉 Đã gắp hết! Nạp bóng mới để chơi tiếp.');
+  }
+}
+
+/* ── RESULT ── */
+function showResult(name,color){
+  document.getElementById('result-name').textContent=name;
+  document.getElementById('result-emoji').textContent=RESULT_EMOJIS[Math.floor(Math.random()*RESULT_EMOJIS.length)];
+  document.getElementById('result-ball-circle').style.background=`radial-gradient(circle at 35% 30%,${lighten(color)},${color} 55%,${darken(color)})`;
+  const starsEl=document.getElementById('result-stars');starsEl.innerHTML='';
+  ['⭐','✨','💫','🌟'].forEach((s,i)=>{
+    const el=document.createElement('span');el.className='result-star';el.textContent=s;
+    el.style.cssText=`left:${10+i*22}%;top:${8+i*5}%;animation-delay:${i*.3}s;`;
+    starsEl.appendChild(el);
+  });
+  document.getElementById('result-overlay').classList.add('show');
+  spawnConfetti();
+}
+function closeResult(){
+  document.getElementById('result-overlay').classList.remove('show');
+  document.getElementById('chute-ball').style.display='none';
+}
+
+/* ── CONFETTI ── */
+function spawnConfetti(){
+  const cols=['#ffe94d','#ff5fa0','#6bcb77','#4dd8ff','#c77dff','#ff9f43','#fff'];
+  for(let i=0;i<65;i++){
+    const el=document.createElement('div');el.className='cfti';
+    const sz=5+Math.random()*8;
+    el.style.cssText=`left:${Math.random()*100}vw;background:${cols[Math.floor(Math.random()*cols.length)]};width:${sz}px;height:${sz*(Math.random()>.5?1:2.5)}px;border-radius:${Math.random()>.4?'50%':'2px'};animation-duration:${1.8+Math.random()*2.2}s;animation-delay:${Math.random()*.6}s;`;
+    document.body.appendChild(el);setTimeout(()=>el.remove(),4200);
+  }
+}
+
+/* ── CHIPS ── */
+function renderChips(){
+  const el=document.getElementById('item-chips');el.innerHTML='';
+  items.forEach(item=>{const c=document.createElement('span');c.className='item-chip';c.textContent=item;el.appendChild(c);});
+}
+
+/* ── STATS ── */
+function updateStats(){
+  const alive=ballEls.filter(b=>b.parentNode&&b.parentNode.id==='balls-container').length;
+  const pct=totalLoaded>0?Math.round((playCount/totalLoaded)*100):0;
+  document.getElementById('stat-plays').textContent=playCount;
+  document.getElementById('stat-left').textContent=alive;
+  document.getElementById('stat-total').textContent=totalLoaded;
+  document.getElementById('stat-pct').textContent=pct+'%';
+  document.getElementById('lcd-plays').textContent='PLY:'+String(playCount).padStart(3,'0');
+  document.getElementById('lcd-items').textContent='ITM:'+String(alive).padStart(3,'0');
+}
+function setStatus(html){
+  const el=document.getElementById('status-msg');
+  if(el)el.innerHTML=html;
+}
+
+/* ── BGM ── */
+const bgmAudio=document.getElementById('bgm-audio');
+let bgmLoaded=false,bgmLooping=true;
+function loadBGM(input){
+  const file=input.files[0];if(!file)return;
+  bgmAudio.src=URL.createObjectURL(file);bgmAudio.loop=bgmLooping;
+  bgmAudio.volume=parseFloat(document.getElementById('volume-slider').value);
+  bgmLoaded=true;document.getElementById('bgm-name').textContent='🎵 '+file.name;
+  bgmAudio.play().catch(()=>{});
+  document.getElementById('btn-bgm-play').textContent='⏸ Dừng';
+  document.getElementById('btn-bgm-play').classList.add('active');
+}
+function toggleBGM(){
+  if(!bgmLoaded){document.getElementById('bgm-name').textContent='Chưa có file nhạc!';return;}
+  const btn=document.getElementById('btn-bgm-play');
+  if(bgmAudio.paused){bgmAudio.play();btn.textContent='⏸ Dừng';btn.classList.add('active');}
+  else{bgmAudio.pause();btn.textContent='▶ Phát';btn.classList.remove('active');}
+}
+function stopBGM(){bgmAudio.pause();bgmAudio.currentTime=0;document.getElementById('btn-bgm-play').textContent='▶ Phát';document.getElementById('btn-bgm-play').classList.remove('active');}
+function toggleLoop(){bgmLooping=!bgmLooping;bgmAudio.loop=bgmLooping;const btn=document.getElementById('btn-bgm-loop');btn.classList.toggle('active',bgmLooping);btn.textContent=bgmLooping?'🔁 Lặp':'▶️ 1 lần';}
+function setVolume(v){bgmAudio.volume=parseFloat(v);}
+
+/* ── INIT ── */
+setupMobileLayout();
+startSway();
+updateStats();
+</script>
+</body>
+</html>
